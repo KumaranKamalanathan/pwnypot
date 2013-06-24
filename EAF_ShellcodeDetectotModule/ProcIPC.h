@@ -1,5 +1,5 @@
 #include "LogInfo.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 #include <Psapi.h>
 #pragma comment(lib, "Psapi.lib")
 #pragma once

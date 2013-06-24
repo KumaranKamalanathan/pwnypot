@@ -6,7 +6,7 @@
 */
 
 #include "Hook.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 #include "PacketDump.h"
 #include "LogInfo.h"
 #include "ETAV_DebugBreak.h"

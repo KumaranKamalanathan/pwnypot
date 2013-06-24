@@ -1,4 +1,4 @@
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 
 STATUS
 ParsRegConfig(

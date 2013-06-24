@@ -1,5 +1,5 @@
 #include "LogInfo.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 
 extern MCEDPREGCONFIG MCEDP_REGCONFIG;
 BOOL bLogStart = FALSE;

@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <stdlib.h>
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 #include "LogInfo.h"
 #pragma once
 

@@ -3,7 +3,7 @@
 #include "winpcap\Include\pcap.h"
 #include <Windows.h>
 #include "LogInfo.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 #pragma comment(lib,"winpcap\\Lib\\Packet.lib")
 #pragma comment(lib,"winpcap\\Lib\\wpcap.lib")
 #pragma once

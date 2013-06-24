@@ -39,7 +39,7 @@
     <ClInclude Include="LdrList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParsConfig.h">
+    <ClInclude Include="ParseConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ModuleAutoInject.h">
@@ -86,7 +86,7 @@
     <ClCompile Include="LdrList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParsConfig.cpp">
+    <ClCompile Include="ParseConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="inih\ini.c">

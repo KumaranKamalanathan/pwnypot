@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <stdlib.h>
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 #include "LdrList.h"
 #include "XmlLog.h"
 #include "LogInfo.h"

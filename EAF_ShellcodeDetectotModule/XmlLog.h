@@ -1,6 +1,6 @@
 #include "mxml\src\mxml-2.7\mxml.h"
 #include "LogInfo.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 
 extern MCEDPREGCONFIG MCEDP_REGCONFIG;
 typedef mxml_node_t XMLNODE;

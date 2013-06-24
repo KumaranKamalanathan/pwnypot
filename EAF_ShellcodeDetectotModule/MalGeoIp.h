@@ -1,6 +1,6 @@
 #include "geoip\GeoIP.h"
 #include "LogInfo.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 
 #define MAX_COUNTRY_NAME_SIZE 100
 typedef GeoIP GEOIP;

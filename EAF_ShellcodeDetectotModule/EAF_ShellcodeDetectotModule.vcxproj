@@ -100,7 +100,7 @@
     <ClInclude Include="mxml\src\mxml-2.7\mxml-private.h" />
     <ClInclude Include="mxml\src\mxml-2.7\mxml.h" />
     <ClInclude Include="mxml\src\mxml-2.7\vcnet\config.h" />
-    <ClInclude Include="ParsConfig.h" />
+    <ClInclude Include="ParseConfig.h" />
     <ClInclude Include="PEUtils.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RopDetection.h" />
@@ -128,7 +128,7 @@
     <ClCompile Include="mxml\src\mxml-2.7\mxml-search.c" />
     <ClCompile Include="mxml\src\mxml-2.7\mxml-set.c" />
     <ClCompile Include="mxml\src\mxml-2.7\mxml-string.c" />
-    <ClCompile Include="ParsConfig.cpp" />
+    <ClCompile Include="ParseConfig.cpp" />
     <ClCompile Include="PEUtils.cpp" />
     <ClCompile Include="RopDetection.cpp" />
     <ClCompile Include="ShellcodeUtils.cpp" />

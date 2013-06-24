@@ -5,7 +5,7 @@
 #include <time.h>
 #include <UrlMon.h>
 #include "LogInfo.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 #include "distorm\include\distorm.h"
 #pragma comment(lib,"distorm\\distorm.lib")
 

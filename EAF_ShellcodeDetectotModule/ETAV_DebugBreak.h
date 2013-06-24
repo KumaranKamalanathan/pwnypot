@@ -7,7 +7,7 @@
 #include "LogInfo.h"
 #include "ShellcodeUtils.h"
 #include "PEUtils.h"
-#include "ParsConfig.h"
+#include "ParseConfig.h"
 
 #define HW_ACCESS_STR				"HW_ON_ACCESS"
 #define HW_EXECUTE_STR				"HW_ON_EXECUTE"
