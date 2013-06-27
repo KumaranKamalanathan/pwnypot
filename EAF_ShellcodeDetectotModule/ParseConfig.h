@@ -1,12 +1,14 @@
 #include <Windows.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "LogInfo.h"
 #include "inih\ini.h"
 #pragma once
 
 #define APP_CONFIG_KEY			"Software\\MCEDP\\Applications\\"
 #define MAIN_CONFIG_KEY			"Software\\MCEDP"
-#define MATCH_CONF(s, n)		stricmp(s, n) == 0
+#define CUCKOO				
+#define MATCH_CONF(s, n)		_stricmp(s, n) == 0
 
 
 typedef struct _MCEDPREGCONFIG

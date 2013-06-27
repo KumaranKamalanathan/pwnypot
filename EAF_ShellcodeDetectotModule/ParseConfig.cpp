@@ -307,10 +307,40 @@ ParsRegConfig(
 	{
 		if (  MATCH_CONF(MainRegConfig[i].ve_valuename, "LogPath") )
 		{
+            #ifdef CUCKOO
+			char buf[512], config_fname[MAX_PATH];
+    		sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId());
+		    FILE *fp = fopen(config_fname, "r");
+		    if(fp != NULL) {
+		        while (fgets(buf, sizeof(buf), fp) != NULL) {
+		            // cut off the newline
+		            char *p = strchr(buf, '\r');
+		            if(p != NULL) *p = 0;
+		            p = strchr(buf, '\n');
+		            if(p != NULL) *p = 0;
+
+		            // split key=value
+		            p = strchr(buf, '=');
+		            if(p != NULL) {
+		                *p = 0;
+
+		                const char *key = buf, *value = p + 1;
+		                if(!strcmp(key, "results")) {
+		                    strncpy(pMcedpRegConfig->LOG_PATH, value,MAX_PATH);
+		                    strncpy(pMcedpRegConfig->DBG_LOG_PATH, value,MAX_PATH);
+		                }
+		            }
+		        }
+		        fclose(fp);
+		        DeleteFile(config_fname);
+		    }            
+
+            #else 
 			strncpy( pMcedpRegConfig->LOG_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
             strncpy( pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH, MAX_PATH );
             strncat( pMcedpRegConfig->DBG_LOG_PATH, "\\", MAX_PATH );
             strncat( pMcedpRegConfig->DBG_LOG_PATH, szAppPathHash, MAX_PATH );
+            #endif
 		}
 		else if ( MATCH_CONF(MainRegConfig[i].ve_valuename, "McedpModulePath") )
 		{
