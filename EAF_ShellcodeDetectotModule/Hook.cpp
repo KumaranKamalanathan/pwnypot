@@ -503,7 +503,7 @@ Hookedconnect(
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "connect_ip");
 		mxmlNewText( XmlLogNode, 0, inet_ntoa(sdata->sin_addr));
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "connect_port");
-		mxmlNewText( XmlLogNode, 0, itoa(htons(sdata->sin_port), szPort, 10));
+		mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port), szPort, 10));
 		// save
 		SaveXml( XmlLog );
 	}
@@ -563,7 +563,7 @@ Hookedbind(
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "bind_ip");
 		mxmlNewText( XmlLogNode, 0, inet_ntoa(sdata->sin_addr));
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "bind_port");
-		mxmlNewText( XmlLogNode, 0, itoa(htons(sdata->sin_port),szPort, 10));
+		mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port),szPort, 10));
 		// save
 		SaveXml( XmlLog );
 	}

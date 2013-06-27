@@ -63,7 +63,7 @@ DllMain(
 		}
 
 		/* only init targeted process otherwise unload DLL from process address space. */
-		if ( stricmp(szAppFullName, MCEDP_REGCONFIG.APP_PATH ) )
+		if ( _stricmp(szAppFullName, MCEDP_REGCONFIG.APP_PATH ) )
 		{
 			return FALSE;
 		}
