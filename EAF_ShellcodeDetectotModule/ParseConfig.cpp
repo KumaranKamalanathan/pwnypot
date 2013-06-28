@@ -320,7 +320,7 @@ ParsRegConfig(
 
 #else 
 	
-	DEBUG_PRINTF(LDBG, NULL, "Using Cookoo Path.\n");
+	DEBUG_PRINTF(LDBG, NULL, "Using Cookoo Paths.\n");
 	char buf[512], config_fname[MAX_PATH];
     sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId());
 	FILE *fp = fopen(config_fname, "r");
@@ -337,10 +337,12 @@ ParsRegConfig(
     	        *p = 0;
         	    const char *key = buf, *value = p + 1;
             	if(!strcmp(key, "results")) {		 
+                    DEBUG_PRINTF(LDBG, NULL, "Setting Logpath.\n");
 	                strncpy(pMcedpRegConfig->LOG_PATH, value,MAX_PATH);
     	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, value,MAX_PATH);
         	    }
                 else if(!strcmp(key, "analyzer")) {
+                    DEBUG_PRINTF(LDBG, NULL, "Setting Analyzer path.\n");
                     strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
                     strncat(pMcedpRegConfig->MCEDP_MODULE_PATH, "\\dll",MAX_PATH);
                 }
@@ -349,6 +351,9 @@ ParsRegConfig(
     	fclose(fp);
 	    DeleteFile(config_fname);
     }    
+    else {
+        DEBUG_PRINTF(LDBG, NULL, "Loading Cuckoo Configuration failed: ini File not found.\n");
+    }
 
 #endif 
 
