@@ -7,7 +7,6 @@
 
 #define APP_CONFIG_KEY			"Software\\MCEDP\\Applications\\"
 #define MAIN_CONFIG_KEY			"Software\\MCEDP"
-#define CUCKOO				
 #define MATCH_CONF(s, n)		_stricmp(s, n) == 0
 
 
