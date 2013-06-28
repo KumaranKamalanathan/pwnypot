@@ -1,4 +1,4 @@
-#include "ParseConfig.h"
+#include "ParseConfig.h"	
 
 STATUS
 ParsRegConfig(
@@ -54,6 +54,7 @@ ParsRegConfig(
 
 	dwBufferSize = 0;
 
+
 	if ( szAppPathHash != NULL )
 	{
 		strncpy(szConfigKey, APP_CONFIG_KEY, Size);
@@ -67,7 +68,7 @@ ParsRegConfig(
 
 		if ( dwStatus != ERROR_SUCCESS )
 		{
-			DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (ERROR_SUCCESS)!\n");
 			REPORT_ERROR("RegOpenKeyEx()", &err);
 			return MCEDP_STATUS_INTERNAL_ERROR;
 		}
@@ -79,7 +80,7 @@ ParsRegConfig(
 										   &dwBufferSize);
 		if ( dwStatus != ERROR_MORE_DATA )
 		{
-			DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (AppRegConfig 1)!\n");
 			REPORT_ERROR("RegQueryMultipleValues()", &err);
 			return MCEDP_STATUS_INTERNAL_ERROR;
 		}
@@ -88,7 +89,7 @@ ParsRegConfig(
 
 		if ( ConfigBuffer == NULL )
 		{
-			DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (ConfigBuffer)!\n");
 			REPORT_ERROR("LocalAlloc()", &err);
 			return MCEDP_STATUS_INTERNAL_ERROR;
 		}
@@ -100,7 +101,7 @@ ParsRegConfig(
 										   &dwBufferSize);
 		if ( dwStatus != ERROR_SUCCESS )
 		{
-			DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (AppRegConfig ConfigBuffer)!\n");
 			REPORT_ERROR("RegQueryMultipleValues()", &err);
 			return MCEDP_STATUS_INTERNAL_ERROR;
 		}
@@ -265,7 +266,7 @@ ParsRegConfig(
 
 	if ( dwStatus != ERROR_SUCCESS )
 	{
-		DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (MAIN_CONFIG_KEY)!\n");
 		REPORT_ERROR("RegOpenKeyEx()", &err);
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
@@ -277,7 +278,7 @@ ParsRegConfig(
 										&dwBufferSize);
 	if ( dwStatus != ERROR_MORE_DATA )
 	{
-		DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (MainRegConfig)!\n");
 		REPORT_ERROR("RegQueryMultipleValues()", &err);
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
@@ -286,11 +287,10 @@ ParsRegConfig(
 
 	if ( ConfigBuffer == NULL )
 	{
-		DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (ConfigBuffer)!\n");
 		REPORT_ERROR("LocalAlloc()", &err);
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
-
 	dwStatus = RegQueryMultipleValues(	hKey, 
 										MainRegConfig, 
 										sizeof(MainRegConfig)/sizeof(VALENT), 
@@ -298,55 +298,60 @@ ParsRegConfig(
 										&dwBufferSize);
 	if ( dwStatus != ERROR_SUCCESS )
 	{
-		DEBUG_PRINTF(LDBG, NULL, "Can't load Config.\n");
+		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (MainRegConfig ConfigBuffer)!\n");
 		REPORT_ERROR("RegQueryMultipleValues()", &err);
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
-
+#ifndef CUCKOO
 	for( i = 0; i < sizeof(MainRegConfig)/sizeof(VALENT); i++) 
 	{
 		if (  MATCH_CONF(MainRegConfig[i].ve_valuename, "LogPath") )
-		{
-            #ifdef CUCKOO
-			char buf[512], config_fname[MAX_PATH];
-    		sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId());
-		    FILE *fp = fopen(config_fname, "r");
-		    if(fp != NULL) {
-		        while (fgets(buf, sizeof(buf), fp) != NULL) {
-		            // cut off the newline
-		            char *p = strchr(buf, '\r');
-		            if(p != NULL) *p = 0;
-		            p = strchr(buf, '\n');
-		            if(p != NULL) *p = 0;
-
-		            // split key=value
-		            p = strchr(buf, '=');
-		            if(p != NULL) {
-		                *p = 0;
-
-		                const char *key = buf, *value = p + 1;
-		                if(!strcmp(key, "results")) {
-		                    strncpy(pMcedpRegConfig->LOG_PATH, value,MAX_PATH);
-		                    strncpy(pMcedpRegConfig->DBG_LOG_PATH, value,MAX_PATH);
-		                }
-		            }
-		        }
-		        fclose(fp);
-		        DeleteFile(config_fname);
-		    }            
-
-            #else 
+		{			
 			strncpy( pMcedpRegConfig->LOG_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
             strncpy( pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH, MAX_PATH );
             strncat( pMcedpRegConfig->DBG_LOG_PATH, "\\", MAX_PATH );
             strncat( pMcedpRegConfig->DBG_LOG_PATH, szAppPathHash, MAX_PATH );
-            #endif
 		}
 		else if ( MATCH_CONF(MainRegConfig[i].ve_valuename, "McedpModulePath") )
 		{
 			strncpy( pMcedpRegConfig->MCEDP_MODULE_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
 		}
 	}
+
+#else 
+	
+	DEBUG_PRINTF(LDBG, NULL, "Using Cookoo Path.\n");
+	char buf[512], config_fname[MAX_PATH];
+    sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId());
+	FILE *fp = fopen(config_fname, "r");
+	if(fp != NULL) {
+	    while (fgets(buf, sizeof(buf), fp) != NULL) {
+		    // cut off the newline
+		    char *p = strchr(buf, '\r');
+	    	if(p != NULL) *p = 0;
+		    p = strchr(buf, '\n');
+		    if(p != NULL) *p = 0;
+        	// split key=value
+        	p = strchr(buf, '=');
+	        if(p != NULL) {
+    	        *p = 0;
+        	    const char *key = buf, *value = p + 1;
+            	if(!strcmp(key, "results")) {		 
+	                strncpy(pMcedpRegConfig->LOG_PATH, value,MAX_PATH);
+    	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, value,MAX_PATH);
+        	    }
+                else if(!strcmp(key, "analyzer")) {
+                    strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
+                    strncat(pMcedpRegConfig->MCEDP_MODULE_PATH, "\\dll",MAX_PATH);
+                }
+        	}
+	    }
+    	fclose(fp);
+	    DeleteFile(config_fname);
+    }    
+
+#endif 
+
 
 	pMcedpRegConfig->PROCESS_HOOKED = FALSE;
 
