@@ -55,6 +55,7 @@ ParsRegConfig(
 	dwBufferSize = 0;
 
 
+#ifndef CUCKOO
 	if ( szAppPathHash != NULL )
 	{
 		strncpy(szConfigKey, APP_CONFIG_KEY, Size);
@@ -302,7 +303,6 @@ ParsRegConfig(
 		REPORT_ERROR("RegQueryMultipleValues()", &err);
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
-#ifndef CUCKOO
 	for( i = 0; i < sizeof(MainRegConfig)/sizeof(VALENT); i++) 
 	{
 		if (  MATCH_CONF(MainRegConfig[i].ve_valuename, "LogPath") )
@@ -337,12 +337,11 @@ ParsRegConfig(
     	        *p = 0;
         	    const char *key = buf, *value = p + 1;
             	if(!strcmp(key, "results")) {		 
-                    DEBUG_PRINTF(LDBG, NULL, "Setting Logpath.\n");
 	                strncpy(pMcedpRegConfig->LOG_PATH, value,MAX_PATH);
-    	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, value,MAX_PATH);
+	                strncat(pMcedpRegConfig->LOG_PATH, "\\logs",MAX_PATH);
+    	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH,MAX_PATH);
         	    }
                 else if(!strcmp(key, "analyzer")) {
-                    DEBUG_PRINTF(LDBG, NULL, "Setting Analyzer path.\n");
                     strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
                     strncat(pMcedpRegConfig->MCEDP_MODULE_PATH, "\\dll",MAX_PATH);
                 }

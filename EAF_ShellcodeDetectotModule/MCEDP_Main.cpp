@@ -61,13 +61,13 @@ DllMain(
 			REPORT_ERROR("ParsRegConfig()", &err);
 			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
 		}
-
+#ifndef CUCKOO
 		/* only init targeted process otherwise unload DLL from process address space. */
 		if ( _stricmp(szAppFullName, MCEDP_REGCONFIG.APP_PATH ) )
 		{
 			return FALSE;
 		}
-
+#endif
 		hDetectorThread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)SetupShellcodeDetector, NULL, 0, NULL);
 		if ( hDetectorThread != NULL )
 		{
