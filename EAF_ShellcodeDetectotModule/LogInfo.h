@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include <windows.h>
 #include <stdio.h>
 #include <tlhelp32.h> 
 #include <time.h>
@@ -96,3 +96,13 @@ HexDumpToFile(
     DWORD dwSize, 
     PCHAR szFileName
     );
+
+#ifdef CUCKOO
+STATUS
+TransmitLogFile(
+    PCHAR szFileName
+    );
+
+int 
+SaveLogs ();
+#endif

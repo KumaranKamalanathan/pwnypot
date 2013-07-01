@@ -136,7 +136,7 @@ InitLogPath(
 	SecureZeroMemory(szLogPath, MAX_PATH);
 	GetLocalTime( &lt);
 	/* init log path by time stamp */
-	_snprintf( szLogPath, MAX_PATH, "\\%s\\%d.%d.%d ,%d-%d-%d-%d", MCEDP_REGCONFIG.APP_PATH_HASH, lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond, lt.wMilliseconds);
+	_snprintf( szLogPath, MAX_PATH, "\\%d.%d.%d ,%d-%d-%d-%d", lt.wYear, lt.wMonth, lt.wDay, lt.wHour, lt.wMinute, lt.wSecond, lt.wMilliseconds);
 	strncat( LogPath,  szLogPath ,Size );
 
 	if ( FolderExists( LogPath ) )
@@ -258,3 +258,100 @@ GenRandomStr(
     szString[dwSize] = 0;
     return szString;
 }
+
+#ifdef CUCKOO
+STATUS 
+TransmitLogFile (
+	PCHAR szFileName
+	)
+{
+	SOCKET s;
+    WSADATA wsadata;
+	CHAR full_path[MAX_PATH];
+	strncpy(full_path, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
+    strncat(full_path, "\\", MAX_PATH);
+    strncat(full_path, szFileName, MAX_PATH);
+	
+    DEBUG_PRINTF(LDBG, NULL, "Trying to upload %s\n", full_path);
+
+    int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
+    if (error)
+    {
+    	DEBUG_PRINTF(LDBG,NULL,"ERROR loading Winsock\n");
+        return MCEDP_STATUS_INTERNAL_ERROR;
+    }
+
+    if (wsadata.wVersion != MAKEWORD(2, 2))
+    {
+    	DEBUG_PRINTF(LDBG,NULL,"ERROR Wrong Winsock version\n");
+        WSACleanup(); //Clean up Winsock
+        return MCEDP_STATUS_INTERNAL_ERROR;
+    }
+
+    SOCKADDR_IN target; 
+
+    target.sin_family = AF_INET; 
+    target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
+    target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT); 
+    s = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
+    if (s == INVALID_SOCKET)
+    {
+    	DEBUG_PRINTF(LDBG,NULL,"Could not create the socket to host %s:%d with error code %d\n",MCEDP_REGCONFIG.RESULT_SERVER_IP,MCEDP_REGCONFIG.RESULT_SERVER_PORT,WSAGetLastError());
+        return MCEDP_STATUS_INTERNAL_ERROR; 
+    }  
+
+    if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
+    {
+    	DEBUG_PRINTF(LDBG,NULL,"Error connection the Resultserver\n");
+        return MCEDP_STATUS_INTERNAL_ERROR; 
+    }
+    else
+    {
+    	DEBUG_PRINTF(LDBG,NULL,"Successfully connected to the Resultserver\n");
+        const int LENGTH = 512;
+        char sdbuf[LENGTH]; 
+
+        char buffer[256];
+        int n;
+
+        memset(buffer, '\0', 256);
+        strncpy(buffer, "FILE\nlogs/",256);
+        strncat(buffer, szFileName,256);
+        strncat(buffer, "\n",256);
+        n = send(s,buffer, strlen(buffer),0);        
+
+        DEBUG_PRINTF(LDBG,NULL,"Sending %s to the Server... \n", full_path);
+        FILE *fs = fopen(full_path, "r");
+        if(fs == NULL)
+        {
+            DEBUG_PRINTF(LDBG,NULL,"ERROR: File %s not found.\n", full_path);
+            return MCEDP_STATUS_INTERNAL_ERROR;
+        }
+
+        memset(sdbuf, '\0', LENGTH); 
+        int fs_block_sz;
+        while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs)) > 0)
+        {
+            if(send(s, sdbuf, fs_block_sz, 0) < 0)
+            {
+                DEBUG_PRINTF(LDBG, NULL, "ERROR: Failed to send file %s. (errno = %d)\n", full_path, errno);
+                return MCEDP_STATUS_INTERNAL_ERROR;
+            }
+            memset(sdbuf, '\0', LENGTH);
+        }
+        DEBUG_PRINTF(LDBG,NULL,"Ok File %s from Client was Sent!\n", full_path);
+        closesocket(s);
+
+        return MCEDP_STATUS_SUCCESS; 	
+    }
+}
+
+int 
+SaveLogs (
+    )
+{
+    TransmitLogFile("LogInfo.txt");
+    return 0;
+}
+
+#endif
