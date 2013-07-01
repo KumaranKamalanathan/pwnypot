@@ -33,6 +33,11 @@ HookInstall(
 	/* CreateProcess should be hooked regardless of what type of protection is enabled */
 	DetourAttach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
 
+#ifdef cuckoo
+	/* TerminateThread should be detected to send Log files before exiting */
+	DetourAttach(&(PVOID&)ExitProcess_					, HookedExitProcess);
+#endif 
+
     /* Hook virtual memory manipulation function needs for checking rop attacks */
 	if ( MCEDP_REGCONFIG.ROP.DETECT_ROP )
 	{
@@ -81,12 +86,18 @@ HookUninstall(
 	VOID
 	)
 {
+
+	DEBUG_PRINTF(LDBG,NULL,"Uninstalling Hooks\n");
 	CreateProcessInternalW_ = (BOOL (WINAPI *)(HANDLE, LPCWSTR, LPWSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCWSTR, LPSTARTUPINFOW, LPPROCESS_INFORMATION, PHANDLE))GetProcAddress(GetModuleHandle("KERNEL32.DLL"), "CreateProcessInternalW");
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 
 	/* Unhooking functions */
 	DetourDetach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
+
+#ifdef cuckoo
+	DetourDetach(&(PVOID&)ExitProcess_					, HookedExitProcess);
+#endif 	
 
 	if ( MCEDP_REGCONFIG.ROP.DETECT_ROP )
 	{
@@ -706,3 +717,16 @@ Hookedrecv(
 
 	return (recv_( s, buf, len, flags));
 }
+
+#ifdef CUCKOO
+VOID
+WINAPI
+HookedExitProcess(
+	UINT dwExitCode
+	)
+{
+	DEBUG_PRINTF(LDBG,NULL,"TerminateThread Hooking called ...\n");
+	TransmitLogFile("LogInfo.txt");
+	ExitProcess_(dwExitCode);
+}
+#endif
