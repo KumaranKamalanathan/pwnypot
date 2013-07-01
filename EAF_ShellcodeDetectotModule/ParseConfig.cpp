@@ -1,7 +1,8 @@
 #include "ParseConfig.h"	
 
+#ifndef CUCKOO
 STATUS
-ParsRegConfig(
+ParseRegConfig(
 	OUT PMCEDPREGCONFIG pMcedpRegConfig,
 	IN PCHAR szAppPathHash,
 	IN DWORD Size
@@ -55,7 +56,6 @@ ParsRegConfig(
 	dwBufferSize = 0;
 
 
-#ifndef CUCKOO
 	if ( szAppPathHash != NULL )
 	{
 		strncpy(szConfigKey, APP_CONFIG_KEY, Size);
@@ -317,12 +317,11 @@ ParsRegConfig(
 			strncpy( pMcedpRegConfig->MCEDP_MODULE_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
 		}
 	}
-
-#else 
 	
 	DEBUG_PRINTF(LDBG, NULL, "Using Cookoo Paths.\n");
 	char buf[512], config_fname[MAX_PATH];
     sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId());
+	DEBUG_PRINTF(LDBG, NULL, "Trying to load Cuckoo Config from %s.\n",config_fname);
 	FILE *fp = fopen(config_fname, "r");
 	if(fp != NULL) {
 	    while (fgets(buf, sizeof(buf), fp) != NULL) {
@@ -337,25 +336,26 @@ ParsRegConfig(
     	        *p = 0;
         	    const char *key = buf, *value = p + 1;
             	if(!strcmp(key, "results")) {		 
-	                strncpy(pMcedpRegConfig->LOG_PATH, value,MAX_PATH);
+	                strncpy(pMcedpRegConfig->LOG_PATH, value, MAX_PATH);
+					DEBUG_PRINTF(LDBG, NULL, "Found Results Path %s.\n",value);
 	                strncat(pMcedpRegConfig->LOG_PATH, "\\logs",MAX_PATH);
+					DEBUG_PRINTF(LDBG, NULL, "Setting Logs Path %s.\n",pMcedpRegConfig->LOG_PATH);
     	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH,MAX_PATH);
         	    }
                 else if(!strcmp(key, "analyzer")) {
                     strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
+                    strncpy(pMcedpRegConfig->CUCKOO_ANALYZER_PATH, value,MAX_PATH);
                     strncat(pMcedpRegConfig->MCEDP_MODULE_PATH, "\\dll",MAX_PATH);
+					DEBUG_PRINTF(LDBG, NULL, "Setting Module Path %s.\n",pMcedpRegConfig->MCEDP_MODULE_PATH);
                 }
         	}
 	    }
     	fclose(fp);
-	    DeleteFile(config_fname);
+	    //DeleteFile(config_fname);
     }    
     else {
         DEBUG_PRINTF(LDBG, NULL, "Loading Cuckoo Configuration failed: ini File not found.\n");
     }
-
-#endif 
-
 
 	pMcedpRegConfig->PROCESS_HOOKED = FALSE;
 
@@ -363,3 +363,63 @@ ParsRegConfig(
 	LocalFree( ConfigBuffer );
 	return MCEDP_STATUS_SUCCESS;
 }
+
+#else 
+STATUS
+ParseConfig(
+	OUT PMCEDPREGCONFIG pMcedpRegConfig
+	)
+{	
+	DEBUG_PRINTF(LDBG, NULL, "Using Cookoo Paths.\n");
+	char buf[512], config_fname[MAX_PATH];
+
+	// Read Randomized Directory names from ini file
+    sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId());
+	DEBUG_PRINTF(LDBG, NULL, "Trying to load Cuckoo Config from %s.\n",config_fname);
+	FILE *fp = fopen(config_fname, "r");
+	if(fp != NULL) {
+	    while (fgets(buf, sizeof(buf), fp) != NULL) {
+		    // cut off the newline
+		    char *p = strchr(buf, '\r');
+	    	if(p != NULL) *p = 0;
+		    p = strchr(buf, '\n');
+		    if(p != NULL) *p = 0;
+        	// split key=value
+        	p = strchr(buf, '=');
+	        if(p != NULL) {
+    	        *p = 0;
+        	    const char *key = buf, *value = p + 1;
+            	if(!strcmp(key, "results")) {		 
+	                strncpy(pMcedpRegConfig->LOG_PATH, value, MAX_PATH);
+					DEBUG_PRINTF(LDBG, NULL, "Found Results Path %s.\n",value);
+	                strncat(pMcedpRegConfig->LOG_PATH, "\\logs",MAX_PATH);
+					DEBUG_PRINTF(LDBG, NULL, "Setting Logs Path %s.\n",pMcedpRegConfig->LOG_PATH);
+    	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH,MAX_PATH);
+        	    }
+                else if(!strcmp(key, "analyzer")) {
+                    strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
+                    strncpy(pMcedpRegConfig->CUCKOO_ANALYZER_PATH, value,MAX_PATH);
+                    strncat(pMcedpRegConfig->MCEDP_MODULE_PATH, "\\dll",MAX_PATH);
+					DEBUG_PRINTF(LDBG, NULL, "Setting Module Path %s.\n",pMcedpRegConfig->MCEDP_MODULE_PATH);
+                }
+                else if(!strcmp(key, "host-ip")) {        
+                    DEBUG_PRINTF(LDBG, NULL, "Found Resultserver IP %s.\n",value);
+    				strncpy(pMcedpRegConfig->RESULT_SERVER_IP, value, MAX_PATH);
+                }
+                else if(!strcmp(key, "host-port")) {        
+                    DEBUG_PRINTF(LDBG, NULL, "Found Resultserver PORT %d.\n",atoi(value));
+    				pMcedpRegConfig->RESULT_SERVER_PORT = atoi(value);
+                }
+        	}
+	    }
+    	fclose(fp);
+	    //DeleteFile(config_fname);
+		pMcedpRegConfig->PROCESS_HOOKED = FALSE;
+    }    
+    else {
+        DEBUG_PRINTF(LDBG, NULL, "Loading Cuckoo Configuration failed: ini File not found.\n");
+		return MCEDP_STATUS_INTERNAL_ERROR;
+    }  
+	return MCEDP_STATUS_SUCCESS;
+}
+#endif 

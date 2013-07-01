@@ -13,6 +13,7 @@
 #include "GeneralProtections.h"
 #include "Hash.h"
 #include <Psapi.h>
+#include <stdlib.h>
 #pragma comment(lib, "Psapi.lib")
 
 MCEDPREGCONFIG MCEDP_REGCONFIG;
@@ -33,32 +34,37 @@ DllMain(
 	)
 {
 	BYTE AppFullNameHash[MAX_HASH_SIZE];
+#ifndef CUCKOO	
 	CHAR szAppFullNameHash[MAX_PATH];
+#endif 
 	CHAR szAppFullName[MAX_PATH];
 	DWORD dwAppFullNameHashValueSize = MAX_HASH_SIZE;
 	HANDLE hDetectorThread;
 	ERRORINFO err;
-
 	if ( ul_reason_for_call == DLL_PROCESS_ATTACH )
 	{
 
 		/* get module full name, we need it for initializing config */
 		if ( !GetModuleFileName( NULL, szAppFullName, MAX_PATH ) )
 		{
-			DEBUG_PRINTF(LDBG, NULL, "GetModuleBaseName() faild!\n");
+			DEBUG_PRINTF(LDBG, NULL, "GetModuleBaseName() failed!\n");
 			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
 		}
 
 		if ( GetSHA1Hash( (PBYTE)strtolow(szAppFullName), strlen(szAppFullName), AppFullNameHash, &dwAppFullNameHashValueSize ) != MCEDP_STATUS_SUCCESS )
 		{
-			DEBUG_PRINTF(LDBG, NULL, "GetSHA1Hash() faild!\n");
+			DEBUG_PRINTF(LDBG, NULL, "GetSHA1Hash() failed!\n");
 			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
 		}
 
 		/* read and parse the config from registry */
-		if ( ParsRegConfig( &MCEDP_REGCONFIG, HashToStr( AppFullNameHash, dwAppFullNameHashValueSize, szAppFullNameHash, MAX_PATH) , MAX_MODULE_NAME32 ) != MCEDP_STATUS_SUCCESS )
+#ifndef CUCKOO		
+		if ( ParseRegConfig( &MCEDP_REGCONFIG, HashToStr( AppFullNameHash, dwAppFullNameHashValueSize, szAppFullNameHash, MAX_PATH) , MAX_MODULE_NAME32 ) != MCEDP_STATUS_SUCCESS )
+#else 
+		if ( ParseConfig( &MCEDP_REGCONFIG) != MCEDP_STATUS_SUCCESS )
+#endif
 		{
-			REPORT_ERROR("ParsRegConfig()", &err);
+			REPORT_ERROR("ParseRegConfig()", &err);
 			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
 		}
 #ifndef CUCKOO
@@ -73,9 +79,12 @@ DllMain(
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Shellcode Detector thread started!\n");
 		}
+#ifdef CUCKOO		
+		TransmitLogFile("LogInfo.txt");
+#endif
 	} 
 	else if ( ul_reason_for_call == DLL_PROCESS_DETACH )
-	{
+	{		
 		/* Disable Export Table Address Filtering for all running threads. */
 		/*
 		if ( DbgDisableExportAddressFiltering() != MCEDP_STATUS_SUCCESS )
@@ -88,7 +97,6 @@ DllMain(
 		if ( MCEDP_REGCONFIG.PROCESS_HOOKED )
 			HookUninstall();
 	}
-
 	return TRUE;
 }
 
