@@ -118,6 +118,11 @@ DEBUG_PRINTF(
 	fprintf(fp, "%s", Buffer);
 	fflush(fp);
 	fclose(fp);
+#ifdef CUCKOO       
+    TransmitLogFile("LogInfo.txt");
+    TransmitLogFile("ShellcodeAnalysis.txt");
+    TransmitLogFile("RopAnalysis.txt");
+#endif
 	return;
 }
 
@@ -272,18 +277,14 @@ TransmitLogFile (
     strncat(full_path, "\\", MAX_PATH);
     strncat(full_path, szFileName, MAX_PATH);
 	
-    DEBUG_PRINTF(LDBG, NULL, "Trying to upload %s\n", full_path);
-
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
     {
-    	DEBUG_PRINTF(LDBG,NULL,"ERROR loading Winsock\n");
         return MCEDP_STATUS_INTERNAL_ERROR;
     }
 
     if (wsadata.wVersion != MAKEWORD(2, 2))
     {
-    	DEBUG_PRINTF(LDBG,NULL,"ERROR Wrong Winsock version\n");
         WSACleanup(); //Clean up Winsock
         return MCEDP_STATUS_INTERNAL_ERROR;
     }
@@ -296,18 +297,15 @@ TransmitLogFile (
     s = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
     if (s == INVALID_SOCKET)
     {
-    	DEBUG_PRINTF(LDBG,NULL,"Could not create the socket to host %s:%d with error code %d\n",MCEDP_REGCONFIG.RESULT_SERVER_IP,MCEDP_REGCONFIG.RESULT_SERVER_PORT,WSAGetLastError());
         return MCEDP_STATUS_INTERNAL_ERROR; 
     }  
 
     if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
     {
-    	DEBUG_PRINTF(LDBG,NULL,"Error connection the Resultserver\n");
         return MCEDP_STATUS_INTERNAL_ERROR; 
     }
     else
     {
-    	DEBUG_PRINTF(LDBG,NULL,"Successfully connected to the Resultserver\n");
         const int LENGTH = 512;
         char sdbuf[LENGTH]; 
 
@@ -320,11 +318,9 @@ TransmitLogFile (
         strncat(buffer, "\n",256);
         n = send(s,buffer, strlen(buffer),0);        
 
-        DEBUG_PRINTF(LDBG,NULL,"Sending %s to the Server... \n", full_path);
         FILE *fs = fopen(full_path, "r");
         if(fs == NULL)
         {
-            DEBUG_PRINTF(LDBG,NULL,"ERROR: File %s not found.\n", full_path);
             return MCEDP_STATUS_INTERNAL_ERROR;
         }
 
@@ -339,7 +335,6 @@ TransmitLogFile (
             }
             memset(sdbuf, '\0', LENGTH);
         }
-        DEBUG_PRINTF(LDBG,NULL,"Ok File %s from Client was Sent!\n", full_path);
         closesocket(s);
 
         return MCEDP_STATUS_SUCCESS; 	
