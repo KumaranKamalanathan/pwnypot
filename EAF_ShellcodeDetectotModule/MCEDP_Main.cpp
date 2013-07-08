@@ -77,11 +77,8 @@ DllMain(
 		hDetectorThread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)SetupShellcodeDetector, NULL, 0, NULL);
 		if ( hDetectorThread != NULL )
 		{
-			DEBUG_PRINTF(LDBG, NULL, "Shellcode Detector thread started!\n");
+			DEBUG_PRINTF(LSHL, NULL, "Shellcode Detector thread started!\n");
 		}
-#ifdef CUCKOO		
-		TransmitLogFile("LogInfo.txt");
-#endif
 	} 
 	else if ( ul_reason_for_call == DLL_PROCESS_DETACH )
 	{		
