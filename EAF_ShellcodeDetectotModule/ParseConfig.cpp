@@ -413,13 +413,17 @@ ParseConfig(
         	}
 	    }
     	fclose(fp);
-	    //DeleteFile(config_fname);
+	    DeleteFile(config_fname);
 		pMcedpRegConfig->PROCESS_HOOKED = FALSE;
     }    
     else {
         DEBUG_PRINTF(LDBG, NULL, "Loading Cuckoo Configuration failed: ini File not found.\n");
 		return MCEDP_STATUS_INTERNAL_ERROR;
     }  
+    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
+    pMcedpRegConfig->ROP.DETECT_ROP = TRUE;
+    pMcedpRegConfig->ROP.DUMP_ROP = TRUE;
+    pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
 	return MCEDP_STATUS_SUCCESS;
 }
 #endif 
