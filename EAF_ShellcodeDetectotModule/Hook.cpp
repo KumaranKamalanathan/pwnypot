@@ -33,7 +33,7 @@ HookInstall(
 	/* CreateProcess should be hooked regardless of what type of protection is enabled */
 	DetourAttach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
 
-#ifdef cuckoo
+#ifdef CUCKOO
 	/* TerminateThread should be detected to send Log files before exiting */
 	DetourAttach(&(PVOID&)ExitProcess_					, HookedExitProcess);
 #endif 
@@ -95,7 +95,7 @@ HookUninstall(
 	/* Unhooking functions */
 	DetourDetach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
 
-#ifdef cuckoo
+#ifdef CUCKOO
 	DetourDetach(&(PVOID&)ExitProcess_					, HookedExitProcess);
 #endif 	
 
