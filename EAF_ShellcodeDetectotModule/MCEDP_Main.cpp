@@ -19,6 +19,7 @@
 MCEDPREGCONFIG MCEDP_REGCONFIG;
 extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
+extern SOCKET LogInfoSock;
 
 STATUS
 SetupShellcodeDetector(
@@ -67,6 +68,14 @@ DllMain(
 			REPORT_ERROR("ParseRegConfig()", &err);
 			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
 		}
+
+#ifdef CUCKOO
+		if ( InitCuckooLogs() != MCEDP_STATUS_SUCCESS ) {
+			REPORT_ERROR("InitCuckooLogs()", &err);
+			return FALSE;
+		}
+#endif
+
 #ifndef CUCKOO
 		/* only init targeted process otherwise unload DLL from process address space. */
 		if ( _stricmp(szAppFullName, MCEDP_REGCONFIG.APP_PATH ) )

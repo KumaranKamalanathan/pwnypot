@@ -5,6 +5,12 @@ extern MCEDPREGCONFIG MCEDP_REGCONFIG;
 BOOL bLogStart = FALSE;
 BOOL bLogPathInitSuccess = FALSE;
 
+#ifdef CUCKOO
+SOCKET LogInfoSock=-1;
+SOCKET LogShellcodeSock=-1;
+SOCKET LogRopSock=-1;
+#endif
+
 
 VOID 
 REPORT_ERROR( 
@@ -69,62 +75,6 @@ REPORT_ERROR_EX(
 	}
 }
 
-VOID 
-DEBUG_PRINTF(
-	IN DWORD dwType,
-	IN DWORD dwTID,
-	IN PCHAR Format, 
-	IN ...
-	)
-{
-    CHAR Buffer[1024] = {0};
-	CHAR szFullLogPath[MAX_PATH];
-	FILE *fp;
-    va_list Args;
-
-	va_start(Args, Format);
-	vsnprintf_s(Buffer, sizeof Buffer, _TRUNCATE, Format, Args);
-	va_end(Args);
-
-	strncpy( szFullLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH );
-#ifdef __DEBUG__
-	if ( dwType == LDBG )
-    {
-        strncpy( szFullLogPath, MCEDP_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
-        strncat( szFullLogPath, "\\LogInfo.txt", MAX_PATH);
-    }
-#else
-    if ( dwType == LDBG )
-        return;
-#endif
-	else if ( dwType == LSHL )
-        strncat(szFullLogPath, "\\ShellcodeAnalysis.txt", MAX_PATH);
-	else if ( dwType == LROP )
-        strncat(szFullLogPath, "\\RopAnalysis.txt", MAX_PATH);
-
-	fflush(stdout);
-	fflush(stderr);
-
-	fp = fopen(szFullLogPath, "a");
-	if ( fp == NULL )
-		return;
-
-    if ( !bLogStart )
-    {
-        fprintf(fp, "\n=========================================================================================\n");
-        bLogStart = TRUE;
-    }
-    
-	fprintf(fp, "%s", Buffer);
-	fflush(fp);
-	fclose(fp);
-#ifdef CUCKOO       
-    TransmitLogFile("LogInfo.txt");
-    TransmitLogFile("ShellcodeAnalysis.txt");
-    TransmitLogFile("RopAnalysis.txt");
-#endif
-	return;
-}
 
 STATUS
 InitLogPath(
@@ -158,6 +108,7 @@ InitLogPath(
 
 	return MCEDP_STATUS_INTERNAL_ERROR;	
 }
+
 
 BOOL 
 FolderExists(
@@ -264,9 +215,250 @@ GenRandomStr(
     return szString;
 }
 
-#ifdef CUCKOO
+
+
+#ifndef CUCKOO
+VOID 
+DEBUG_PRINTF(
+    IN DWORD dwType,
+    IN DWORD dwTID,
+    IN PCHAR Format, 
+    IN ...
+    )
+{
+    CHAR Buffer[1024] = {0};
+    CHAR szFullLogPath[MAX_PATH];
+    FILE *fp;
+    va_list Args;
+
+    va_start(Args, Format);
+    vsnprintf_s(Buffer, sizeof Buffer, _TRUNCATE, Format, Args);
+    va_end(Args);
+
+    strncpy( szFullLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH );
+#ifdef __DEBUG__
+    if ( dwType == LDBG )
+    {
+        strncpy( szFullLogPath, MCEDP_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
+        strncat( szFullLogPath, "\\LogInfo.txt", MAX_PATH);
+    }
+#else
+    if ( dwType == LDBG )
+        return;
+#endif
+    else if ( dwType == LSHL )
+        strncat(szFullLogPath, "\\ShellcodeAnalysis.txt", MAX_PATH);
+    else if ( dwType == LROP )
+        strncat(szFullLogPath, "\\RopAnalysis.txt", MAX_PATH);
+
+    fflush(stdout);
+    fflush(stderr);
+
+    fp = fopen(szFullLogPath, "a");
+    if ( fp == NULL )
+        return;
+
+    if ( !bLogStart )
+    {
+        fprintf(fp, "\n=========================================================================================\n");
+        bLogStart = TRUE;
+    }
+    
+    fprintf(fp, "%s", Buffer);
+    fflush(fp);
+    fclose(fp);
+    return;
+}
+
+
+#else 
+
+VOID 
+DEBUG_PRINTF(
+    IN DWORD dwType,
+    IN DWORD dwTID,
+    IN PCHAR Format, 
+    IN ...
+    )
+{
+    CHAR Buffer[1024] = {0};
+    CHAR szFullLogPath[MAX_PATH];
+    FILE *fp;
+    va_list Args;
+
+    va_start(Args, Format);
+    vsnprintf_s(Buffer, sizeof Buffer, _TRUNCATE, Format, Args);
+    va_end(Args);
+
+    strncpy( szFullLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH );
+#ifdef __DEBUG__
+    if ( LogInfoSock != -1 ){
+        WriteFileSocket( LogInfoSock, Buffer );
+    }
+#else
+    if ( dwType == LDBG )
+        return;
+#endif
+    else if ( dwType == LSHL )
+        if ( LogShellcodeSock != -1 ){
+            WriteFileSocket( LogShellcodeSock, Buffer );
+        }
+    else if ( dwType == LROP )
+        if ( LogRopSock != -1 ){
+            WriteFileSocket( LogRopSock, Buffer );
+        }
+
+    return;
+}
+
+
+VOID LOCAL_DEBUG_PRINTF (
+    IN DWORD dwType,
+    IN DWORD dwTID,
+    IN PCHAR Format, 
+    IN ...
+    )
+{
+    CHAR Buffer[1024] = {0};
+    CHAR szFullLogPath[MAX_PATH];
+    FILE *fp;
+    va_list Args;
+
+    va_start(Args, Format);
+    vsnprintf_s(Buffer, sizeof Buffer, _TRUNCATE, Format, Args);
+    va_end(Args);
+    strncpy( szFullLogPath, MCEDP_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
+    strncat( szFullLogPath, "\\LogInfo.txt", MAX_PATH);
+
+    fflush(stdout);
+    fflush(stderr);
+
+    fp = fopen(szFullLogPath, "a");
+    if ( fp == NULL )
+        return;
+
+    if ( !bLogStart )
+    {
+        fprintf(fp, "\n=========================================================================================\n");
+        bLogStart = TRUE;
+    }
+
+    
+    fprintf(fp, "%s", Buffer);
+    fflush(fp);
+    fclose(fp);
+    return;
+}
+
+SOCKET 
+InitFileSocket (
+    PCHAR szFileName
+    )
+{
+    SOCKET s;
+    WSADATA wsadata;
+    CHAR full_path[MAX_PATH];
+    strncpy(full_path, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
+    strncat(full_path, "\\", MAX_PATH);
+    strncat(full_path, szFileName, MAX_PATH);
+    LOCAL_DEBUG_PRINTF(LDBG,NULL, "Initializing File Socket\n");
+    int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
+    if (error)
+    {
+        LOCAL_DEBUG_PRINTF(LDBG,NULL, "WSAStartup error\n");
+        return -1;
+    }
+
+    if (wsadata.wVersion != MAKEWORD(2, 2))
+    {
+        LOCAL_DEBUG_PRINTF(LDBG,NULL, "Wrong version\n");
+        return -1;
+    }
+
+    SOCKADDR_IN target; 
+
+    target.sin_family = AF_INET; 
+    target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
+    target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT); 
+    s = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
+    if (s == INVALID_SOCKET)
+    {
+        LOCAL_DEBUG_PRINTF(LDBG,NULL, "Invalid Socket\n");
+        return -1; 
+    }  
+
+    if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
+    {
+        LOCAL_DEBUG_PRINTF(LDBG,NULL, "Socket Error\n");
+        return -1; 
+    }
+    else
+    {
+        const int LENGTH = 512;
+        char sdbuf[LENGTH]; 
+
+        char buffer[256];
+        int n;
+
+        memset(buffer, '\0', 256);
+        strncpy(buffer, "FILE\nlogs/",256);
+        strncat(buffer, szFileName,256);
+        strncat(buffer, "\n",256);
+        n = send(s,buffer, strlen(buffer),0);   
+
+        LOCAL_DEBUG_PRINTF(LDBG, NULL, "Successfully Initialized FileSocket\n");
+    }
+    return s;
+}
+
 STATUS 
-TransmitLogFile (
+WriteFileSocket (
+    SOCKET Socket,
+    PCHAR Buffer
+    )
+{   
+    LOCAL_DEBUG_PRINTF( LDBG, NULL, "WriteFileSocket called on Socket %d", Socket );
+    int res = send ( Socket, Buffer, strlen( Buffer ), 0 );
+    LOCAL_DEBUG_PRINTF( LDBG, NULL, "Sent %d bytes: %s\n", res, Buffer);
+    if ( res == SOCKET_ERROR ) {
+        LOCAL_DEBUG_PRINTF(LDBG, NULL, "Last error: %d\n", WSAGetLastError());
+    }
+    return MCEDP_STATUS_SUCCESS;
+}
+
+STATUS 
+InitCuckooLogs ()
+{
+    // init LogInfo.txt
+    LogInfoSock = InitFileSocket("LogInfo.txt");
+    if (LogInfoSock==-1){
+        return MCEDP_STATUS_INTERNAL_ERROR;
+    }
+
+    // init Shellcode.txt
+    LogShellcodeSock = InitFileSocket("ShellcodeAnalysis.txt");
+    if (LogShellcodeSock==-1){
+        return MCEDP_STATUS_INTERNAL_ERROR;
+    }
+
+    // init RopDetection.txt
+    LogRopSock = InitFileSocket("RopAnalysis.txt");
+    if (LogRopSock==-1){
+        return MCEDP_STATUS_INTERNAL_ERROR;
+    }
+
+    return MCEDP_STATUS_SUCCESS;
+}
+
+STATUS
+CloseCuckooLogs ()
+{
+    closesocket(LogInfoSock);
+}
+
+
+STATUS 
+TransmitFile (
 	PCHAR szFileName
 	)
 {
@@ -313,7 +505,7 @@ TransmitLogFile (
         int n;
 
         memset(buffer, '\0', 256);
-        strncpy(buffer, "FILE\nlogs/",256);
+        strncpy(buffer, "FILE\n",256);
         strncat(buffer, szFileName,256);
         strncat(buffer, "\n",256);
         n = send(s,buffer, strlen(buffer),0);        
@@ -345,7 +537,7 @@ int
 SaveLogs (
     )
 {
-    TransmitLogFile("LogInfo.txt");
+    TransmitFile("logs/LogInfo.txt");
     return 0;
 }
 

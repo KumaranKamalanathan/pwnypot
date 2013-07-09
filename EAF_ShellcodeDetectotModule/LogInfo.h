@@ -98,8 +98,28 @@ HexDumpToFile(
     );
 
 #ifdef CUCKOO
+
+
+VOID 
+LOCAL_DEBUG_PRINTF(
+    IN DWORD dwType,
+    IN DWORD dwTID,
+    IN PCHAR Format, 
+    IN ...
+    );
+
+
 STATUS
-TransmitLogFile(
+WriteFileSocket(
+    SOCKET Socket,
+    PCHAR Buffer
+    );
+
+STATUS
+InitCuckooLogs();
+
+STATUS
+TransmitFile(
     PCHAR szFileName
     );
 
