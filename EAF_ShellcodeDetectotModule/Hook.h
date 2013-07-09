@@ -29,9 +29,6 @@ static     int (WSAAPI *send_                   )( SOCKET s, const char *buf, in
 static     int (WSAAPI *recv_                   )( SOCKET s, char *buf, int len, int flags ) = recv;
 
 
-#ifdef CUCKOO
-static	  VOID (WINAPI *ExitProcess_            )( DWORD dwExitCode ) = ExitThread;
-#endif
 
 extern MCEDPREGCONFIG MCEDP_REGCONFIG;
 extern DWORD dwEaAccessCount;
@@ -239,10 +236,4 @@ Hookedrecv(
 	int flags
 	);
 
-#ifdef CUCKOO
-VOID
-WINAPI
-HookedExitProcess(
-	DWORD dwExitCode
-	);
-#endif
+
