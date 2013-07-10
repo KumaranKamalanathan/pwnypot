@@ -41,8 +41,13 @@ ShuDumpShellcode(
 		lpEndAddress = (LPVOID)((DWORD)lpEndAddress + 4);
 	}
 
-	sprintf(szShellcodeFile, "\\Shellcode.bin");
+	sprintf(szShellcodeFile, "Shellcode.bin");
+#ifdef CUCKOO
+	strncpy( szLogPath, MCEDP_REGCONFIG.SHELLCODE_PATH, MAX_PATH);	
+#else
 	strncpy( szLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
+#endif
+	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeFile, MAX_PATH);
 
     /* Dump shellcode from memory */
@@ -101,6 +106,9 @@ ShuDumpShellcode(
 
 	LocalFree(ShellcodeDump);
 	CloseHandle(hShellcodeFile);
+#ifdef CUCKOO
+	TransmitFile(MCEDP_REGCONFIG.SHELLCODE_PATH, szShellcodeFile, "drops/");
+#endif	
 	return MCEDP_STATUS_SUCCESS;
 }
 
@@ -127,8 +135,13 @@ ShuDisassembleShellcode(
 	dwDecodedInstructionsCount = 0;
 	DecodedInstructions = (_DecodedInst *)LocalAlloc(LMEM_ZEROINIT, MAX_INSTRUCTIONS * sizeof(_DecodedInst));
 
-	sprintf(szShellcodeDisassFile, "\\ShellcodeDisass.txt");
+	sprintf(szShellcodeDisassFile, "ShellcodeDisass.txt");
+#ifdef CUCKOO
+	strncpy( szLogPath, MCEDP_REGCONFIG.SHELLCODE_PATH, MAX_PATH);
+#else
 	strncpy( szLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
+#endif
+	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeDisassFile, MAX_PATH);
 	
 	ShellcodeFile = fopen( szLogPath, "a");
@@ -161,6 +174,9 @@ ShuDisassembleShellcode(
 
 	LocalFree(DecodedInstructions);
 	fclose(ShellcodeFile);
+#ifdef CUCKOO
+	TransmitFile(MCEDP_REGCONFIG.SHELLCODE_PATH,szShellcodeDisassFile,"drops/");
+#endif	
 	return MCEDP_STATUS_SUCCESS;
 }
 

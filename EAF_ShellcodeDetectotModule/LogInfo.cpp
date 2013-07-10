@@ -2,7 +2,6 @@
 #include "ParseConfig.h"
 
 extern MCEDPREGCONFIG MCEDP_REGCONFIG;
-BOOL bLogStart = FALSE;
 BOOL bLogPathInitSuccess = FALSE;
 
 #ifdef CUCKOO
@@ -336,13 +335,6 @@ VOID LOCAL_DEBUG_PRINTF (
     fp = fopen(szFullLogPath, "a");
     if ( fp == NULL )
         return;
-
-    if ( !bLogStart )
-    {
-        fprintf(fp, "\n=========================================================================================\n");
-        bLogStart = TRUE;
-    }
-
     
     fprintf(fp, "%s", Buffer);
     fflush(fp);
@@ -429,6 +421,8 @@ WriteFileSocket (
 STATUS 
 InitCuckooLogs ()
 {
+    if ( bLogPathInitSuccess )
+        return MCEDP_STATUS_SUCCESS;
     // init LogInfo.txt
     LogInfoSock = InitFileSocket("LogInfo.txt");
     if (LogInfoSock==-1){
@@ -447,6 +441,7 @@ InitCuckooLogs ()
         return MCEDP_STATUS_INTERNAL_ERROR;
     }
 
+    bLogPathInitSuccess = TRUE;
     return MCEDP_STATUS_SUCCESS;
 }
 
@@ -459,15 +454,14 @@ CloseCuckooLogs ()
 
 STATUS 
 TransmitFile (
-	PCHAR szFileName
+    PCHAR szLocalPath,
+	PCHAR szFileName,
+    PCHAR szRemotePath
 	)
 {
 	SOCKET s;
     WSADATA wsadata;
-	CHAR full_path[MAX_PATH];
-	strncpy(full_path, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
-    strncat(full_path, "\\", MAX_PATH);
-    strncat(full_path, szFileName, MAX_PATH);
+	CHAR szFullPath[MAX_PATH];
 	
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
@@ -506,11 +500,15 @@ TransmitFile (
 
         memset(buffer, '\0', 256);
         strncpy(buffer, "FILE\n",256);
+        strncat(buffer, szRemotePath,256);
         strncat(buffer, szFileName,256);
         strncat(buffer, "\n",256);
-        n = send(s,buffer, strlen(buffer),0);        
+        n = send(s,buffer, strlen(buffer),0);    
 
-        FILE *fs = fopen(full_path, "r");
+        strncpy(szFullPath, szLocalPath,MAX_PATH);
+        strncat(szFullPath, szFileName,MAX_PATH);
+
+        FILE *fs = fopen(szFullPath, "r");
         if(fs == NULL)
         {
             return MCEDP_STATUS_INTERNAL_ERROR;
@@ -522,7 +520,7 @@ TransmitFile (
         {
             if(send(s, sdbuf, fs_block_sz, 0) < 0)
             {
-                DEBUG_PRINTF(LDBG, NULL, "ERROR: Failed to send file %s. (errno = %d)\n", full_path, errno);
+                DEBUG_PRINTF(LDBG, NULL, "ERROR: Failed to send file %s. (errno = %d)\n", szFullPath, errno);
                 return MCEDP_STATUS_INTERNAL_ERROR;
             }
             memset(sdbuf, '\0', LENGTH);
@@ -531,14 +529,6 @@ TransmitFile (
 
         return MCEDP_STATUS_SUCCESS; 	
     }
-}
-
-int 
-SaveLogs (
-    )
-{
-    TransmitFile("logs/LogInfo.txt");
-    return 0;
 }
 
 #endif

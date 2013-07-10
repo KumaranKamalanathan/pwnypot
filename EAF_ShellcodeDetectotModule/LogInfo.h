@@ -120,9 +120,9 @@ InitCuckooLogs();
 
 STATUS
 TransmitFile(
-    PCHAR szFileName
+    PCHAR szLocalPath,
+    PCHAR szFileName,
+    PCHAR szRemotePath
     );
 
-int 
-SaveLogs ();
 #endif

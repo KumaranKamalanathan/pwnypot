@@ -88,11 +88,19 @@ DbgSetRopFlag(
 	bRopDetected = TRUE;
 
     /* init log path */
+#ifdef CUCKOO
+    if ( InitCuckooLogs() != MCEDP_STATUS_SUCCESS )
+	{
+		REPORT_ERROR("InitCuckooLogs()", &err);
+		return MCEDP_STATUS_GENERAL_FAIL;
+	}
+#else
     if ( InitLogPath( MCEDP_REGCONFIG.LOG_PATH, MAX_PATH ) != MCEDP_STATUS_SUCCESS )
 	{
 		REPORT_ERROR("InitLogPath()", &err);
 		return MCEDP_STATUS_GENERAL_FAIL;
 	}
+#endif
 
 	return MCEDP_STATUS_SHELLCODE_FLAG_SET;
 }

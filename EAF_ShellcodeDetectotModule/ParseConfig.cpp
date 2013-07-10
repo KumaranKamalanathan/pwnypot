@@ -390,11 +390,16 @@ ParseConfig(
     	        *p = 0;
         	    const char *key = buf, *value = p + 1;
             	if(!strcmp(key, "results")) {		 
+            		// setting paths for logs
 	                strncpy(pMcedpRegConfig->LOG_PATH, value, MAX_PATH);
 					DEBUG_PRINTF(LDBG, NULL, "Found Results Path %s.\n",value);
 	                strncat(pMcedpRegConfig->LOG_PATH, "\\logs",MAX_PATH);
 					DEBUG_PRINTF(LDBG, NULL, "Setting Logs Path %s.\n",pMcedpRegConfig->LOG_PATH);
     	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH,MAX_PATH);
+
+    	           	// setting paths for shellcodes
+	                strncpy(pMcedpRegConfig->SHELLCODE_PATH, value, MAX_PATH);
+	                strncat(pMcedpRegConfig->SHELLCODE_PATH, "\\shellcode", MAX_PATH);
         	    }
                 else if(!strcmp(key, "analyzer")) {
                     strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);

@@ -38,7 +38,8 @@ SaveXml(
 	CHAR szShellcodeFile[MAX_PATH];
 
 	strncpy(szLogDir, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
-	sprintf(szShellcodeFile, "\\ShellcodeAnalysis.xml");
+	strncat(szLogDir, "\\", MAX_PATH);
+	sprintf(szShellcodeFile, "ShellcodeAnalysis.xml");
 	strncat(szLogDir, szShellcodeFile , MAX_PATH);
 
     fp = fopen(szLogDir, "w");
@@ -56,5 +57,8 @@ SaveXml(
 	}
 
     fclose(fp);
+#ifdef CUCKOO    
+    TransmitFile(szLogDir, szShellcodeFile, "shellcode/");
+#endif 
 	return MCEDP_STATUS_SUCCESS;
 }
