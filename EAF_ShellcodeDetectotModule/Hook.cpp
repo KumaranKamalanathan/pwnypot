@@ -242,7 +242,7 @@ HookedCreateProcessInternalW(
 			XmlLogNode = mxmlNewElement( XmlIDLogNode, "exec_cmd");
 			mxmlNewText( XmlLogNode, 0, szCommandLineA);
 			/* save */
-			SaveXml( XmlLog );
+			SaveXml( LSC, XmlLog );
 
 			LocalFree(szApplicationNameA);
 			LocalFree(szCommandLineA);
@@ -339,7 +339,7 @@ HookedURLDownloadToFileW(
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "download_filename");
 		mxmlNewText( XmlLogNode, 0, (PCHAR)szFileNameA);
 		/* save */
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog);
 
 		if ( MCEDP_REGCONFIG.SHELLCODE.ALLOW_MALWARE_DWONLOAD == FALSE )
 			return S_OK;
@@ -371,7 +371,7 @@ HookedLoadLibraryExW(
 		XmlLogNode = CreateXmlElement( XmlShellcode, "loadlib");
 		XmlDataNode = CreateXmlElement( XmlLogNode, "libname");
 		SetTextNode( XmlDataNode, 0, szLibFileNameA);
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog );
 
 		LocalFree(szLibFileNameA);
 	}
@@ -474,7 +474,7 @@ Hookedsocket(
 		}
 
 		// save
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog );
 	}
 
 	return (socket_( af, type, protocol));
@@ -507,7 +507,7 @@ Hookedconnect(
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "connect_port");
 		mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port), szPort, 10));
 		// save
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog );
 	}
 
 	return (connect_(s, name, namelen));
@@ -534,7 +534,7 @@ Hookedlisten(
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "listen_desc");
 		mxmlNewText( XmlLogNode, 0, "Shellcode attemp to listen on a port (possibly on previously bind address).");
 		// save
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog );
 	}
 
 	return (listen_( s,backlog ));
@@ -567,7 +567,7 @@ Hookedbind(
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "bind_port");
 		mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port),szPort, 10));
 		// save
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog );
 	}
 
 	return (bind_(s, name, namelen));
@@ -602,7 +602,7 @@ Hookedaccept(
 			XmlLogNode = mxmlNewElement( XmlIDLogNode, "accept_port");
 			mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port),szPort, 10));
 			// save
-			SaveXml( XmlLog );
+			SaveXml( LSC, XmlLog );
 		}
 		else
 		{
@@ -616,7 +616,7 @@ Hookedaccept(
 			XmlLogNode = mxmlNewElement( XmlIDLogNode, "accept_port");
 			mxmlNewText( XmlLogNode, 0, "NULL");
 			// save
-			SaveXml( XmlLog );
+			SaveXml( LSC, XmlLog );
 		}
 	}
 
@@ -661,7 +661,7 @@ Hookedsend(
 			mxmlNewText( XmlLogNode, 0, GenRandomStr(szUID, UID_SIZE-1));
             HexDumpToFile((PBYTE)buf, len ,szUID);
 			// save
-			SaveXml( XmlLog );
+			SaveXml( LSC, XmlLog );
 		}
 	}
 
@@ -703,7 +703,7 @@ Hookedrecv(
 	    mxmlNewText( XmlLogNode, 0, GenRandomStr(szUID, UID_SIZE-1));
         HexDumpToFile((PBYTE)buf, len ,szUID);
 		// save
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog );
 	}
 
 	return (recv_( s, buf, len, flags));

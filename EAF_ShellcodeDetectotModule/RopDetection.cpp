@@ -194,7 +194,7 @@ DbgReportRop(
 	{
 		XmlLogNode = CreateXmlElement( XmlIDLogNode, "module");
 		SetTextNode( XmlLogNode, 0, szAssciFullModuleName);
-		SaveXml( XmlLog );
+		SaveXml( LSC, XmlLog );
 	}
 
     /* Dump possible ROP gadgets */
