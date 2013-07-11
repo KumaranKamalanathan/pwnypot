@@ -2,6 +2,9 @@
 #include "LogInfo.h"
 #include "ParseConfig.h"
 
+#define LSC		1
+#define LROP 	2
+
 extern MCEDPREGCONFIG MCEDP_REGCONFIG;
 typedef mxml_node_t XMLNODE;
 typedef mxml_node_t* PXMLNODE;
@@ -27,5 +30,6 @@ SetTextNode(
 
 STATUS
 SaveXml(
+	IN DWORD dwType,
 	IN PXMLNODE TopElement
 	);
