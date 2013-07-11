@@ -245,8 +245,6 @@ DEBUG_PRINTF(
     if ( dwType == LDBG )
         return;
 #endif
-    else if ( dwType == LSHL )
-        strncat(szFullLogPath, "\\ShellcodeAnalysis.txt", MAX_PATH);
     else if ( dwType == LROP )
         strncat(szFullLogPath, "\\RopAnalysis.txt", MAX_PATH);
 
@@ -426,12 +424,6 @@ InitCuckooLogs ()
     // init LogInfo.txt
     LogInfoSock = InitFileSocket("LogInfo.txt");
     if (LogInfoSock==-1){
-        return MCEDP_STATUS_INTERNAL_ERROR;
-    }
-
-    // init Shellcode.txt
-    LogShellcodeSock = InitFileSocket("ShellcodeAnalysis.txt");
-    if (LogShellcodeSock==-1){
         return MCEDP_STATUS_INTERNAL_ERROR;
     }
 
