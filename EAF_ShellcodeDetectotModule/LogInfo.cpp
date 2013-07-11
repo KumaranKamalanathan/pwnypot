@@ -296,10 +296,6 @@ DEBUG_PRINTF(
     if ( dwType == LDBG )
         return;
 #endif
-    else if ( dwType == LSHL )
-        if ( LogShellcodeSock != -1 ){
-            WriteFileSocket( LogShellcodeSock, Buffer );
-        }
     else if ( dwType == LROP )
         if ( LogRopSock != -1 ){
             WriteFileSocket( LogRopSock, Buffer );
