@@ -7,7 +7,6 @@
 
 #include "Hook.h"
 #include "ParseConfig.h"
-#include "PacketDump.h"
 #include "LogInfo.h"
 #include "ETAV_DebugBreak.h"
 #include "GeneralProtections.h"
