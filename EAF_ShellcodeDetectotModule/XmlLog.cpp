@@ -35,7 +35,6 @@ SaveXml(
 	FILE *fp;
 	ERRORINFO err;
 	CHAR szLogDir[MAX_PATH];
-	CHAR szShellcodeFile[MAX_PATH];
 
 	strncpy(szLogDir, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogDir, "\\", MAX_PATH);
@@ -57,7 +56,12 @@ SaveXml(
 
     fclose(fp);
 #ifdef CUCKOO    
-    TransmitFile(szLogDir, szShellcodeFile, "logs/");
+    if ( TransmitFile(MCEDP_REGCONFIG.LOG_PATH, "ShellcodeAnalysis.xml", "logs/") != MCEDP_STATUS_SUCCESS ) 
+    	DEBUG_PRINTF ( LDBG, NULL, "Error on transmission of file ShellcodeAnalysis.xml\n" );
+    else 
+    	DEBUG_PRINTF ( LDBG, NULL, "Successfully transmitted ShellcodeAnalysis.xml\n" );
+
 #endif 
+
 	return MCEDP_STATUS_SUCCESS;
 }

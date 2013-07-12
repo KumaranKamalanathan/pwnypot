@@ -6,7 +6,6 @@ BOOL bLogPathInitSuccess = FALSE;
 
 #ifdef CUCKOO
 SOCKET LogInfoSock=-1;
-SOCKET LogShellcodeSock=-1;
 SOCKET LogRopSock=-1;
 #endif
 
@@ -289,7 +288,7 @@ DEBUG_PRINTF(
 
     strncpy( szFullLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH );
 #ifdef __DEBUG__
-    if ( LogInfoSock != -1 ){
+    if (  dwType == LDBG && LogInfoSock != -1 ){
         WriteFileSocket( LogInfoSock, Buffer );
     }
 #else
@@ -297,17 +296,20 @@ DEBUG_PRINTF(
         return;
 #endif
     else if ( dwType == LROP )
+    {
         if ( LogRopSock != -1 ){
             WriteFileSocket( LogRopSock, Buffer );
         }
-
+        else 
+        {
+            LOCAL_DEBUG_PRINTF("Could not write to ROP Filesocket");
+        }
+    }
     return;
 }
 
 
 VOID LOCAL_DEBUG_PRINTF (
-    IN DWORD dwType,
-    IN DWORD dwTID,
     IN PCHAR Format, 
     IN ...
     )
@@ -347,17 +349,17 @@ InitFileSocket (
     strncpy(full_path, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
     strncat(full_path, "\\", MAX_PATH);
     strncat(full_path, szFileName, MAX_PATH);
-    LOCAL_DEBUG_PRINTF(LDBG,NULL, "Initializing File Socket\n");
+    LOCAL_DEBUG_PRINTF("Initializing File Socket\n");
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
     {
-        LOCAL_DEBUG_PRINTF(LDBG,NULL, "WSAStartup error\n");
+        LOCAL_DEBUG_PRINTF("WSAStartup error\n");
         return -1;
     }
 
     if (wsadata.wVersion != MAKEWORD(2, 2))
     {
-        LOCAL_DEBUG_PRINTF(LDBG,NULL, "Wrong version\n");
+        LOCAL_DEBUG_PRINTF("Wrong version\n");
         return -1;
     }
 
@@ -369,13 +371,13 @@ InitFileSocket (
     s = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
     if (s == INVALID_SOCKET)
     {
-        LOCAL_DEBUG_PRINTF(LDBG,NULL, "Invalid Socket\n");
+        LOCAL_DEBUG_PRINTF("Invalid Socket\n");
         return -1; 
     }  
 
     if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
     {
-        LOCAL_DEBUG_PRINTF(LDBG,NULL, "Socket Error\n");
+        LOCAL_DEBUG_PRINTF("Socket Error\n");
         return -1; 
     }
     else
@@ -392,7 +394,7 @@ InitFileSocket (
         strncat(buffer, "\n",256);
         n = send(s,buffer, strlen(buffer),0);   
 
-        LOCAL_DEBUG_PRINTF(LDBG, NULL, "Successfully Initialized FileSocket\n");
+        LOCAL_DEBUG_PRINTF("Successfully Initialized FileSocket\n");
     }
     return s;
 }
@@ -403,11 +405,11 @@ WriteFileSocket (
     PCHAR Buffer
     )
 {   
-    LOCAL_DEBUG_PRINTF( LDBG, NULL, "WriteFileSocket called on Socket %d", Socket );
+    LOCAL_DEBUG_PRINTF("WriteFileSocket called on Socket %d\\", Socket );
     int res = send ( Socket, Buffer, strlen( Buffer ), 0 );
-    LOCAL_DEBUG_PRINTF( LDBG, NULL, "Sent %d bytes: %s\n", res, Buffer);
+    LOCAL_DEBUG_PRINTF("Sent %d bytes: %s\n", res, Buffer);
     if ( res == SOCKET_ERROR ) {
-        LOCAL_DEBUG_PRINTF(LDBG, NULL, "Last error: %d\n", WSAGetLastError());
+        LOCAL_DEBUG_PRINTF("Last error: %d\n", WSAGetLastError());
     }
     return MCEDP_STATUS_SUCCESS;
 }
@@ -471,34 +473,37 @@ TransmitFile (
     s = socket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
     if (s == INVALID_SOCKET)
     {
+        DEBUG_PRINTF(LDBG, NULL, "ERROR: Invalid socket for file transmission.\n");
         return MCEDP_STATUS_INTERNAL_ERROR; 
     }  
 
     if (connect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
     {
+        DEBUG_PRINTF(LDBG, NULL, "ERROR: Failed to connect to socket for file transmission.\n");
         return MCEDP_STATUS_INTERNAL_ERROR; 
     }
     else
     {
         const int LENGTH = 512;
         char sdbuf[LENGTH]; 
-
-        char buffer[256];
+        char buffer[LENGTH];
         int n;
 
-        memset(buffer, '\0', 256);
-        strncpy(buffer, "FILE\n",256);
-        strncat(buffer, szRemotePath,256);
-        strncat(buffer, szFileName,256);
-        strncat(buffer, "\n",256);
+        memset(buffer, '\0', LENGTH);
+        strncpy(buffer, "FILE\n",LENGTH);
+        strncat(buffer, szRemotePath,LENGTH);
+        strncat(buffer, szFileName,LENGTH);
+        strncat(buffer, "\n",LENGTH);
         n = send(s,buffer, strlen(buffer),0);    
 
         strncpy(szFullPath, szLocalPath,MAX_PATH);
+        strncat(szFullPath, "\\",LENGTH);
         strncat(szFullPath, szFileName,MAX_PATH);
 
         FILE *fs = fopen(szFullPath, "r");
         if(fs == NULL)
         {
+            DEBUG_PRINTF(LDBG, NULL, "ERROR: Failed to open file for sending %s. (errno = %d)\n", szFullPath, errno);
             return MCEDP_STATUS_INTERNAL_ERROR;
         }
 

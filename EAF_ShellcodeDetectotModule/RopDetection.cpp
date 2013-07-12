@@ -27,7 +27,7 @@ ValidateCallAgainstRop(
 			{
 				/* set ROP flags */
 				DbgSetRopFlag();
-				DEBUG_PRINTF(LDBG,NULL,"ROP Detected by STACK_MONITOR, out of bound stack!\n");
+				DEBUG_PRINTF(LROP,NULL,"ROP Detected by STACK_MONITOR, out of bound stack!\n");
 			}
 		}
 
@@ -44,7 +44,7 @@ ValidateCallAgainstRop(
 				{
 					/* set ROP flag */
 					DbgSetRopFlag();
-					DEBUG_PRINTF(LDBG,NULL,"ROP Detected by STACK_RWX, stack permission changed to be executable!\n");
+					DEBUG_PRINTF(LROP,NULL,"ROP Detected by STACK_RWX, stack permission changed to be executable!\n");
 				}
 			}
 		}
@@ -67,7 +67,10 @@ ValidateCallAgainstRop(
 		if ( DbgGetRopFlag() == MCEDP_STATUS_ROP_FLAG_SET )
 		{
 			if ( MCEDP_REGCONFIG.ROP.DUMP_ROP )
+			{
+				DEBUG_PRINTF(LROP, NULL, "Trying to dump ROP from ESP at 0x%p and APINumber %d\n",(PVOID)lpEspAddress, RopCallee);
 				DbgReportRop((PVOID)lpEspAddress,RopCallee);
+			}
 
 			if ( MCEDP_REGCONFIG.ROP.KILL_ROP)
 				TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
@@ -82,21 +85,15 @@ DbgSetRopFlag(
 	VOID
 	)
 {
-    ERRORINFO err;
 
 	/* set the ROP flag */
 	bRopDetected = TRUE;
 
     /* init log path */
-#ifdef CUCKOO
-    if ( InitCuckooLogs() != MCEDP_STATUS_SUCCESS )
-	{
-		REPORT_ERROR("InitCuckooLogs()", &err);
-		return MCEDP_STATUS_GENERAL_FAIL;
-	}
-#else
+#ifndef CUCKOO
     if ( InitLogPath( MCEDP_REGCONFIG.LOG_PATH, MAX_PATH ) != MCEDP_STATUS_SUCCESS )
 	{
+    	ERRORINFO err;
 		REPORT_ERROR("InitLogPath()", &err);
 		return MCEDP_STATUS_GENERAL_FAIL;
 	}
@@ -194,9 +191,9 @@ DbgReportRop(
     /* Get the module that used for rop gadgets */
 	if ( DbgGetRopModule( lpAddress, szAssciFullModuleName, MAX_MODULE_NAME32) == MCEDP_STATUS_SUCCESS )
 	{
+		DEBUG_PRINTF(LROP, NULL, "Rop Module name: %s\n", szAssciFullModuleName);
 		XmlLogNode = CreateXmlElement( XmlIDLogNode, "module");
 		SetTextNode( XmlLogNode, 0, szAssciFullModuleName);
-		SaveXml( XmlLog );
 	}
 
     /* Dump possible ROP gadgets */
@@ -205,6 +202,8 @@ DbgReportRop(
 		lpAddress = (PVOID)((DWORD_PTR)lpAddress - MCEDP_REGCONFIG.ROP.ROP_MEM_FAR);
 		for ( i = 0 ; i <= MCEDP_REGCONFIG.ROP.MAX_ROP_MEM ; i++ , lpAddress = (LPVOID)((DWORD)lpAddress + 4) )
 		{
+
+			DEBUG_PRINTF(LROP, NULL, "New gadget\n");
 			XmlLogNode = CreateXmlElement ( XmlIDLogNode, "rop_gadget");
 
 			XmlSubNode = mxmlNewElement( XmlLogNode, "address");
@@ -219,12 +218,15 @@ DbgReportRop(
 
 			if ( LdrFindEntryForAddress((PVOID)(*(DWORD *)lpAddress), &TableEntry) == MCEDP_STATUS_SUCCESS )
 			{
+
+				DEBUG_PRINTF(LROP, NULL, "find entry for address success\n");
 				/* get module name */
 				wcstombs( szAssciModuleName, TableEntry->FullDllName.Buffer, TableEntry->FullDllName.Length );
 
 				/* Get module .text section start address */
 				if ( ( lpCodeSectionAddress = PeGetCodeSectionAddress( TableEntry->DllBase ) ) == NULL )
 				{
+					DEBUG_PRINTF(LROP, NULL, "FAILED -- MODULE CODE SECTION ADDRESS NULL\n");
 					XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 					mxmlNewText( XmlSubNode, 0, "FAILED -- MODULE CODE SECTION ADDRESS NULL");
 					break;
@@ -233,7 +235,7 @@ DbgReportRop(
 				/* Get module .text section size */
 				if ( ( dwCodeSectionSize = PeGetCodeSectionSize( TableEntry->DllBase ) ) == NULL )
 				{
-
+					DEBUG_PRINTF(LROP, NULL, "FAILED -- MODULE CODE SECTION SIZE NULL\n");
 					XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 					mxmlNewText( XmlSubNode, 0, "FAILED -- MODULE CODE SECTION SIZE NULL");
 					break;
@@ -245,10 +247,12 @@ DbgReportRop(
 
 					if ( ShuDisassmbleRopInstructions( (PVOID)(*(ULONG_PTR *)lpAddress), szRopInst, MCEDP_REGCONFIG.ROP.MAX_ROP_INST ) == MCEDP_STATUS_SUCCESS )
 					{
+						DEBUG_PRINTF(LROP, NULL, "rop_module\n");
 						XmlSubNode = mxmlNewElement( XmlLogNode, "rop_module");
         				memset( szTemp, '\0', 1024 );
 						sprintf( szTemp, "0x%s", szAssciModuleName);
 						mxmlNewText( XmlSubNode, 0, szTemp );	
+						DEBUG_PRINTF(LROP, NULL, "rop_inst\n");
 
 						XmlSubNode = mxmlNewElement( XmlLogNode, "rop_inst");
         				memset( szTemp, '\0', 1024 );
@@ -256,6 +260,7 @@ DbgReportRop(
 						mxmlNewText( XmlSubNode, 0, szTemp );	
 					} else
 					{
+						DEBUG_PRINTF(LROP, NULL, "FAILED TO DISASSMBLE\n");
 						XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 						mxmlNewText( XmlSubNode, 0, "FAILED TO DISASSMBLE");
 					}
@@ -263,11 +268,14 @@ DbgReportRop(
 					SecureZeroMemory(szRopInst, 2048);
 
 				} else
+					DEBUG_PRINTF(LROP, NULL, "OUT OF CODE SECTION\n");
 					XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 					mxmlNewText( XmlSubNode, 0, "OUT OF CODE SECTION");
 			} 
 		}
 	}
 
+	DEBUG_PRINTF(LROP, NULL, "Trying to save ROP gadget\n");
+	SaveXml( XmlLog );
 	LocalFree(szRopInst);
 }

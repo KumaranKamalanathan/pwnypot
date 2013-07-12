@@ -399,7 +399,7 @@ ParseConfig(
 
     	           	// setting paths for shellcodes
 	                strncpy(pMcedpRegConfig->SHELLCODE_PATH, value, MAX_PATH);
-	                strncat(pMcedpRegConfig->SHELLCODE_PATH, "\\shellcode", MAX_PATH);
+	                strncat(pMcedpRegConfig->SHELLCODE_PATH, "\\logs", MAX_PATH);
         	    }
                 else if(!strcmp(key, "analyzer")) {
                     strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
@@ -425,10 +425,15 @@ ParseConfig(
         DEBUG_PRINTF(LDBG, NULL, "Loading Cuckoo Configuration failed: ini File not found.\n");
 		return MCEDP_STATUS_INTERNAL_ERROR;
     }  
+    pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
     pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
+    pMcedpRegConfig->MEM.STACK_RWX = TRUE;
+
+    pMcedpRegConfig->ROP.STACK_MONITOR;
     pMcedpRegConfig->ROP.DETECT_ROP = TRUE;
     pMcedpRegConfig->ROP.DUMP_ROP = TRUE;
-    pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
+    pMcedpRegConfig->ROP.KILL_ROP = FALSE;
+
 	return MCEDP_STATUS_SUCCESS;
 }
 #endif 

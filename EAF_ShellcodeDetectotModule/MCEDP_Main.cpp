@@ -111,7 +111,6 @@ SetupShellcodeDetector(
 	)
 {
 	ERRORINFO err;
-
 	/* creating XML */
 	XmlLog = NewXmlRoot("1.0");
 	XmlShellcode = CreateXmlElement(XmlLog, "shellcode");

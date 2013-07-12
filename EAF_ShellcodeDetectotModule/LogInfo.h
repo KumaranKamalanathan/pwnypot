@@ -102,8 +102,6 @@ HexDumpToFile(
 
 VOID 
 LOCAL_DEBUG_PRINTF(
-    IN DWORD dwType,
-    IN DWORD dwTID,
     IN PCHAR Format, 
     IN ...
     );

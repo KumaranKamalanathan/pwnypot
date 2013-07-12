@@ -107,7 +107,14 @@ ShuDumpShellcode(
 	LocalFree(ShellcodeDump);
 	CloseHandle(hShellcodeFile);
 #ifdef CUCKOO
-	TransmitFile(MCEDP_REGCONFIG.SHELLCODE_PATH, szShellcodeFile, "drops/");
+	if ( TransmitFile(MCEDP_REGCONFIG.LOG_PATH, szShellcodeFile, "logs/") != MCEDP_STATUS_SUCCESS)
+	{
+    	DEBUG_PRINTF ( LDBG, NULL, "Error on transmission of file Shellcode.bin\n" );
+	}
+	else 
+	{		
+    	DEBUG_PRINTF ( LDBG, NULL, "Successfully transmitted Shellcode.bin\n" );
+	}
 #endif	
 	return MCEDP_STATUS_SUCCESS;
 }
@@ -175,7 +182,13 @@ ShuDisassembleShellcode(
 	LocalFree(DecodedInstructions);
 	fclose(ShellcodeFile);
 #ifdef CUCKOO
-	TransmitFile(MCEDP_REGCONFIG.SHELLCODE_PATH,szShellcodeDisassFile,"drops/");
+	if ( TransmitFile(MCEDP_REGCONFIG.LOG_PATH,szShellcodeDisassFile,"logs/") != MCEDP_STATUS_SUCCESS )
+	{
+    	DEBUG_PRINTF ( LDBG, NULL, "Error on transmission of file ShellcodeDisass.txt\n" );
+	}
+	else
+    	DEBUG_PRINTF ( LDBG, NULL, "Successfully transmitted ShellcodeDisass.txt\n" );
+
 #endif	
 	return MCEDP_STATUS_SUCCESS;
 }
