@@ -29,7 +29,6 @@ SetTextNode(
 
 STATUS
 SaveXml(
-	IN DWORD dwType,
 	IN PXMLNODE TopElement
 	)
 {
@@ -40,14 +39,7 @@ SaveXml(
 
 	strncpy(szLogDir, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogDir, "\\", MAX_PATH);
-	if ( dwType == LSC ) 
-	{
-		strncat(szLogDir, "ShellcodeAnalysis.xml" , MAX_PATH);
-	}
-	else if ( dwType == LROP ) 
-	{		
-		strncat(szLogDir, "RopAnalysis.xml" , MAX_PATH);
-	}
+	strncat(szLogDir, "ShellcodeAnalysis.xml" , MAX_PATH);
 
     fp = fopen(szLogDir, "w");
 
