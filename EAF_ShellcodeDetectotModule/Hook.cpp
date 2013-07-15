@@ -81,7 +81,6 @@ HookUninstall(
 	VOID
 	)
 {
-
 	DEBUG_PRINTF(LDBG,NULL,"Uninstalling Hooks\n");
 	CreateProcessInternalW_ = (BOOL (WINAPI *)(HANDLE, LPCWSTR, LPWSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCWSTR, LPSTARTUPINFOW, LPPROCESS_INFORMATION, PHANDLE))GetProcAddress(GetModuleHandle("KERNEL32.DLL"), "CreateProcessInternalW");
 	DetourTransactionBegin();
@@ -138,6 +137,7 @@ HookedCreateThread(
 	 HANDLE	hThreadHandle;
 	 DWORD dwThreadId;
 	 PHWBREAKDATA phd;
+
 
 	 /* Enable breakpoint for new thread only when shellcode is not detected */
 	 if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_NOT_SET )
@@ -255,7 +255,6 @@ HookedCreateProcessInternalW(
         /* let the malware execute */
 		return (CreateProcessInternalW_( hToken, lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, hNewToken));
 	}
-	
 	/* if the process is creating with CREATE_SUSPENDED flag, let it do its job */
 	if ( IsBitSet(dwCreationFlags, 2) )
 	{
@@ -264,6 +263,7 @@ HookedCreateProcessInternalW(
 		if ( bReturn != FALSE )
 		{
            
+#ifndef CUCKOO	
 			strncpy( szDllFullPath, MCEDP_REGCONFIG.MCEDP_MODULE_PATH, MAX_PATH );
 			if ( InjectDLLIntoProcess( szDllFullPath, lpProcessInformation->hProcess ) != MCEDP_STATUS_SUCCESS )
 			{
@@ -275,6 +275,12 @@ HookedCreateProcessInternalW(
 			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
 			Sleep(INIT_WAIT_TIME);
+#else
+			DEBUG_PRINTF(LDBG, NULL, "Trying to pipe to cuckoo new process: %d\n", lpProcessInformation->dwProcessId);
+			char buf[MAX_PATH];
+			sprintf(buf,"PROCESS:%d",lpProcessInformation->dwProcessId,MAX_PATH);
+			pipe(buf);
+#endif			
 			return bReturn;
 		}
 	} 
@@ -285,6 +291,7 @@ HookedCreateProcessInternalW(
 		
 		if ( bReturn != FALSE )
 		{
+#ifndef CUCKOO			
              /* TODO : We dont need this if ther process is already added into Protection List in registry, so we should remove this lines  */
 			strncpy( szDllFullPath, MCEDP_REGCONFIG.MCEDP_MODULE_PATH, MAX_PATH );
 			if ( InjectDLLIntoProcess( szDllFullPath, lpProcessInformation->hProcess ) != MCEDP_STATUS_SUCCESS )
@@ -298,11 +305,18 @@ HookedCreateProcessInternalW(
 			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
 			Sleep(INIT_WAIT_TIME);
+#else
+			DEBUG_PRINTF(LDBG, NULL, "Trying to pipe to cuckoo new process: %d\n", lpProcessInformation->dwProcessId);
+			char buf[MAX_PATH];
+			sprintf(buf,"PROCESS:%d",lpProcessInformation->dwProcessId,MAX_PATH);
+			DWORD len = strlen(buf);
+			pipe(buf);
+#endif					
 			ResumeThread(lpProcessInformation->hThread);
 			return bReturn;
 		}
 	}
-
+	
 	return bReturn;
 }
 
@@ -341,7 +355,7 @@ HookedURLDownloadToFileW(
 		/* save */
 		SaveXml( XmlLog );
 
-		if ( MCEDP_REGCONFIG.SHELLCODE.ALLOW_MALWARE_DWONLOAD == FALSE )
+		if ( MCEDP_REGCONFIG.SHELLCODE.ALLOW_MALWARE_DOWNLOAD == FALSE )
 			return S_OK;
 
 		LocalFree(szUrlA);

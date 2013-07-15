@@ -6,6 +6,7 @@
 #include <time.h>
 #include <UrlMon.h>
 #include "LogInfo.h"
+#include "CuckooPipe.h"
 #include "ETAV_DebugBreak.h"
 #include "ModuleAutoInject.h"
 #include "XmlLog.h"
