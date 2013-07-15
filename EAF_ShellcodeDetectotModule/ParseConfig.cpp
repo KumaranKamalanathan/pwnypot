@@ -140,7 +140,7 @@ ParseRegConfig(
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "MalwareDownload") ) 
 			{
-				pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DWONLOAD = *pdwFlag;
+				pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "KillShellcode") ) 
 			{
@@ -401,6 +401,10 @@ ParseConfig(
 	                strncpy(pMcedpRegConfig->SHELLCODE_PATH, value, MAX_PATH);
 	                strncat(pMcedpRegConfig->SHELLCODE_PATH, "\\logs", MAX_PATH);
         	    }
+        	    if(!strcmp(key, "pipe")) {
+                     strncpy(pMcedpRegConfig->CUCKOO_PIPE_NAME, value,MAX_PATH);
+                }
+
                 else if(!strcmp(key, "analyzer")) {
                     strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
                     strncpy(pMcedpRegConfig->CUCKOO_ANALYZER_PATH, value,MAX_PATH);
@@ -425,14 +429,20 @@ ParseConfig(
         DEBUG_PRINTF(LDBG, NULL, "Loading Cuckoo Configuration failed: ini File not found.\n");
 		return MCEDP_STATUS_INTERNAL_ERROR;
     }  
-    pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
-    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
-    pMcedpRegConfig->MEM.STACK_RWX = TRUE;
+	//pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
+	pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = TRUE;
 
-    pMcedpRegConfig->ROP.STACK_MONITOR;
+    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
+	pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = 1;
+	pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = TRUE;
+	pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = FALSE;
+
     pMcedpRegConfig->ROP.DETECT_ROP = TRUE;
+    pMcedpRegConfig->ROP.ROP_MEM_FAR = 32;
     pMcedpRegConfig->ROP.DUMP_ROP = TRUE;
-    pMcedpRegConfig->ROP.KILL_ROP = FALSE;
+	pMcedpRegConfig->ROP.FE_FAR = 4;
+	pMcedpRegConfig->ROP.FORWARD_EXECUTION = TRUE;
+	pMcedpRegConfig->ROP.KILL_ROP = FALSE;
 
 	return MCEDP_STATUS_SUCCESS;
 }
