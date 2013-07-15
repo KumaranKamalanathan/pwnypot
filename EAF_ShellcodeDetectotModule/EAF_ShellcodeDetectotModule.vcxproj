@@ -162,6 +162,7 @@
     <CustomBuild Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CuckooPipe.h" />
     <ClInclude Include="ETAV_DebugBreak.h" />
     <ClInclude Include="GeneralProtections.h" />
     <ClInclude Include="Hash.h" />
@@ -181,6 +182,7 @@
     <ClInclude Include="XmlLog.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CuckooPipe.cpp" />
     <ClCompile Include="ETAV_DebugBreak.cpp" />
     <ClCompile Include="GeneralProtections.cpp" />
     <ClCompile Include="Hash.cpp" />
