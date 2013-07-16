@@ -292,7 +292,7 @@ DEBUG_PRINTF(
         if( LogInfoSock != -1) 
             WriteFileSocket( LogInfoSock, Buffer );
         else             
-            LOCAL_DEBUG_PRINTF("Could not write to Log Filesocket\n");
+            LOCAL_DEBUG_PRINTF("Could not write to Log Filesocket: %s\n",Buffer);
     }
 #else
     if ( dwType == LDBG )
@@ -305,7 +305,7 @@ DEBUG_PRINTF(
         }
         else 
         {
-            LOCAL_DEBUG_PRINTF("Could not write to ROP Filesocket\n");
+            LOCAL_DEBUG_PRINTF("Could not write to ROP Filesocket: %s\n",Buffer);
         }
     }
     return;
