@@ -390,13 +390,15 @@ ParseConfig(
         LOCAL_DEBUG_PRINTF("Loading Cuckoo Configuration failed: ini File not found.\n");
 		return MCEDP_STATUS_INTERNAL_ERROR;
     }  
-	//pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
+	pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
 	pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = TRUE;
+	pMcedpRegConfig->GENERAL.SEHOP = TRUE;
 
     pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
 	pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = 1;
 	pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = TRUE;
 	pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = FALSE;
+	pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = TRUE;
 
     pMcedpRegConfig->ROP.DETECT_ROP = TRUE;
     pMcedpRegConfig->ROP.ROP_MEM_FAR = 32;
@@ -404,6 +406,9 @@ ParseConfig(
 	pMcedpRegConfig->ROP.FE_FAR = 4;
 	pMcedpRegConfig->ROP.FORWARD_EXECUTION = TRUE;
 	pMcedpRegConfig->ROP.KILL_ROP = FALSE;
+
+	pMcedpRegConfig->MEM.TEXT_RWX = TRUE;
+	pMcedpRegConfig->MEM.STACK_RWX = TRUE:
 
 	return MCEDP_STATUS_SUCCESS;
 }
