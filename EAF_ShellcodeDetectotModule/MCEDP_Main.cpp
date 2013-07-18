@@ -18,7 +18,6 @@
 MCEDPREGCONFIG MCEDP_REGCONFIG;
 extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
-extern SOCKET LogInfoSock;
 
 STATUS
 SetupShellcodeDetector(

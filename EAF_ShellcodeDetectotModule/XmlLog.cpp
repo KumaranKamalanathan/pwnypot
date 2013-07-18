@@ -35,9 +35,12 @@ SaveXml(
 	FILE *fp;
 	ERRORINFO err;
 	CHAR szLogDir[MAX_PATH];
+	CHAR szPid[MAX_PATH];
 
 	strncpy(szLogDir, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogDir, "\\", MAX_PATH);
+	sprintf(szPid, "%u_", GetCurrentProcessId(),MAX_PATH);
+	strncat(szLogDir, szPid, MAX_PATH);
 	strncat(szLogDir, "ShellcodeAnalysis.xml" , MAX_PATH);
 
     fp = fopen(szLogDir, "w");
@@ -53,13 +56,13 @@ SaveXml(
 		REPORT_ERROR("mxmlSaveFile()", &err);
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
-
+	fflush(fp);
     fclose(fp);
-#ifdef CUCKOO    
+#ifndef CUCKOO    
     if ( TransmitFile(MCEDP_REGCONFIG.LOG_PATH, "ShellcodeAnalysis.xml", "logs/") != MCEDP_STATUS_SUCCESS ) 
-    	DEBUG_PRINTF ( LDBG, NULL, "Error on transmission of file ShellcodeAnalysis.xml\n" );
+    	LOCAL_DEBUG_PRINTF ( "Error on transmission of file ShellcodeAnalysis.xml\n" );
     else 
-    	DEBUG_PRINTF ( LDBG, NULL, "Successfully transmitted ShellcodeAnalysis.xml\n" );
+    	LOCAL_DEBUG_PRINTF ( "Successfully transmitted ShellcodeAnalysis.xml\n" );
 
 #endif 
 

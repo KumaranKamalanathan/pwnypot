@@ -1,10 +1,12 @@
 #pragma once
-#include <windows.h>
+#include <WinSock2.h>
+#include <Windows.h>
 #include <stdio.h>
 #include <tlhelp32.h> 
 #include <time.h>
 #include <UrlMon.h>
 #include <Shlobj.h>
+#include "detours\detours.h"
 
 #define __DEBUG__
 #define __OUTTMPFILE__
@@ -40,6 +42,10 @@
 #define SEC             1000
 #define MAX_ERROR_MSG   256
 typedef DWORD STATUS;
+
+static 	int  	(WSAAPI * TrueConnect	)(SOCKET s, const struct sockaddr *name, int namelen ) = NULL;
+static  SOCKET 	(WSAAPI * TrueSocket  	)(int af, int type, int protocol ) = NULL;
+static  int 	(WSAAPI * TrueSend      )( SOCKET s, const char *buf, int len, int flags ) = NULL;
 
 typedef struct _ERRORINFO {
 	DWORD	dwErrorNum;
@@ -115,6 +121,10 @@ WriteFileSocket(
 
 STATUS
 InitCuckooLogs();
+
+STATUS
+InitShellcodeLog();
+
 
 STATUS
 TransmitFile(

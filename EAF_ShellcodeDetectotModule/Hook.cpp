@@ -86,6 +86,7 @@ HookUninstall(
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 
+	LOCAL_DEBUG_PRINTF("Hook add: %p", connect_);
 	/* Unhooking functions */
 	DetourDetach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
 
@@ -216,6 +217,7 @@ HookedCreateProcessInternalW(
 	BOOL bReturn;
 	CHAR szDllFullPath[MAX_PATH];
 
+	LOCAL_DEBUG_PRINTF("HookedCreateProcessInternalW called\n");
 	/* apply config rules if shellcode or ROP detected */
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == MCEDP_STATUS_ROP_FLAG_SET )
 	{
@@ -260,7 +262,16 @@ HookedCreateProcessInternalW(
 
 		LOCAL_DEBUG_PRINTF("MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC TRUE\n");
         /* let the malware execute */
-		return (CreateProcessInternalW_( hToken, lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, hNewToken));
+        BOOL res = (CreateProcessInternalW_( hToken, lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, hNewToken));
+ 
+ #ifdef CUCKOO
+			LOCAL_DEBUG_PRINTF("Executing Malware with cuckoomon.dll: %d\n", lpProcessInformation->dwProcessId);
+			char buf[MAX_PATH];
+			sprintf(buf,"PROCESS:%d,cuckoomon.dll",lpProcessInformation->dwProcessId,MAX_PATH);
+			pipe(buf);
+
+#endif		       
+		return res;
 	}
 	/* if the process is creating with CREATE_SUSPENDED flag, let it do its job */
 	if ( IsBitSet(dwCreationFlags, 2) )
@@ -281,13 +292,14 @@ HookedCreateProcessInternalW(
 			DEBUG_PRINTF(LDBG, NULL, "Module injected itself into newly created process , PID : %d\n", lpProcessInformation->dwProcessId);
 			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
-			Sleep(INIT_WAIT_TIME);
 #else
 			DEBUG_PRINTF(LDBG, NULL, "New Process with CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
-			sprintf(buf,"PROCESS:%d",lpProcessInformation->dwProcessId,MAX_PATH);
+			sprintf(buf,"PROCESS:%d,MCEDP.dll",lpProcessInformation->dwProcessId,MAX_PATH);
 			pipe(buf);
+
 #endif			
+			Sleep(INIT_WAIT_TIME);
 			return bReturn;
 		}
 	} 
@@ -309,16 +321,16 @@ HookedCreateProcessInternalW(
 			}
 
 			DEBUG_PRINTF(LDBG, NULL, "Module injected itself into newly created process , PID : %d\n", lpProcessInformation->dwProcessId);
-			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
-			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
-			Sleep(INIT_WAIT_TIME);
 #else
 			DEBUG_PRINTF(LDBG, NULL, "New Process !without! CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
-			sprintf(buf,"PROCESS:%d",lpProcessInformation->dwProcessId,MAX_PATH);
+			sprintf(buf,"PROCESS:%d,MCEDP.dll",lpProcessInformation->dwProcessId,MAX_PATH);
 			DWORD len = strlen(buf);
 			pipe(buf);
-#endif					
+#endif				
+			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
+			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
+			Sleep(INIT_WAIT_TIME);
 			ResumeThread(lpProcessInformation->hThread);
 			return bReturn;
 		}
@@ -326,6 +338,7 @@ HookedCreateProcessInternalW(
 	
 	return bReturn;
 }
+
 
 HRESULT
 WINAPI

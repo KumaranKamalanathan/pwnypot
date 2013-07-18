@@ -378,6 +378,7 @@ ParseConfig(
 		return MCEDP_STATUS_INTERNAL_ERROR;
     }  
     pMcedpRegConfig->SKIP_HBP_ERROR = TRUE;
+	pMcedpRegConfig->INIT_DELAY = 0;
 
 	pMcedpRegConfig->GENERAL.PERMANENT_DEP = FALSE;
 	pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = FALSE;
@@ -385,24 +386,24 @@ ParseConfig(
 	pMcedpRegConfig->GENERAL.NULL_PAGE = FALSE;
 	pMcedpRegConfig->GENERAL.HEAP_SPRAY = FALSE;
 
-    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
 	pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = TRUE;
-	pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = TRUE;
-	pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = FALSE;
 	pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = FALSE;
 	pMcedpRegConfig->SHELLCODE.ETA_VALIDATION = TRUE;
-	strncpy( pMcedpRegConfig->SHELLCODE.ETAF_MODULE, "KERNEL32.DLL", MAX_MODULE_NAME32 );
+	strncpy( pMcedpRegConfig->SHELLCODE.ETAF_MODULE, "KERNEL32.DLL", MAX_MODULE_NAME32 );	
+	pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = FALSE;
+    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
+	pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = TRUE;
 
     pMcedpRegConfig->ROP.DETECT_ROP = TRUE;
-    pMcedpRegConfig->ROP.ROP_MEM_FAR = 32;
     pMcedpRegConfig->ROP.DUMP_ROP = TRUE;
-	pMcedpRegConfig->ROP.FE_FAR = 4;
+    pMcedpRegConfig->ROP.ROP_MEM_FAR = 20; //32
 	pMcedpRegConfig->ROP.FORWARD_EXECUTION = TRUE;
+	pMcedpRegConfig->ROP.FE_FAR = 4;
 	pMcedpRegConfig->ROP.KILL_ROP = TRUE;
 	pMcedpRegConfig->ROP.CALL_VALIDATION = FALSE;
 	pMcedpRegConfig->ROP.STACK_MONITOR = FALSE;
-	pMcedpRegConfig->ROP.MAX_ROP_INST = 128;
-	pMcedpRegConfig->ROP.MAX_ROP_MEM = 128;
+	pMcedpRegConfig->ROP.MAX_ROP_INST = 80; //132
+	pMcedpRegConfig->ROP.MAX_ROP_MEM = 80; 
 	pMcedpRegConfig->ROP.PIVOTE_DETECTION = TRUE;
 	pMcedpRegConfig->ROP.PIVOTE_TRESHOLD = 2;
 	pMcedpRegConfig->ROP.PIVOTE_INST_TRESHOLD = 3;

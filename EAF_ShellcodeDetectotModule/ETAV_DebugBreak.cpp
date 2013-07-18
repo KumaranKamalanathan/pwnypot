@@ -46,7 +46,7 @@ DbgExceptionHandler(
 				
 				/* Set shellcode detection flags */
 				if ( DbgSetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
-					DEBUG_PRINTF(LDBG, NULL, "Shellcode flag set successfully!\n");
+					//DEBUG_PRINTF(LDBG, NULL, "Shellcode flag set successfully!\n");
 
 				/* If KILL_SHELLCODE is set, terminate process without any further shellcode analysis */
 				if ( MCEDP_REGCONFIG.SHELLCODE.KILL_SHELLCODE )
@@ -413,12 +413,13 @@ DbgSetShellcodeFlag(
 
 	/* set the shellcode flag */
 	bShellcodeDetected = TRUE;
+	LOCAL_DEBUG_PRINTF("Setting Shellcode Flag\n");
 
     /* init log path */
 #ifdef CUCKOO
-    if ( InitCuckooLogs() != MCEDP_STATUS_SUCCESS )
+    if ( InitShellcodeLog() != MCEDP_STATUS_SUCCESS )
     {
-        REPORT_ERROR("InitCuckooLogs()", &err);
+        REPORT_ERROR("InitShellcodeLog()", &err);
       	return MCEDP_STATUS_GENERAL_FAIL;
     }    
 #else
@@ -429,6 +430,7 @@ DbgSetShellcodeFlag(
 	}
 #endif
 
+	LOCAL_DEBUG_PRINTF("Setting Shellcode Flag success\n");
 	return MCEDP_STATUS_SHELLCODE_FLAG_SET;
 }
 
