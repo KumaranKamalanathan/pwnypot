@@ -42,11 +42,7 @@ ShuDumpShellcode(
 	}
 
 	sprintf(szShellcodeFile, "Shellcode.bin");
-#ifdef CUCKOO
-	strncpy( szLogPath, MCEDP_REGCONFIG.SHELLCODE_PATH, MAX_PATH);	
-#else
 	strncpy( szLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
-#endif
 	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeFile, MAX_PATH);
 
@@ -143,11 +139,7 @@ ShuDisassembleShellcode(
 	DecodedInstructions = (_DecodedInst *)LocalAlloc(LMEM_ZEROINIT, MAX_INSTRUCTIONS * sizeof(_DecodedInst));
 
 	sprintf(szShellcodeDisassFile, "ShellcodeDisass.txt");
-#ifdef CUCKOO
-	strncpy( szLogPath, MCEDP_REGCONFIG.SHELLCODE_PATH, MAX_PATH);
-#else
 	strncpy( szLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
-#endif
 	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeDisassFile, MAX_PATH);
 	

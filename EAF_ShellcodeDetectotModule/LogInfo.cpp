@@ -355,7 +355,7 @@ InitFileSocket (
     CHAR szPid[MAX_PATH];
     sprintf(szPid, "%u", GetCurrentProcessId(), MAX_PATH);
 
-    LOCAL_DEBUG_PRINTF("Initializing File Socket\n");
+    LOCAL_DEBUG_PRINTF("Initializing File Socket %s for PID %s\n",szFileName,szPid);
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
     {
@@ -412,7 +412,6 @@ WriteFileSocket (
     PCHAR Buffer
     )
 {   
-    LOCAL_DEBUG_PRINTF("WriteFileSocket called on Socket %d\n", Socket );
     int res = send ( Socket, Buffer, strlen( Buffer ), 0 );
     LOCAL_DEBUG_PRINTF("Sent %d bytes: %s\n", res, Buffer);
     if ( res == SOCKET_ERROR ) {

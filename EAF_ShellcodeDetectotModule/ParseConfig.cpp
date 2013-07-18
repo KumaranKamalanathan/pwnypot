@@ -357,27 +357,14 @@ ParseConfig(
 	                strncat(pMcedpRegConfig->LOG_PATH, "\\logs",MAX_PATH);
 					LOCAL_DEBUG_PRINTF("Setting Logs Path %s.\n",pMcedpRegConfig->LOG_PATH);
     	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH,MAX_PATH);
-
-    	           	// setting paths for shellcodes
-	                strncpy(pMcedpRegConfig->SHELLCODE_PATH, value, MAX_PATH);
-	                strncat(pMcedpRegConfig->SHELLCODE_PATH, "\\logs", MAX_PATH);
         	    }
         	    if(!strcmp(key, "pipe")) {
                      strncpy(pMcedpRegConfig->CUCKOO_PIPE_NAME, value,MAX_PATH);
                 }
-
-                else if(!strcmp(key, "analyzer")) {
-                    strncpy(pMcedpRegConfig->MCEDP_MODULE_PATH, value,MAX_PATH);
-                    strncpy(pMcedpRegConfig->CUCKOO_ANALYZER_PATH, value,MAX_PATH);
-                    strncat(pMcedpRegConfig->MCEDP_MODULE_PATH, "\\dll",MAX_PATH);
-					LOCAL_DEBUG_PRINTF("Setting Module Path %s.\n",pMcedpRegConfig->MCEDP_MODULE_PATH);
-                }
                 else if(!strcmp(key, "host-ip")) {        
-                    LOCAL_DEBUG_PRINTF("Found Resultserver IP %s.\n",value);
     				strncpy(pMcedpRegConfig->RESULT_SERVER_IP, value, MAX_PATH);
                 }
                 else if(!strcmp(key, "host-port")) {        
-                    LOCAL_DEBUG_PRINTF("Found Resultserver PORT %d.\n",atoi(value));
     				pMcedpRegConfig->RESULT_SERVER_PORT = atoi(value);
                 }
         	}
@@ -390,26 +377,39 @@ ParseConfig(
         LOCAL_DEBUG_PRINTF("Loading Cuckoo Configuration failed: ini File not found.\n");
 		return MCEDP_STATUS_INTERNAL_ERROR;
     }  
-	pMcedpRegConfig->GENERAL.PERMANENT_DEP = TRUE;
-	pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = TRUE;
-	pMcedpRegConfig->GENERAL.SEHOP = TRUE;
+    pMcedpRegConfig->SKIP_HBP_ERROR = TRUE;
+
+	pMcedpRegConfig->GENERAL.PERMANENT_DEP = FALSE;
+	pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = FALSE;
+	pMcedpRegConfig->GENERAL.SEHOP = FALSE;
+	pMcedpRegConfig->GENERAL.NULL_PAGE = FALSE;
+	pMcedpRegConfig->GENERAL.HEAP_SPRAY = FALSE;
 
     pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
-	pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = 1;
+	pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = TRUE;
 	pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = TRUE;
 	pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = FALSE;
-	pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = TRUE;
+	pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = FALSE;
+	pMcedpRegConfig->SHELLCODE.ETA_VALIDATION = TRUE;
+	strncpy( pMcedpRegConfig->SHELLCODE.ETAF_MODULE, "KERNEL32.DLL", MAX_MODULE_NAME32 );
 
     pMcedpRegConfig->ROP.DETECT_ROP = TRUE;
     pMcedpRegConfig->ROP.ROP_MEM_FAR = 32;
     pMcedpRegConfig->ROP.DUMP_ROP = TRUE;
 	pMcedpRegConfig->ROP.FE_FAR = 4;
 	pMcedpRegConfig->ROP.FORWARD_EXECUTION = TRUE;
-	pMcedpRegConfig->ROP.KILL_ROP = FALSE;
+	pMcedpRegConfig->ROP.KILL_ROP = TRUE;
+	pMcedpRegConfig->ROP.CALL_VALIDATION = FALSE;
+	pMcedpRegConfig->ROP.STACK_MONITOR = FALSE;
+	pMcedpRegConfig->ROP.MAX_ROP_INST = 128;
+	pMcedpRegConfig->ROP.MAX_ROP_MEM = 128;
+	pMcedpRegConfig->ROP.PIVOTE_DETECTION = TRUE;
+	pMcedpRegConfig->ROP.PIVOTE_TRESHOLD = 2;
+	pMcedpRegConfig->ROP.PIVOTE_INST_TRESHOLD = 3;
 
-	pMcedpRegConfig->MEM.TEXT_RWX = TRUE;
-	pMcedpRegConfig->MEM.STACK_RWX = TRUE:
-
+	pMcedpRegConfig->MEM.TEXT_RWX = FALSE;
+	pMcedpRegConfig->MEM.STACK_RWX = FALSE;
+	pMcedpRegConfig->MEM.TEXT_RANDOMIZATION = FALSE;
 	return MCEDP_STATUS_SUCCESS;
 }
 #endif 

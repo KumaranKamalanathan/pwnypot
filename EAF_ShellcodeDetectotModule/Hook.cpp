@@ -219,8 +219,10 @@ HookedCreateProcessInternalW(
 	/* apply config rules if shellcode or ROP detected */
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == MCEDP_STATUS_ROP_FLAG_SET )
 	{
+		LOCAL_DEBUG_PRINTF("MCEDP_STATUS_ROP_FLAG_SET OR MCEDP_STATUS_SHELLCODE_FLAG_SET TRUE\n");
 		if ( MCEDP_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
 		{
+			LOCAL_DEBUG_PRINTF("ANALYSIS_SHELLCODE TRUE\n");
 			CHAR *szApplicationNameA = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 			CHAR *szCommandLineA     = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 			PXMLNODE XmlLogNode;
@@ -250,8 +252,13 @@ HookedCreateProcessInternalW(
 
         /* if malware execution is not allowd then terminate the process */
 		if ( MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC == FALSE )
-			TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
+		{
 
+			LOCAL_DEBUG_PRINTF("MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC FALSE\n");
+			TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
+		}
+
+		LOCAL_DEBUG_PRINTF("MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC TRUE\n");
         /* let the malware execute */
 		return (CreateProcessInternalW_( hToken, lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, hNewToken));
 	}
@@ -276,7 +283,7 @@ HookedCreateProcessInternalW(
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
 			Sleep(INIT_WAIT_TIME);
 #else
-			DEBUG_PRINTF(LDBG, NULL, "Trying to pipe to cuckoo new process: %d\n", lpProcessInformation->dwProcessId);
+			DEBUG_PRINTF(LDBG, NULL, "New Process with CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
 			sprintf(buf,"PROCESS:%d",lpProcessInformation->dwProcessId,MAX_PATH);
 			pipe(buf);
@@ -306,7 +313,7 @@ HookedCreateProcessInternalW(
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
 			Sleep(INIT_WAIT_TIME);
 #else
-			DEBUG_PRINTF(LDBG, NULL, "Trying to pipe to cuckoo new process: %d\n", lpProcessInformation->dwProcessId);
+			DEBUG_PRINTF(LDBG, NULL, "New Process !without! CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
 			sprintf(buf,"PROCESS:%d",lpProcessInformation->dwProcessId,MAX_PATH);
 			DWORD len = strlen(buf);
