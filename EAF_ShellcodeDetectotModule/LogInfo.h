@@ -43,9 +43,6 @@
 #define MAX_ERROR_MSG   256
 typedef DWORD STATUS;
 
-static 	int  	(WSAAPI * TrueConnect	)(SOCKET s, const struct sockaddr *name, int namelen ) = NULL;
-static  SOCKET 	(WSAAPI * TrueSocket  	)(int af, int type, int protocol ) = NULL;
-static  int 	(WSAAPI * TrueSend      )( SOCKET s, const char *buf, int len, int flags ) = NULL;
 
 typedef struct _ERRORINFO {
 	DWORD	dwErrorNum;

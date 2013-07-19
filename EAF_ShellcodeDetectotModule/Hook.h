@@ -37,6 +37,9 @@ extern DWORD dwEaAccessCount;
 extern BOOL bShellcodeDetected;
 extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
+extern int (WSAAPI *TrueConnect		 )( SOCKET s, const struct sockaddr *name, int namelen ) ;
+extern SOCKET (WSAAPI *TrueSocket    )( int af, int type, int protocol );
+extern     int (WSAAPI *TrueSend   )( SOCKET s, const char *buf, int len, int flags );
 
 #define INIT_WAIT_TIME 2000
 

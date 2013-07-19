@@ -67,6 +67,9 @@ HookInstall(
     error = DetourTransactionCommit();
     if (error == NO_ERROR)
 	{
+		TrueSocket = socket_;
+		TrueConnect = connect_;
+		TrueSend = send_;
 		MCEDP_REGCONFIG.PROCESS_HOOKED = TRUE;
 		return MCEDP_STATUS_SUCCESS;
 	}
@@ -86,7 +89,6 @@ HookUninstall(
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 
-	LOCAL_DEBUG_PRINTF("Hook add: %p", connect_);
 	/* Unhooking functions */
 	DetourDetach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
 
@@ -217,14 +219,11 @@ HookedCreateProcessInternalW(
 	BOOL bReturn;
 	CHAR szDllFullPath[MAX_PATH];
 
-	LOCAL_DEBUG_PRINTF("HookedCreateProcessInternalW called\n");
 	/* apply config rules if shellcode or ROP detected */
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == MCEDP_STATUS_ROP_FLAG_SET )
 	{
-		LOCAL_DEBUG_PRINTF("MCEDP_STATUS_ROP_FLAG_SET OR MCEDP_STATUS_SHELLCODE_FLAG_SET TRUE\n");
 		if ( MCEDP_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
 		{
-			LOCAL_DEBUG_PRINTF("ANALYSIS_SHELLCODE TRUE\n");
 			CHAR *szApplicationNameA = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 			CHAR *szCommandLineA     = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 			PXMLNODE XmlLogNode;
@@ -255,12 +254,9 @@ HookedCreateProcessInternalW(
         /* if malware execution is not allowd then terminate the process */
 		if ( MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC == FALSE )
 		{
-
-			LOCAL_DEBUG_PRINTF("MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC FALSE\n");
 			TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
 		}
 
-		LOCAL_DEBUG_PRINTF("MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC TRUE\n");
         /* let the malware execute */
         BOOL res = (CreateProcessInternalW_( hToken, lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, hNewToken));
  
@@ -421,7 +417,6 @@ Hookedsocket(
 	int protocol
 	)
 {
-
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
 		PXMLNODE XmlLogNode;

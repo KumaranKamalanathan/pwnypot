@@ -11,6 +11,10 @@ SOCKET LogShellcodeSock = -1;
 #endif
 
 
+int     (WSAAPI * TrueConnect   )(SOCKET s, const struct sockaddr *name, int namelen ) = NULL;
+SOCKET  (WSAAPI * TrueSocket    )(int af, int type, int protocol ) = NULL;
+int     (WSAAPI * TrueSend      )( SOCKET s, const char *buf, int len, int flags ) = NULL;
+
 VOID 
 REPORT_ERROR( 
 	IN PCHAR Function,
@@ -299,7 +303,7 @@ DEBUG_PRINTF(
     if ( dwType == LDBG )
         return;
 #endif
-    else if ( dwType == LROP )
+    else if ( dwType == LROP && MCEDP_REGCONFIG.ROP.DETECT_ROP)
     {
         if ( LogRopSock != -1 ){
             WriteFileSocket( LogRopSock, Buffer );
@@ -446,9 +450,12 @@ InitCuckooLogs ()
     }
 
     // init RopDetection.txt
-    LogRopSock = InitFileSocket("RopAnalysis.txt");
-    if (LogRopSock==-1){
-        return MCEDP_STATUS_INTERNAL_ERROR;
+    if(MCEDP_REGCONFIG.ROP.DETECT_ROP)
+    {
+        LogRopSock = InitFileSocket("RopAnalysis.txt");
+        if (LogRopSock==-1){
+            return MCEDP_STATUS_INTERNAL_ERROR;
+        }
     }
 
     LogShellcodeSock = InitFileSocket("LogShellcode.txt");
@@ -474,10 +481,6 @@ InitShellcodeLog ()
     if (LogShellcodeSock!=-1){
         return MCEDP_STATUS_SUCCESS;
     }
-    LOCAL_DEBUG_PRINTF("Initializing Cuckoo Shellcode Logs from PID: %u\n",GetCurrentProcessId());
-    TrueConnect = (int (WSAAPI *)( SOCKET , const struct sockaddr * , int ))DetourFindFunction("ws2_32.dll", "connect");
-    TrueSocket = (SOCKET (WSAAPI *)( int , int , int ))DetourFindFunction("ws2_32.dll", "socket");
-    TrueSend = (int (WSAAPI *)(SOCKET s, const char *, int , int ))DetourFindFunction("ws2_32.dll", "send");
     return MCEDP_STATUS_SUCCESS;
 }
 
@@ -491,10 +494,6 @@ TransmitFile (
 	SOCKET s;
     WSADATA wsadata;
 	CHAR szFullPath[MAX_PATH];
-
-    TrueConnect = (int (WSAAPI *)( SOCKET , const struct sockaddr * , int ))DetourFindFunction("ws2_32.dll", "connect");
-    TrueSocket = (SOCKET (WSAAPI *)( int , int , int ))DetourFindFunction("ws2_32.dll", "socket");
-    TrueSend = (int (WSAAPI *)(SOCKET s, const char *, int , int ))DetourFindFunction("ws2_32.dll", "send");
 	
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
@@ -513,7 +512,9 @@ TransmitFile (
     target.sin_family = AF_INET; 
     target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
     target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT); 
+    LOCAL_DEBUG_PRINTF("Pre TrueSocket %p.\n", TrueSocket);
     s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
+    LOCAL_DEBUG_PRINTF("After TrueSocket %p.\n", TrueSocket);
     if (s == INVALID_SOCKET)
     {
         LOCAL_DEBUG_PRINTF("ERROR: Invalid socket for file transmission.\n");

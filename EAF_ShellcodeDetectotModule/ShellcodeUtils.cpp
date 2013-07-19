@@ -73,7 +73,6 @@ ShuDumpShellcode(
 		LocalFree(ShellcodeDump);
 		return MCEDP_STATUS_INTERNAL_ERROR;	
 	}
-	//LOCAL_DEBUG_PRINTF("Dumping shellcode: %s",ShellcodeDump);
 	WriteFile( hShellcodeFile, 
 		       ShellcodeDump,
 			   dwRead,
@@ -88,26 +87,32 @@ ShuDumpShellcode(
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
 
+	//DEBUG_PRINTF(LSHL, NULL, "Shellcode Dumped from (0x%p -- 0x%p) Size ( 0x%p )\n", lpStartAddress, lpEndAddress, ((DWORD)lpEndAddress - (DWORD)lpStartAddress));
 	LOCAL_DEBUG_PRINTF("Shellcode Dumped from (0x%p -- 0x%p) Size ( 0x%p )\n", lpStartAddress, lpEndAddress, ((DWORD)lpEndAddress - (DWORD)lpStartAddress));
 
     /* log and dump disassembled version of in-memory shelloce */
 	status = ShuDisassembleShellcode( lpStartAddress, lpStartAddress, ((DWORD)lpEndAddress - (DWORD)lpStartAddress));
 	if ( status == MCEDP_STATUS_SUCCESS )
 		LOCAL_DEBUG_PRINTF("Shellcode disassembled successfully!\n");
+		// DEBUG_PRINTF(LSHL, NULL, "Shellcode disassembled successfully!\n");
 	else if ( status == MCEDP_STATUS_PARTIAL_DISASSEMBLE )
 		LOCAL_DEBUG_PRINTF("Only a part of Shellcode disassembled successfully!\n");
+		// DEBUG_PRINTF(LSHL, NULL, "Only a part of Shellcode disassembled successfully!\n");
 	else
 		LOCAL_DEBUG_PRINTF("Failed to disassemble Shellcode!\n");
+		// DEBUG_PRINTF(LSHL, NULL, "Failed to disassemble Shellcode!\n");
 
 	LocalFree(ShellcodeDump);
 	CloseHandle(hShellcodeFile);
-#ifndef CUCKOO
+#ifdef CUCKOO
 	if ( TransmitFile(MCEDP_REGCONFIG.LOG_PATH, szShellcodeFile, "logs/") != MCEDP_STATUS_SUCCESS)
 	{
+    	// DEBUG_PRINTF (LSHL, NULL, "Error on transmission of file Shellcode.bin\n");
     	LOCAL_DEBUG_PRINTF ("Error on transmission of file Shellcode.bin\n");
 	}
 	else 
 	{		
+    	// DEBUG_PRINTF (LSHL, NULL, "Successfully transmitted Shellcode.bin\n");
     	LOCAL_DEBUG_PRINTF ("Successfully transmitted Shellcode.bin\n");
 	}
 #endif	
@@ -172,7 +177,7 @@ ShuDisassembleShellcode(
 
 	LocalFree(DecodedInstructions);
 	fclose(ShellcodeFile);
-#ifndef CUCKOO
+#ifdef CUCKOO
 	if ( TransmitFile(MCEDP_REGCONFIG.LOG_PATH, szShellcodeDisassFile, "logs/") != MCEDP_STATUS_SUCCESS )
 	{
     	LOCAL_DEBUG_PRINTF ("Error on transmission of file ShellcodeDisass.txt\n");

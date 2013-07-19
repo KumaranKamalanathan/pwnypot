@@ -413,7 +413,6 @@ DbgSetShellcodeFlag(
 
 	/* set the shellcode flag */
 	bShellcodeDetected = TRUE;
-	LOCAL_DEBUG_PRINTF("Setting Shellcode Flag\n");
 
     /* init log path */
 #ifdef CUCKOO
@@ -430,7 +429,6 @@ DbgSetShellcodeFlag(
 	}
 #endif
 
-	LOCAL_DEBUG_PRINTF("Setting Shellcode Flag success\n");
 	return MCEDP_STATUS_SHELLCODE_FLAG_SET;
 }
 

@@ -18,6 +18,9 @@
 MCEDPREGCONFIG MCEDP_REGCONFIG;
 extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
+extern int (WSAAPI *TrueConnect		 )( SOCKET s, const struct sockaddr *name, int namelen ) ;
+extern SOCKET (WSAAPI *TrueSocket    )( int af, int type, int protocol );
+extern     int (WSAAPI *TrueSend   )( SOCKET s, const char *buf, int len, int flags );
 
 STATUS
 SetupShellcodeDetector(
@@ -71,7 +74,7 @@ DllMain(
 		if ( InitCuckooLogs() != MCEDP_STATUS_SUCCESS ) {
 			REPORT_ERROR("InitCuckooLogs()", &err);
 			return FALSE;
-		}
+		}		
 #endif
 
 #ifndef CUCKOO

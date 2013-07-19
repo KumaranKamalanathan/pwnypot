@@ -1,9 +1,9 @@
+#pragma once
 #include <Windows.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "LogInfo.h"
 #include "inih\ini.h"
-#pragma once
 
 #define APP_CONFIG_KEY			"Software\\MCEDP\\Applications\\"
 #define MAIN_CONFIG_KEY			"Software\\MCEDP"
