@@ -367,6 +367,9 @@ ParseConfig(
                 else if(!strcmp(key, "host-port")) {        
     				pMcedpRegConfig->RESULT_SERVER_PORT = atoi(value);
                 }
+                else if(!strcmp(key, "exec-malware")) {        
+    				pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
+                }
         	}
 	    }
     	fclose(fp);
@@ -381,7 +384,6 @@ ParseConfig(
 	pMcedpRegConfig->INIT_DELAY = 0;
 
 	pMcedpRegConfig->GENERAL.PERMANENT_DEP = FALSE;
-	pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = FALSE;
 	pMcedpRegConfig->GENERAL.SEHOP = FALSE;
 	pMcedpRegConfig->GENERAL.NULL_PAGE = FALSE;
 	pMcedpRegConfig->GENERAL.HEAP_SPRAY = FALSE;
@@ -399,7 +401,7 @@ ParseConfig(
     pMcedpRegConfig->ROP.ROP_MEM_FAR = 20; //32
 	pMcedpRegConfig->ROP.FORWARD_EXECUTION = TRUE;
 	pMcedpRegConfig->ROP.FE_FAR = 4;
-	pMcedpRegConfig->ROP.KILL_ROP = TRUE;
+	pMcedpRegConfig->ROP.KILL_ROP = FALSE;
 	pMcedpRegConfig->ROP.CALL_VALIDATION = FALSE;
 	pMcedpRegConfig->ROP.STACK_MONITOR = FALSE;
 	pMcedpRegConfig->ROP.MAX_ROP_INST = 80; //132
