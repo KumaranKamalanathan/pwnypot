@@ -334,8 +334,8 @@ ParseConfig(
 	LOCAL_DEBUG_PRINTF("Using Cookoo Paths.\n");
 	char buf[512], config_fname[MAX_PATH];
 
-	// Read Randomized Directory names from ini file
-    sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId());
+	// Read Randomized Directory names and resultserver info from ini file
+    sprintf(config_fname, "%s\\%d.ini",getenv("TEMP"), GetCurrentProcessId(), MAX_PATH);
 	LOCAL_DEBUG_PRINTF("Trying to load Cuckoo Config from %s.\n",config_fname);
 	FILE *fp = fopen(config_fname, "r");
 	if(fp != NULL) {
@@ -361,6 +361,9 @@ ParseConfig(
         	    if(!strcmp(key, "pipe")) {
                      strncpy(pMcedpRegConfig->CUCKOO_PIPE_NAME, value,MAX_PATH);
                 }
+        	    if(!strcmp(key, "analyzer")) {
+                     strncpy(pMcedpRegConfig->CUCKOO_ANALYZER_DIR, value,MAX_PATH);
+                }
                 else if(!strcmp(key, "host-ip")) {        
     				strncpy(pMcedpRegConfig->RESULT_SERVER_IP, value, MAX_PATH);
                 }
@@ -374,45 +377,129 @@ ParseConfig(
 	    }
     	fclose(fp);
 	    DeleteFile(config_fname);
-		pMcedpRegConfig->PROCESS_HOOKED = FALSE;
     }    
     else {
         LOCAL_DEBUG_PRINTF("Loading Cuckoo Configuration failed: ini File not found.\n");
 		return MCEDP_STATUS_INTERNAL_ERROR;
     }  
-    pMcedpRegConfig->SKIP_HBP_ERROR = TRUE;
-	pMcedpRegConfig->INIT_DELAY = 0;
 
-	pMcedpRegConfig->GENERAL.PERMANENT_DEP = FALSE;
-	pMcedpRegConfig->GENERAL.SEHOP = FALSE;
-	pMcedpRegConfig->GENERAL.NULL_PAGE = FALSE;
-	pMcedpRegConfig->GENERAL.HEAP_SPRAY = FALSE;
+    // Read PwnyPot configuration variables from analysis.conf
+    memset(config_fname, '\0', MAX_PATH); 
+    sprintf(config_fname, "%s\\analysis.conf",pMcedpRegConfig->CUCKOO_ANALYZER_DIR, MAX_PATH);
+	LOCAL_DEBUG_PRINTF("Trying to load PwnyPot Config from %s.\n",config_fname);
+	fp = fopen(config_fname, "r");
+	if(fp != NULL) {
+	    while (fgets(buf, sizeof(buf), fp) != NULL) {
+		    // cut off the newline
+		    char *p = strchr(buf, '\r');
+	    	if(p != NULL) *p = 0;
+		    p = strchr(buf, '\n');
+		    if(p != NULL) *p = 0;
+        	// split key=value
+        	p = strchr(buf, ' =');
+	        if(p != NULL) {
+    	        *p = 0;
+        	    const char *key = buf, *value = p + 2;
+        	    if(!strcmp(key, "skip_hbp_error ")) {
+                    pMcedpRegConfig->SKIP_HBP_ERROR = atoi(value);
+                }
+        	    else if(!strcmp(key, "init_delay ")) {
+                    pMcedpRegConfig->INIT_DELAY = atoi(value);
+                }
+        	    else if(!strcmp(key, "permanent_dep ")) {
+                    pMcedpRegConfig->GENERAL.PERMANENT_DEP = atoi(value);
+                }
+        	    else if(!strcmp(key, "sehop ")) {
+                    pMcedpRegConfig->GENERAL.SEHOP = atoi(value);
+                }
+        	    else if(!strcmp(key, "null_page ")) {
+                    pMcedpRegConfig->GENERAL.NULL_PAGE = atoi(value);
+                }
+        	    else if(!strcmp(key, "heap_spray ")) {
+                    pMcedpRegConfig->GENERAL.HEAP_SPRAY = atoi(value);
+                }
+        	    else if(!strcmp(key, "allow_malware_exec ")) {
+                    pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
+                }
+        	    else if(!strcmp(key, "analysis_shellcode ")) {
+                    pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = atoi(value);
+                }
+        	    else if(!strcmp(key, "syscall_validation ")) {
+                    pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = atoi(value);
+                }
+        	    else if(!strcmp(key, "eta_validation ")) {
+                    pMcedpRegConfig->SHELLCODE.ETA_VALIDATION = atoi(value);
+                }
+        	    else if(!strcmp(key, "etaf_module ")) {
+					strncpy( pMcedpRegConfig->SHELLCODE.ETAF_MODULE, value, MAX_MODULE_NAME32 );	
+                }
+        	    else if(!strcmp(key, "kill_shellcode ")) {
+                    pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = atoi(value);
+                }
+        	    else if(!strcmp(key, "dump_shellcode ")) {
+                    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = atoi(value);
+                }
+        	    else if(!strcmp(key, "allow_malware_download ")) {
+                    pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = atoi(value);
+                }
+        	    else if(!strcmp(key, "detect_rop ")) {
+                    pMcedpRegConfig->ROP.DETECT_ROP = atoi(value);
+                }
+        	    else if(!strcmp(key, "dump_rop ")) {
+                    pMcedpRegConfig->ROP.DUMP_ROP = atoi(value);
+                }
+        	    else if(!strcmp(key, "rop_mem_far ")) {
+                    pMcedpRegConfig->ROP.ROP_MEM_FAR = atoi(value);					
+                }
+        	    else if(!strcmp(key, "forward_execution ")) {
+                    pMcedpRegConfig->ROP.FORWARD_EXECUTION = atoi(value);
+                }
+        	    else if(!strcmp(key, "fe_far ")) {
+                    pMcedpRegConfig->ROP.FE_FAR = atoi(value);					
+                }
+        	    else if(!strcmp(key, "kill_rop ")) {
+                    pMcedpRegConfig->ROP.KILL_ROP = atoi(value);
+                }
+        	    else if(!strcmp(key, "call_validation ")) {
+                    pMcedpRegConfig->ROP.CALL_VALIDATION = atoi(value);
+                }
+        	    else if(!strcmp(key, "stack_monitor ")) {
+                    pMcedpRegConfig->ROP.STACK_MONITOR = atoi(value);
+                }
+        	    else if(!strcmp(key, "max_rop_inst ")) {
+                    pMcedpRegConfig->ROP.MAX_ROP_INST = atoi(value);
+                }
+        	    else if(!strcmp(key, "max_rop_mem ")) {
+                    pMcedpRegConfig->ROP.MAX_ROP_MEM = atoi(value);
+                }
+        	    else if(!strcmp(key, "pivote_detection ")) {
+                    pMcedpRegConfig->ROP.PIVOTE_DETECTION = atoi(value);
+                }
+        	    else if(!strcmp(key, "pivote_threshold ")) {
+                    pMcedpRegConfig->ROP.PIVOTE_TRESHOLD = atoi(value);
+                }
+        	    else if(!strcmp(key, "pivote_inst_threshold ")) {
+                    pMcedpRegConfig->ROP.PIVOTE_INST_TRESHOLD = atoi(value);
+                }
+        	    else if(!strcmp(key, "text_rwx ")) {
+                    pMcedpRegConfig->MEM.TEXT_RWX = atoi(value);
+                }
+        	    else if(!strcmp(key, "stack_rwx ")) {
+                    pMcedpRegConfig->MEM.STACK_RWX = atoi(value);
+                }
+        	    else if(!strcmp(key, "text_randomization ")) {
+                    pMcedpRegConfig->MEM.TEXT_RANDOMIZATION = atoi(value);
+                }
+        	}
+	    }
+    	fclose(fp);
+    }    
+    else {
+        LOCAL_DEBUG_PRINTF("Loading Cuckoo Configuration failed: analysis.conf File not found.\n");
+		return MCEDP_STATUS_INTERNAL_ERROR;
+    }  
 
-	pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = TRUE;
-	pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = FALSE;
-	pMcedpRegConfig->SHELLCODE.ETA_VALIDATION = TRUE;
-	strncpy( pMcedpRegConfig->SHELLCODE.ETAF_MODULE, "KERNEL32.DLL", MAX_MODULE_NAME32 );	
-	pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = FALSE;
-    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = TRUE;
-	pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = TRUE;
-
-    pMcedpRegConfig->ROP.DETECT_ROP = TRUE;
-    pMcedpRegConfig->ROP.DUMP_ROP = TRUE;
-    pMcedpRegConfig->ROP.ROP_MEM_FAR = 20; //32
-	pMcedpRegConfig->ROP.FORWARD_EXECUTION = TRUE;
-	pMcedpRegConfig->ROP.FE_FAR = 4;
-	pMcedpRegConfig->ROP.KILL_ROP = FALSE;
-	pMcedpRegConfig->ROP.CALL_VALIDATION = FALSE;
-	pMcedpRegConfig->ROP.STACK_MONITOR = FALSE;
-	pMcedpRegConfig->ROP.MAX_ROP_INST = 80; //132
-	pMcedpRegConfig->ROP.MAX_ROP_MEM = 80; 
-	pMcedpRegConfig->ROP.PIVOTE_DETECTION = TRUE;
-	pMcedpRegConfig->ROP.PIVOTE_TRESHOLD = 2;
-	pMcedpRegConfig->ROP.PIVOTE_INST_TRESHOLD = 3;
-
-	pMcedpRegConfig->MEM.TEXT_RWX = FALSE;
-	pMcedpRegConfig->MEM.STACK_RWX = FALSE;
-	pMcedpRegConfig->MEM.TEXT_RANDOMIZATION = FALSE;
+	pMcedpRegConfig->PROCESS_HOOKED = FALSE;
 	return MCEDP_STATUS_SUCCESS;
 }
 #endif 
