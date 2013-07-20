@@ -288,7 +288,7 @@ HookedCreateProcessInternalW(
 			DEBUG_PRINTF(LDBG, NULL, "Module injected itself into newly created process , PID : %d\n", lpProcessInformation->dwProcessId);
 			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
-			Sleep(INIT_WAIT_TIME);
+			
 #else
 			DEBUG_PRINTF(LDBG, NULL, "New Process with CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
@@ -296,6 +296,7 @@ HookedCreateProcessInternalW(
 			pipe(buf);
 
 #endif			
+			Sleep(INIT_WAIT_TIME);
 			return bReturn;
 		}
 	} 
@@ -317,7 +318,6 @@ HookedCreateProcessInternalW(
 			}
 
 			DEBUG_PRINTF(LDBG, NULL, "Module injected itself into newly created process , PID : %d\n", lpProcessInformation->dwProcessId);
-			Sleep(INIT_WAIT_TIME);
 #else
 			DEBUG_PRINTF(LDBG, NULL, "New Process !without! CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
@@ -327,6 +327,7 @@ HookedCreateProcessInternalW(
 #endif				
 			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
+			Sleep(INIT_WAIT_TIME);
 			ResumeThread(lpProcessInformation->hThread);
 			return bReturn;
 		}
