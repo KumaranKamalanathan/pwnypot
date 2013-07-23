@@ -226,7 +226,6 @@ HookedCreateProcessInternalW(
 		{
 			CHAR *szApplicationNameA = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 			CHAR *szCommandLineA     = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
-			PXMLNODE XmlLogNode;
 			PXMLNODE XmlIDLogNode;
 
 			if ( lpApplicationName != NULL )
@@ -237,13 +236,9 @@ HookedCreateProcessInternalW(
 
 			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 			/* type */
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-			mxmlNewText( XmlLogNode, 0, "1");
-			/* exec */
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "exec_process");
-			mxmlNewText( XmlLogNode, 0, szApplicationNameA);
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "exec_cmd");
-			mxmlNewText( XmlLogNode, 0, szCommandLineA);
+			mxmlElementSetAttr(XmlIDLogNode, "type", "1");
+			mxmlElementSetAttr(XmlIDLogNode, "exec_process", szApplicationNameA);
+			mxmlElementSetAttr(XmlIDLogNode, "exec_cmd", szCommandLineA);
 			/* save */
 			SaveXml( XmlLog );
 
@@ -362,13 +357,9 @@ HookedURLDownloadToFileW(
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		/* type */
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-		mxmlNewText( XmlLogNode, 0, "2");
-		/* download */
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "download_url");
-		mxmlNewText( XmlLogNode, 0, (PCHAR)szUrlA);
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "download_filename");
-		mxmlNewText( XmlLogNode, 0, (PCHAR)szFileNameA);
+		mxmlElementSetAttr(XmlIDLogNode, "type", "2");
+		mxmlElementSetAttr(XmlIDLogNode, "download_url", (PCHAR)szUrlA);
+		mxmlElementSetAttr(XmlIDLogNode, "download_filename", (PCHAR)szFileNameA);
 		/* save */
 		SaveXml( XmlLog );
 
@@ -418,88 +409,85 @@ Hookedsocket(
 	int protocol
 	)
 {
+	LOCAL_DEBUG_PRINTF("Hookedsocket : %p\n", Hookedsocket);
+	LOCAL_DEBUG_PRINTF("real socket : %p\n", socket_);
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-		mxmlNewText( XmlLogNode, 0, "3");
+			mxmlElementSetAttr(XmlIDLogNode, "type", "3");
 		// socket
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "socket_af");
 		switch (af) 
 		{
 		case AF_UNSPEC:
-			mxmlNewText( XmlLogNode, 0, "Unspecified");
+			mxmlElementSetAttr( XmlIDLogNode, "AF", "Unspecified");
 				break;
 		case AF_INET:
-			mxmlNewText( XmlLogNode, 0, "AF_INET (IPv4)");
+			mxmlElementSetAttr( XmlIDLogNode, "AF", "AF_INET (IPv4)");
 			break;
 		case AF_INET6:
-			mxmlNewText( XmlLogNode, 0, "AF_INET6 (IPv6)");
+			mxmlElementSetAttr( XmlIDLogNode, "AF", "AF_INET6 (IPv6)");
 			break;
 		case AF_NETBIOS:
-			mxmlNewText( XmlLogNode, 0, "AF_NETBIOS (NetBIOS)");
+			mxmlElementSetAttr( XmlIDLogNode, "AF", "AF_NETBIOS (NetBIOS)");
 			break;
 		case AF_BTH:
-			mxmlNewText( XmlLogNode, 0, "AF_BTH (Bluetooth)");
+			mxmlElementSetAttr( XmlIDLogNode, "AF", "AF_BTH (Bluetooth)");
 			break;
 		default:
-			mxmlNewText( XmlLogNode, 0, "Other");
+			mxmlElementSetAttr( XmlIDLogNode, "AF", "Other");
 			break;
 		}
 
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "socket_type");
 		switch (type) 
 		{
 		case 0:
-			mxmlNewText( XmlLogNode, 0, "Unspecified");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_type", "Unspecified");
 			break;
 		case SOCK_STREAM:
-			mxmlNewText( XmlLogNode, 0, "SOCK_STREAM (stream)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_type", "SOCK_STREAM (stream)");
 			break;
 		case SOCK_DGRAM:
-			mxmlNewText( XmlLogNode, 0, "SOCK_DGRAM (datagram)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_type", "SOCK_DGRAM (datagram)");
 			break;
 		case SOCK_RAW:
-			mxmlNewText( XmlLogNode, 0, "SOCK_RAW (raw)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_type", "SOCK_RAW (raw)");
 			break;
 		case SOCK_RDM:
-			mxmlNewText( XmlLogNode, 0, "SOCK_RDM (reliable message datagram)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_type", "SOCK_RDM (reliable message datagram)");
 			break;
 		case SOCK_SEQPACKET:
-			mxmlNewText( XmlLogNode, 0, "SOCK_SEQPACKET (pseudo-stream packet)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_type", "SOCK_SEQPACKET (pseudo-stream packet)");
 			break;
 		default:
-			mxmlNewText( XmlLogNode, 0, "Other");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_type", "Other");
 			break;
 		}
 
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "socket_protocol");
 		switch (protocol)
 		{
 		case 0:
-			mxmlNewText( XmlLogNode, 0, "Unspecified");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "Unspecified");
 			break;
 		case IPPROTO_ICMP:
-			mxmlNewText( XmlLogNode, 0, "IPPROTO_ICMP (ICMP)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "IPPROTO_ICMP (ICMP)");
 			break;
 		case IPPROTO_IGMP:
-			mxmlNewText( XmlLogNode, 0, "IPPROTO_IGMP (IGMP)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "IPPROTO_IGMP (IGMP)");
 			break;
 		case IPPROTO_TCP:
-			mxmlNewText( XmlLogNode, 0, "IPPROTO_TCP (TCP)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "IPPROTO_TCP (TCP)");
 			break;
 		case IPPROTO_UDP:
-			mxmlNewText( XmlLogNode, 0, "IPPROTO_UDP (UDP)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "IPPROTO_UDP (UDP)");
 			break;
 		case IPPROTO_ICMPV6:
-			mxmlNewText( XmlLogNode, 0, "IPPROTO_ICMPV6 (ICMP Version 6)");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "IPPROTO_ICMPV6 (ICMP Version 6)");
 			break;
 		default:
-			mxmlNewText( XmlLogNode, 0, "Other");
+			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "Other");
 			break;
 		}
 
@@ -521,7 +509,6 @@ Hookedconnect(
 {
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
 		CHAR szPort[20];
 		sockaddr_in *sdata;
@@ -529,13 +516,11 @@ Hookedconnect(
 		
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-		mxmlNewText( XmlLogNode, 0, "4");
+		mxmlElementSetAttr(XmlIDLogNode, "type", "4");
 		// connect
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "connect_ip");
-		mxmlNewText( XmlLogNode, 0, inet_ntoa(sdata->sin_addr));
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "connect_port");
-		mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port), szPort, 10));
+		mxmlElementSetAttr( XmlIDLogNode, "connect_ip", inet_ntoa(sdata->sin_addr));
+		mxmlElementSetAttr( XmlIDLogNode, "connect_port", _itoa(htons(sdata->sin_port), szPort, 10));
+
 		// save
 		SaveXml( XmlLog );
 	}
@@ -553,13 +538,12 @@ Hookedlisten(
 {
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
+		PXMLNODE XmlLogNode;
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-		mxmlNewText( XmlLogNode, 0, "5");
+		mxmlElementSetAttr(XmlIDLogNode, "type", "5");
 		// listen
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "listen_desc");
 		mxmlNewText( XmlLogNode, 0, "Shellcode attemp to listen on a port (possibly on previously bind address).");
@@ -581,7 +565,6 @@ Hookedbind(
 {
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
 		CHAR szPort[20];
 		sockaddr_in *sdata;
@@ -589,13 +572,9 @@ Hookedbind(
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-		mxmlNewText( XmlLogNode, 0, "6");
-		// bind
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "bind_ip");
-		mxmlNewText( XmlLogNode, 0, inet_ntoa(sdata->sin_addr));
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "bind_port");
-		mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port),szPort, 10));
+		mxmlElementSetAttr(XmlIDLogNode, "type", "6");
+		mxmlElementSetAttr(XmlIDLogNode, "bind_ip", inet_ntoa(sdata->sin_addr));
+		mxmlElementSetAttr(XmlIDLogNode, "bind_port", _itoa(htons(sdata->sin_port),szPort, 10));
 		// save
 		SaveXml( XmlLog );
 	}
@@ -614,7 +593,6 @@ Hookedaccept(
 
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
 		CHAR szPort[20];
 		sockaddr_in *sdata;
@@ -624,13 +602,9 @@ Hookedaccept(
 		{
 			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 			// type
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-			mxmlNewText( XmlLogNode, 0, "7");
-			// accept
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "accept_ip");
-			mxmlNewText( XmlLogNode, 0, inet_ntoa(sdata->sin_addr));
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "accept_port");
-			mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata->sin_port),szPort, 10));
+			mxmlElementSetAttr(XmlIDLogNode, "type", "7");
+			mxmlElementSetAttr(XmlIDLogNode, "accept_ip", inet_ntoa(sdata->sin_addr));
+			mxmlElementSetAttr(XmlIDLogNode, "accept_port", _itoa(htons(sdata->sin_port),szPort, 10));
 			// save
 			SaveXml( XmlLog );
 		}
@@ -638,13 +612,9 @@ Hookedaccept(
 		{
 			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 			// type
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-			mxmlNewText( XmlLogNode, 0, "7");
-			// accept
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "accept_ip");
-			mxmlNewText( XmlLogNode, 0, "NULL");
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "accept_port");
-			mxmlNewText( XmlLogNode, 0, "NULL");
+			mxmlElementSetAttr(XmlIDLogNode, "type", "7");
+			mxmlElementSetAttr(XmlIDLogNode, "accept_ip", "NULL");
+			mxmlElementSetAttr(XmlIDLogNode, "accept_port", "NULL");
 			// save
 			SaveXml( XmlLog );
 		}
@@ -663,13 +633,11 @@ Hookedsend(
 	int flags
 	)
 {
-
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
 		CHAR szPort[20];
         CHAR szUID[UID_SIZE];
 		sockaddr_in sdata;
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
 		int sock_len = sizeof(sockaddr);
 
@@ -677,18 +645,12 @@ Hookedsend(
 		{
 			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 			// type
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-			mxmlNewText( XmlLogNode, 0, "8");
-			// send
+			mxmlElementSetAttr(XmlIDLogNode, "type", "8");
 			getpeername( s, (sockaddr *)&sdata, &sock_len);
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "send_ip");
-			mxmlNewText( XmlLogNode, 0, inet_ntoa(sdata.sin_addr));
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "send_port");
-			mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata.sin_port), szPort, 10));
-			XmlLogNode = mxmlNewElement( XmlIDLogNode, "send_datalen");
-			mxmlNewText( XmlLogNode, 0, _itoa(len, szPort, 10));
-            XmlLogNode = mxmlNewElement( XmlIDLogNode, "data_uid");
-			mxmlNewText( XmlLogNode, 0, GenRandomStr(szUID, UID_SIZE-1));
+			mxmlElementSetAttr(XmlIDLogNode, "send_ip", inet_ntoa(sdata.sin_addr));
+			mxmlElementSetAttr(XmlIDLogNode, "send_port", _itoa(htons(sdata.sin_port), szPort, 10));
+			mxmlElementSetAttr(XmlIDLogNode, "send_datalen", _itoa(len, szPort, 10));
+			mxmlElementSetAttr(XmlIDLogNode, "data_uid", GenRandomStr(szUID, UID_SIZE-1));
             HexDumpToFile((PBYTE)buf, len ,szUID);
 			// save
 			SaveXml( XmlLog );
@@ -714,23 +676,16 @@ Hookedrecv(
         CHAR szUID[UID_SIZE];
 		sockaddr_in sdata;
 		int sock_len = sizeof(sockaddr);
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
 			
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-		mxmlNewText( XmlLogNode, 0, "9");
-		// recv
+		mxmlElementSetAttr(XmlIDLogNode, "type", "9");
 		getpeername( s, (sockaddr *)&sdata, &sock_len);
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "recv_ip");
-		mxmlNewText( XmlLogNode, 0, inet_ntoa(sdata.sin_addr));
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "recv_port");
-		mxmlNewText( XmlLogNode, 0, _itoa(htons(sdata.sin_port), szPort, 10));
-		XmlLogNode = mxmlNewElement( XmlIDLogNode, "recv_datalen");
-		mxmlNewText( XmlLogNode, 0, _itoa(len, szPort, 10));
-        XmlLogNode = mxmlNewElement( XmlIDLogNode, "data_uid");
-	    mxmlNewText( XmlLogNode, 0, GenRandomStr(szUID, UID_SIZE-1));
+		mxmlElementSetAttr(XmlIDLogNode, "recv_ip", inet_ntoa(sdata.sin_addr));
+		mxmlElementSetAttr(XmlIDLogNode, "recv_port", _itoa(htons(sdata.sin_port), szPort, 10));
+		mxmlElementSetAttr(XmlIDLogNode, "recv_datalen", _itoa(len, szPort, 10));
+		mxmlElementSetAttr(XmlIDLogNode, "data_uid", GenRandomStr(szUID, UID_SIZE-1));
         HexDumpToFile((PBYTE)buf, len ,szUID);
 		// save
 		SaveXml( XmlLog );

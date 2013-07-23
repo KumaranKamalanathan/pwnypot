@@ -155,10 +155,9 @@ DbgReportRop(
 
 	XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
     // type
-	XmlLogNode = mxmlNewElement( XmlIDLogNode, "type");
-	mxmlNewText( XmlLogNode, 0, "0");
+    mxmlElementSetAttr(XmlIDLogNode, "type", "0");
+
     // data
-	XmlLogNode = CreateXmlElement( XmlIDLogNode, "function");
 	SecureZeroMemory(szAssciFullModuleName, MAX_MODULE_NAME32);
 	SecureZeroMemory(szAssciModuleName, MAX_MODULE_NAME32);
 	szRopInst = (PCHAR)LocalAlloc(LMEM_ZEROINIT, 2048);
@@ -169,22 +168,22 @@ DbgReportRop(
 	switch (APINumber)
 	{
 	case CalleeVirtualAlloc:
-		SetTextNode( XmlLogNode, 0, "VirtualAlloc");
+		mxmlElementSetAttr( XmlIDLogNode, "function", "VirtualAlloc");
 		break;
 	case CalleeVirtualAllocEx:
-		SetTextNode( XmlLogNode, 0, "VirtualAllocEx");
+		mxmlElementSetAttr( XmlIDLogNode, "function", "VirtualAllocEx");
 		break;
 	case CalleeVirtualProtect:
-		SetTextNode( XmlLogNode, 0, "VirtualProtect");
+		mxmlElementSetAttr( XmlIDLogNode, "function", "VirtualProtect");
 		break;
 	case CalleeVirtualProtectEx:
-		SetTextNode( XmlLogNode, 0, "VirtualProtectEx");
+		mxmlElementSetAttr( XmlIDLogNode, "function", "VirtualProtectEx");
 		break;
 	case CalleeMapViewOfFile:
-		SetTextNode( XmlLogNode, 0, "MapViewOfFile");
+		mxmlElementSetAttr( XmlIDLogNode, "function", "MapViewOfFile");
 		break;
 	case CalleeMapViewOfFileEx:
-		SetTextNode( XmlLogNode, 0, "MapViewOfFileEx");
+		mxmlElementSetAttr( XmlIDLogNode, "function", "MapViewOfFileEx");
 		break;
 	}
 
@@ -192,8 +191,7 @@ DbgReportRop(
 	if ( DbgGetRopModule( lpAddress, szAssciFullModuleName, MAX_MODULE_NAME32) == MCEDP_STATUS_SUCCESS )
 	{
 		DEBUG_PRINTF(LROP, NULL, "Rop Module name: %s\n", szAssciFullModuleName);
-		XmlLogNode = CreateXmlElement( XmlIDLogNode, "module");
-		SetTextNode( XmlLogNode, 0, szAssciFullModuleName);
+		mxmlElementSetAttr( XmlIDLogNode, "module", szAssciFullModuleName);
 	}
 
     /* Dump possible ROP gadgets */
@@ -203,41 +201,27 @@ DbgReportRop(
 		for ( i = 0 ; i <= MCEDP_REGCONFIG.ROP.MAX_ROP_MEM ; i++ , lpAddress = (LPVOID)((DWORD)lpAddress + 4) )
 		{
 
-			DEBUG_PRINTF(LROP, NULL, "New gadget\n");
 			XmlLogNode = CreateXmlElement ( XmlIDLogNode, "rop_gadget");
-
-			XmlSubNode = mxmlNewElement( XmlLogNode, "address");
-        	memset( szTemp, '\0', 1024 );
-			sprintf( szTemp, "0x%p", lpAddress);
-			mxmlNewText ( XmlSubNode, 0, szTemp );
-
-			XmlSubNode = mxmlNewElement( XmlLogNode, "val_at_addr");
-        	memset( szTemp, '\0', 1024 );
-			sprintf( szTemp, "0x%p", (*(ULONG_PTR *)lpAddress));
-			mxmlNewText ( XmlSubNode, 0, szTemp );
-
 			if ( LdrFindEntryForAddress((PVOID)(*(DWORD *)lpAddress), &TableEntry) == MCEDP_STATUS_SUCCESS )
 			{
-
-				DEBUG_PRINTF(LROP, NULL, "find entry for address success\n");
 				/* get module name */
 				wcstombs( szAssciModuleName, TableEntry->FullDllName.Buffer, TableEntry->FullDllName.Length );
 
 				/* Get module .text section start address */
 				if ( ( lpCodeSectionAddress = PeGetCodeSectionAddress( TableEntry->DllBase ) ) == NULL )
 				{
-					DEBUG_PRINTF(LROP, NULL, "FAILED -- MODULE CODE SECTION ADDRESS NULL\n");
 					XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 					mxmlNewText( XmlSubNode, 0, "FAILED -- MODULE CODE SECTION ADDRESS NULL");
+					DEBUG_PRINTF(LROP, NULL, "FAILED -- MODULE CODE SECTION ADDRESS NULL\n");
 					break;
 				}
 
 				/* Get module .text section size */
 				if ( ( dwCodeSectionSize = PeGetCodeSectionSize( TableEntry->DllBase ) ) == NULL )
 				{
-					DEBUG_PRINTF(LROP, NULL, "FAILED -- MODULE CODE SECTION SIZE NULL\n");
 					XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 					mxmlNewText( XmlSubNode, 0, "FAILED -- MODULE CODE SECTION SIZE NULL");
+					DEBUG_PRINTF(LROP, NULL, "FAILED -- MODULE CODE SECTION SIZE NULL\n");
 					break;
 				}
 
@@ -247,35 +231,44 @@ DbgReportRop(
 
 					if ( ShuDisassmbleRopInstructions( (PVOID)(*(ULONG_PTR *)lpAddress), szRopInst, MCEDP_REGCONFIG.ROP.MAX_ROP_INST ) == MCEDP_STATUS_SUCCESS )
 					{
-						DEBUG_PRINTF(LROP, NULL, "rop_module\n");
-						XmlSubNode = mxmlNewElement( XmlLogNode, "rop_module");
-        				memset( szTemp, '\0', 1024 );
-						sprintf( szTemp, "0x%s", szAssciModuleName);
-						mxmlNewText( XmlSubNode, 0, szTemp );	
-						DEBUG_PRINTF(LROP, NULL, "rop_inst\n");
+						mxmlElementSetAttrf(XmlLogNode, "offset", "0x%p", (*(ULONG_PTR *)lpAddress - (ULONG_PTR)TableEntry->DllBase));
+						DEBUG_PRINTF(LROP, NULL, "found rop_module: \n", szTemp);
 
 						XmlSubNode = mxmlNewElement( XmlLogNode, "rop_inst");
         				memset( szTemp, '\0', 1024 );
-						sprintf( szTemp, 0, "%s", szRopInst );	
+						sprintf( szTemp, "%s", szRopInst );	
 						mxmlNewText( XmlSubNode, 0, szTemp );	
-					} else
+						DEBUG_PRINTF(LROP, NULL, "found rop_inst: %s \n", szTemp);
+					} 
+					else
 					{
-						DEBUG_PRINTF(LROP, NULL, "FAILED TO DISASSMBLE\n");
 						XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 						mxmlNewText( XmlSubNode, 0, "FAILED TO DISASSMBLE");
+						DEBUG_PRINTF(LROP, NULL, "FAILED TO DISASSMBLE\n");
 					}
 
 					SecureZeroMemory(szRopInst, 2048);
 
-				} else
-					DEBUG_PRINTF(LROP, NULL, "OUT OF CODE SECTION\n");
+				} else {
 					XmlSubNode = mxmlNewElement( XmlLogNode, "error");
 					mxmlNewText( XmlSubNode, 0, "OUT OF CODE SECTION");
-			} 
+				}
+			}
+			else  {
+				XmlSubNode = mxmlNewElement( XmlLogNode, "address");
+	        	memset( szTemp, '\0', 1024 );
+				sprintf( szTemp, "0x%p", lpAddress);
+				mxmlNewText ( XmlSubNode, 0, szTemp );
+
+				XmlSubNode = mxmlNewElement( XmlLogNode, "val_at_addr");
+	        	memset( szTemp, '\0', 1024 );
+				sprintf( szTemp, "0x%p", (*(ULONG_PTR *)lpAddress));
+				mxmlNewText ( XmlSubNode, 0, szTemp );
+			}
 		}
 	}
 
-	DEBUG_PRINTF(LROP, NULL, "Trying to save ROP gadget\n");
+	DEBUG_PRINTF(LROP, NULL, "Trying to save ROP gadget XML File\n");
 	SaveXml( XmlLog );
 	LocalFree(szRopInst);
 }
