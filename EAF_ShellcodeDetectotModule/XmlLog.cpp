@@ -36,6 +36,7 @@ SaveXml(
 	ERRORINFO err;
 	CHAR szLogDir[MAX_PATH];
 	CHAR szFileName[MAX_PATH];
+	CHAR szLogBuffer[8192];
 
 	strncpy(szLogDir, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogDir, "\\", MAX_PATH);
@@ -50,7 +51,6 @@ SaveXml(
 		REPORT_ERROR("fopen()", &err);
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
-
     if ( mxmlSaveFile(TopElement, fp, MXML_NO_CALLBACK) == -1 )
 	{
 		REPORT_ERROR("mxmlSaveFile()", &err);

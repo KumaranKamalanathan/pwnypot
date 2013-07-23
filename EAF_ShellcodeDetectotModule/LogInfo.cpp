@@ -305,7 +305,7 @@ DEBUG_PRINTF(
 #endif
     else if ( dwType == LROP && MCEDP_REGCONFIG.ROP.DETECT_ROP)
     {
-        if ( LogRopSock != -1 ){
+        if ( LogRopSock != -1 ){            
             WriteFileSocket( LogRopSock, Buffer );
         }
         else 
@@ -426,8 +426,8 @@ WriteFileSocket (
     PCHAR Buffer
     )
 {   
-    int res = send ( Socket, Buffer, strlen( Buffer ), 0 );
-    LOCAL_DEBUG_PRINTF("Sent %d bytes: %s\n", res, Buffer);
+    int res = TrueSend ( Socket, Buffer, strlen( Buffer ), 0 );
+    LOCAL_DEBUG_PRINTF("Sent %d bytes\n", res);
     if ( res == SOCKET_ERROR ) {
         LOCAL_DEBUG_PRINTF("Last error: %d\n", WSAGetLastError());
     }
@@ -512,9 +512,7 @@ TransmitFile (
     target.sin_family = AF_INET; 
     target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
     target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT); 
-    LOCAL_DEBUG_PRINTF("Pre TrueSocket %p.\n", TrueSocket);
     s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
-    LOCAL_DEBUG_PRINTF("After TrueSocket %p.\n", TrueSocket);
     if (s == INVALID_SOCKET)
     {
         LOCAL_DEBUG_PRINTF("ERROR: Invalid socket for file transmission.\n");
