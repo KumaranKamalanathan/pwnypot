@@ -409,15 +409,20 @@ Hookedsocket(
 	int protocol
 	)
 {
+	int ret_val;
+
 	LOCAL_DEBUG_PRINTF("Hookedsocket : %p\n", Hookedsocket);
 	LOCAL_DEBUG_PRINTF("real socket : %p\n", socket_);
+
+	ret_val = (socket_( af, type, protocol));
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
 		PXMLNODE XmlIDLogNode;
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-			mxmlElementSetAttr(XmlIDLogNode, "type", "3");
+		mxmlElementSetAttr(XmlIDLogNode, "type", "3");
+		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", ret_val);
 		// socket
 		switch (af) 
 		{
@@ -490,12 +495,10 @@ Hookedsocket(
 			mxmlElementSetAttr( XmlIDLogNode, "socket_protocol", "Other");
 			break;
 		}
-
 		// save
 		SaveXml( XmlLog );
 	}
-
-	return (socket_( af, type, protocol));
+	return ret_val;
 }
 
 
@@ -518,6 +521,7 @@ Hookedconnect(
 		// type
 		mxmlElementSetAttr(XmlIDLogNode, "type", "4");
 		// connect
+		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		mxmlElementSetAttr( XmlIDLogNode, "connect_ip", inet_ntoa(sdata->sin_addr));
 		mxmlElementSetAttr( XmlIDLogNode, "connect_port", _itoa(htons(sdata->sin_port), szPort, 10));
 
@@ -545,6 +549,7 @@ Hookedlisten(
 		// type
 		mxmlElementSetAttr(XmlIDLogNode, "type", "5");
 		// listen
+		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "listen_desc");
 		mxmlNewText( XmlLogNode, 0, "Shellcode attemp to listen on a port (possibly on previously bind address).");
 		// save
@@ -573,6 +578,7 @@ Hookedbind(
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
 		mxmlElementSetAttr(XmlIDLogNode, "type", "6");
+		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		mxmlElementSetAttr(XmlIDLogNode, "bind_ip", inet_ntoa(sdata->sin_addr));
 		mxmlElementSetAttr(XmlIDLogNode, "bind_port", _itoa(htons(sdata->sin_port),szPort, 10));
 		// save
@@ -603,6 +609,7 @@ Hookedaccept(
 			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 			// type
 			mxmlElementSetAttr(XmlIDLogNode, "type", "7");
+			mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 			mxmlElementSetAttr(XmlIDLogNode, "accept_ip", inet_ntoa(sdata->sin_addr));
 			mxmlElementSetAttr(XmlIDLogNode, "accept_port", _itoa(htons(sdata->sin_port),szPort, 10));
 			// save
@@ -633,8 +640,8 @@ Hookedsend(
 	int flags
 	)
 {
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
-	{
+	//if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	//{
 		CHAR szPort[20];
         CHAR szUID[UID_SIZE];
 		sockaddr_in sdata;
@@ -647,6 +654,7 @@ Hookedsend(
 			// type
 			mxmlElementSetAttr(XmlIDLogNode, "type", "8");
 			getpeername( s, (sockaddr *)&sdata, &sock_len);
+			mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 			mxmlElementSetAttr(XmlIDLogNode, "send_ip", inet_ntoa(sdata.sin_addr));
 			mxmlElementSetAttr(XmlIDLogNode, "send_port", _itoa(htons(sdata.sin_port), szPort, 10));
 			mxmlElementSetAttr(XmlIDLogNode, "send_datalen", _itoa(len, szPort, 10));
@@ -655,7 +663,7 @@ Hookedsend(
 			// save
 			SaveXml( XmlLog );
 		}
-	}
+	//}
 
 	return (send_( s, buf, len, flags));
 }
@@ -670,8 +678,8 @@ Hookedrecv(
 	)
 {
 
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET && len > 1)
-	{
+	//if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET && len > 1)
+	//{
 		CHAR szPort[20];
         CHAR szUID[UID_SIZE];
 		sockaddr_in sdata;
@@ -682,6 +690,7 @@ Hookedrecv(
 		// type
 		mxmlElementSetAttr(XmlIDLogNode, "type", "9");
 		getpeername( s, (sockaddr *)&sdata, &sock_len);
+		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		mxmlElementSetAttr(XmlIDLogNode, "recv_ip", inet_ntoa(sdata.sin_addr));
 		mxmlElementSetAttr(XmlIDLogNode, "recv_port", _itoa(htons(sdata.sin_port), szPort, 10));
 		mxmlElementSetAttr(XmlIDLogNode, "recv_datalen", _itoa(len, szPort, 10));
@@ -689,7 +698,7 @@ Hookedrecv(
         HexDumpToFile((PBYTE)buf, len ,szUID);
 		// save
 		SaveXml( XmlLog );
-	}
+	//}
 
 	return (recv_( s, buf, len, flags));
 }
