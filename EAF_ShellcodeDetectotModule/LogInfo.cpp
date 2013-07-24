@@ -138,6 +138,33 @@ strtolow(
 	return szString;
 }
 
+
+
+
+PCHAR
+GenRandomStr(
+    PCHAR szString, 
+    DWORD dwSize
+    ) 
+{
+    DWORD dwSeed;
+    CONST CHAR alphanum[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+    Sleep(100);
+    dwSeed = ((DWORD)&dwSeed >> 8) ^ (GetTickCount() >> 8) ^ GetCurrentThreadId();
+    srand(dwSeed);
+
+    for (int i = 0; i < dwSize; ++i)
+        szString[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+
+    szString[dwSize] = 0;
+    return szString;
+}
+
+
+
+#ifndef CUCKOO
+
 VOID
 HexDumpToFile(
     PBYTE Data, 
@@ -159,9 +186,9 @@ HexDumpToFile(
    strncat(szFullLogPath, szFileName, MAX_PATH);
    strncat(szFullLogPath, ".txt", MAX_PATH);
 
-	fp = fopen(szFullLogPath, "a");
-	if ( fp == NULL )
-		return; 
+    fp = fopen(szFullLogPath, "a");
+    if ( fp == NULL )
+        return; 
 
     for (dp = 1; dp <= dwSize; dp++)  
     {
@@ -197,30 +224,6 @@ HexDumpToFile(
     return;
 }
 
-
-PCHAR
-GenRandomStr(
-    PCHAR szString, 
-    DWORD dwSize
-    ) 
-{
-    DWORD dwSeed;
-    CONST CHAR alphanum[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-    Sleep(100);
-    dwSeed = ((DWORD)&dwSeed >> 8) ^ (GetTickCount() >> 8) ^ GetCurrentThreadId();
-    srand(dwSeed);
-
-    for (int i = 0; i < dwSize; ++i)
-        szString[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
-
-    szString[dwSize] = 0;
-    return szString;
-}
-
-
-
-#ifndef CUCKOO
 VOID 
 DEBUG_PRINTF(
     IN DWORD dwType,
@@ -564,6 +567,124 @@ TransmitFile (
 
         return MCEDP_STATUS_SUCCESS; 	
     }
+}
+
+VOID
+HexDumpToFile(
+    PBYTE Data, 
+    DWORD dwSize, 
+    PCHAR szFileName
+    ) 
+{
+    UINT dp, p;
+    SOCKET s;
+    WSADATA wsadata;
+    const UINT dumpLength = 65536;
+    const int tmpLength = 1024;
+    CHAR szBuf[dumpLength];
+    CHAR szTmp[tmpLength];
+    CONST CHAR trans[] = "................................ !\"#$%&'()*+,-./0123456789"
+                        ":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklm"
+                        "nopqrstuvwxyz{|}~...................................."
+                        "....................................................."
+                        "........................................";
+
+    for (dp = 1; dp <= dwSize; dp++)  
+    { 
+        memset(szTmp, '\0', tmpLength); 
+        sprintf(szTmp,"%02x ", Data[dp-1], tmpLength);
+        strncat(szBuf, szTmp, dumpLength);
+        if ((dp % 8) == 0)
+           strncat(szBuf," ", dumpLength);
+        if ((dp % 16) == 0) 
+        {
+            strncat(szBuf,"| ", dumpLength);
+            p = dp;
+            for (dp -= 16; dp < p; dp++)
+            {
+                memset(szTmp, '\0', tmpLength); 
+                sprintf(szTmp,"%c", trans[Data[dp]], tmpLength);
+                strncat(szBuf, szTmp, dumpLength);
+            }
+            strncat(szBuf,"\n", dumpLength);
+        }
+    }
+
+    if ((dwSize % 16) != 0)
+    {
+        p = dp = 16 - (dwSize % 16);
+        for (dp = p; dp > 0; dp--) 
+        {
+            strncat(szBuf, "   ", dumpLength);
+            if (((dp % 8) == 0) && (p != 8))
+                strncat(szBuf, " ", dumpLength);
+        }
+        strncat(szBuf," | ", dumpLength);
+        for (dp = (dwSize - (16 - p)); dp < dwSize; dp++)
+        {
+            memset(szTmp, '\0', tmpLength); 
+            sprintf(szTmp, "%c", trans[Data[dp]], tmpLength);
+            strncat(szBuf, szTmp, dumpLength);
+        }
+    }
+
+    strncat(szBuf,"\n", dumpLength);
+  
+    int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
+    if (error)
+    {
+        return;
+    }
+
+    if (wsadata.wVersion != MAKEWORD(2, 2))
+    {
+        WSACleanup(); //Clean up Winsock
+        return;
+    }
+
+    SOCKADDR_IN target; 
+
+    target.sin_family = AF_INET; 
+    target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
+    target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT); 
+    s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
+    if (s == INVALID_SOCKET)
+    {
+        LOCAL_DEBUG_PRINTF("ERROR: Invalid socket for file transmission.\n");
+        return; 
+    }  
+
+    if (TrueConnect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
+    {
+        LOCAL_DEBUG_PRINTF("ERROR: Failed to connect to socket for file transmission.\n");
+        return; 
+    }
+    else
+    {
+        const int LENGTH = 512;
+        char buffer[LENGTH];
+
+        memset(buffer, '\0', LENGTH);
+        memset(szTmp, '\0', tmpLength);
+        strncpy(buffer, "FILE\nlogs/",LENGTH);
+        sprintf(szTmp, "%d_dump-%s.txt\n", GetCurrentProcessId(), szFileName, tmpLength);
+        strncat(buffer, szTmp, LENGTH);
+        TrueSend(s,buffer, strlen(buffer),0);    
+
+        int pos = 0;
+        int sent = 0;
+        sent = TrueSend(s, szBuf, strlen(szBuf), 0);
+        closesocket(s);
+
+        if (sent <= 0) 
+        {
+            LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szFileName, errno);
+            return;
+        }  
+        LOCAL_DEBUG_PRINTF("Sent hexdump %s\n", szFileName);
+    }    
+
+    return;
 }
 
 #endif
