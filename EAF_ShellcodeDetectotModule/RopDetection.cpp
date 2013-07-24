@@ -49,7 +49,7 @@ ValidateCallAgainstRop(
 			}
 		}
 
-		if ( MCEDP_REGCONFIG.ROP.PIVOTE_DETECTION )
+		if ( MCEDP_REGCONFIG.ROP.PIVOT_DETECTION )
 		{
 			/* NOT IMPLEMENTED */
 		}

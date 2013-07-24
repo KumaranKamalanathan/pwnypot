@@ -168,15 +168,15 @@ ParseRegConfig(
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "PivotDetection") ) 
 			{
-				pMcedpRegConfig->ROP.PIVOTE_DETECTION = *pdwFlag;
+				pMcedpRegConfig->ROP.PIVOT_DETECTION = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "PivotThreshold") ) 
 			{
-				pMcedpRegConfig->ROP.PIVOTE_TRESHOLD = *pdwFlag;
+				pMcedpRegConfig->ROP.PIVOT_TRESHOLD = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "PivotInstThreshold") ) 
 			{
-				pMcedpRegConfig->ROP.PIVOTE_INST_TRESHOLD = *pdwFlag;
+				pMcedpRegConfig->ROP.PIVOT_INST_TRESHOLD = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "DumpRop") ) 
 			{
@@ -472,14 +472,14 @@ ParseConfig(
         	    else if(!strcmp(key, "max_rop_mem ")) {
                     pMcedpRegConfig->ROP.MAX_ROP_MEM = atoi(value);
                 }
-        	    else if(!strcmp(key, "pivote_detection ")) {
-                    pMcedpRegConfig->ROP.PIVOTE_DETECTION = atoi(value);
+        	    else if(!strcmp(key, "pivot_detection ")) {
+                    pMcedpRegConfig->ROP.PIVOT_DETECTION = atoi(value);
                 }
-        	    else if(!strcmp(key, "pivote_threshold ")) {
-                    pMcedpRegConfig->ROP.PIVOTE_TRESHOLD = atoi(value);
+        	    else if(!strcmp(key, "pivot_threshold ")) {
+                    pMcedpRegConfig->ROP.PIVOT_TRESHOLD = atoi(value);
                 }
-        	    else if(!strcmp(key, "pivote_inst_threshold ")) {
-                    pMcedpRegConfig->ROP.PIVOTE_INST_TRESHOLD = atoi(value);
+        	    else if(!strcmp(key, "pivot_inst_threshold ")) {
+                    pMcedpRegConfig->ROP.PIVOT_INST_TRESHOLD = atoi(value);
                 }
         	    else if(!strcmp(key, "text_rwx ")) {
                     pMcedpRegConfig->MEM.TEXT_RWX = atoi(value);
