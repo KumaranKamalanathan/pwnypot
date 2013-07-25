@@ -27,7 +27,22 @@ SetTextNode(
 	return ( mxmlNewText( ParentXmlNode, WhiteSpace, Value) );
 }
 
+/*
+ * Copyright 2003-2011 by Michael R Sweet.
+ *
+ * These coded instructions, statements, and computer programs are the
+ * property of Michael R Sweet and are protected by Federal copyright
+ * law.  Distribution and use rights are outlined in the file "COPYING"
+ * which should have been included with this file.  If this file is
+ * missing or damaged, see the license at:
+ *
+ *     http://www.minixml.org/
+ *
+ * Contents:
 
+ *   whitespace_cb() - Let the mxmlSaveFile() function know when to insert
+ *                     newlines and tabs...
+ */
 const char *				/* O - Whitespace string or NULL */
 WhiteSpaceCb(
 	mxml_node_t *node,	/* I - Element node */
