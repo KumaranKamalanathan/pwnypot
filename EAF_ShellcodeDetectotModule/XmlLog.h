@@ -29,3 +29,5 @@ STATUS
 SaveXml(
 	IN PXMLNODE TopElement
 	);
+
+const char	*WhiteSpaceCb(mxml_node_t *node, int where);
