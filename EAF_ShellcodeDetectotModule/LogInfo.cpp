@@ -494,10 +494,54 @@ TransmitFile (
     PCHAR szRemotePath
 	)
 {
-	SOCKET s;
+    char *buffer;
+    char szRemoteFile[MAX_PATH];
+    char szFullPath[MAX_PATH];
+    long fileLength;
+
+    memset(szRemoteFile, '\0', MAX_PATH);
+    strncpy(szRemoteFile, szRemotePath, MAX_PATH);
+    strncat(szRemoteFile, szFileName, MAX_PATH);  
+
+    strncpy(szFullPath, szLocalPath,MAX_PATH);
+    strncat(szFullPath, "\\",MAX_PATH);
+    strncat(szFullPath, szFileName,MAX_PATH);
+
+    FILE *fs = fopen(szFullPath, "r");
+    if(fs == NULL)
+    {
+        LOCAL_DEBUG_PRINTF("ERROR: Failed to open file for sending %s. (errno = %d)\n", szFullPath, errno);
+        return MCEDP_STATUS_INTERNAL_ERROR;
+    }
+
+    fseek(fs, 0L, SEEK_END);
+    fileLength = ftell(fs);
+    fseek(fs, 0L, SEEK_SET);
+    buffer = (char*)calloc(fileLength, sizeof(char)); 
+    if(buffer == NULL)
+        return MCEDP_STATUS_INTERNAL_ERROR;
+
+
+    fread(buffer, sizeof(char), fileLength, fs);
+    fclose(fs);
+
+    STATUS result = TransmitBufAsFile(buffer, szRemoteFile);
+    free(buffer);
+    return result;
+    
+}
+
+
+STATUS 
+TransmitBufAsFile (
+    PCHAR szBuf,
+    PCHAR szRemoteFileName
+    )
+{
+    SOCKET s;
     WSADATA wsadata;
-	CHAR szFullPath[MAX_PATH];
-	
+    CHAR szFullPath[MAX_PATH];
+    
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
     {
@@ -530,44 +574,31 @@ TransmitFile (
     else
     {
         const int LENGTH = 512;
-        char sdbuf[LENGTH]; 
         char buffer[LENGTH];
-        int n;
 
         memset(buffer, '\0', LENGTH);
         strncpy(buffer, "FILE\n",LENGTH);
-        strncat(buffer, szRemotePath,LENGTH);
-        strncat(buffer, szFileName,LENGTH);
+        strncat(buffer, szRemoteFileName,LENGTH);
         strncat(buffer, "\n",LENGTH);
-        n = TrueSend(s,buffer, strlen(buffer),0);    
-
-        strncpy(szFullPath, szLocalPath,MAX_PATH);
-        strncat(szFullPath, "\\",LENGTH);
-        strncat(szFullPath, szFileName,MAX_PATH);
-
-        FILE *fs = fopen(szFullPath, "r");
-        if(fs == NULL)
+        if (TrueSend(s,buffer, strlen(buffer),0) <= 0)
         {
-            LOCAL_DEBUG_PRINTF("ERROR: Failed to open file for sending %s. (errno = %d)\n", szFullPath, errno);
+            LOCAL_DEBUG_PRINTF("Failed to send remote Filename %s.\n", szRemoteFileName);
             return MCEDP_STATUS_INTERNAL_ERROR;
         }
 
-        memset(sdbuf, '\0', LENGTH); 
-        int fs_block_sz;
-        while((fs_block_sz = fread(sdbuf, sizeof(char), LENGTH, fs)) > 0)
-        {
-            if(TrueSend(s, sdbuf, fs_block_sz, 0) < 0)
-            {
-                LOCAL_DEBUG_PRINTF("ERROR: Failed to send file %s. (errno = %d)\n", szFullPath, errno);
-                return MCEDP_STATUS_INTERNAL_ERROR;
-            }
-            memset(sdbuf, '\0', LENGTH);
-        }
+        int sent = 0;
+        sent = TrueSend(s, szBuf, strlen(szBuf), 0);
         closesocket(s);
 
-        return MCEDP_STATUS_SUCCESS; 	
+        if (sent <= 0) 
+        {
+            LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szRemoteFileName, errno);
+            return MCEDP_STATUS_INTERNAL_ERROR;
+        }   
+        return MCEDP_STATUS_SUCCESS;
     }
 }
+
 
 VOID
 HexDumpToFile(
@@ -629,62 +660,14 @@ HexDumpToFile(
     }
 
     strncat(szBuf,"\n", dumpLength);
-  
-    int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
-    if (error)
-    {
-        return;
-    }
+    memset(szTmp, '\0', tmpLength);
+    sprintf(szTmp, "logs/%d_dump-%s.txt\n", GetCurrentProcessId(), szFileName, tmpLength);    
 
-    if (wsadata.wVersion != MAKEWORD(2, 2))
-    {
-        WSACleanup(); //Clean up Winsock
-        return;
-    }
-
-    SOCKADDR_IN target; 
-
-    target.sin_family = AF_INET; 
-    target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
-    target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT); 
-    s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
-    if (s == INVALID_SOCKET)
-    {
-        LOCAL_DEBUG_PRINTF("ERROR: Invalid socket for file transmission.\n");
-        return; 
-    }  
-
-    if (TrueConnect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
-    {
-        LOCAL_DEBUG_PRINTF("ERROR: Failed to connect to socket for file transmission.\n");
-        return; 
-    }
+    if (TransmitBufAsFile(szBuf, szTmp) == MCEDP_STATUS_INTERNAL_ERROR) 
+        LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szFileName, errno);
+     
     else
-    {
-        const int LENGTH = 512;
-        char buffer[LENGTH];
-
-        memset(buffer, '\0', LENGTH);
-        memset(szTmp, '\0', tmpLength);
-        strncpy(buffer, "FILE\nlogs/",LENGTH);
-        sprintf(szTmp, "%d_dump-%s.txt\n", GetCurrentProcessId(), szFileName, tmpLength);
-        strncat(buffer, szTmp, LENGTH);
-        TrueSend(s,buffer, strlen(buffer),0);    
-
-        int pos = 0;
-        int sent = 0;
-        sent = TrueSend(s, szBuf, strlen(szBuf), 0);
-        closesocket(s);
-
-        if (sent <= 0) 
-        {
-            LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szFileName, errno);
-            return;
-        }  
         LOCAL_DEBUG_PRINTF("Sent hexdump %s\n", szFileName);
-    }    
-
-    return;
 }
 
 #endif

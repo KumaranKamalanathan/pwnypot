@@ -130,4 +130,10 @@ TransmitFile(
     PCHAR szRemotePath
     );
 
+STATUS
+TransmitBufAsFile(
+    PCHAR szBuf,
+    PCHAR szRemoteFileName
+    );
+
 #endif
