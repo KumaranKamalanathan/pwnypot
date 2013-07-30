@@ -411,9 +411,6 @@ Hookedsocket(
 {
 	int ret_val;
 
-	LOCAL_DEBUG_PRINTF("Hookedsocket : %p\n", Hookedsocket);
-	LOCAL_DEBUG_PRINTF("real socket : %p\n", socket_);
-
 	ret_val = (socket_( af, type, protocol));
 	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
 	{
@@ -640,8 +637,8 @@ Hookedsend(
 	int flags
 	)
 {
-	//if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
-	//{
+	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	{
 		CHAR szPort[20];
         CHAR szUID[UID_SIZE];
 		sockaddr_in sdata;
@@ -663,7 +660,7 @@ Hookedsend(
 			// save
 			SaveXml( XmlLog );
 		}
-	//}
+	}
 
 	return (send_( s, buf, len, flags));
 }
@@ -678,8 +675,8 @@ Hookedrecv(
 	)
 {
 
-	//if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET && len > 1)
-	//{
+	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET && len > 1)
+	{
 		CHAR szPort[20];
         CHAR szUID[UID_SIZE];
 		sockaddr_in sdata;
@@ -698,7 +695,7 @@ Hookedrecv(
         HexDumpToFile((PBYTE)buf, len ,szUID);
 		// save
 		SaveXml( XmlLog );
-	//}
+	}
 
 	return (recv_( s, buf, len, flags));
 }
