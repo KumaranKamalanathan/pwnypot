@@ -577,10 +577,10 @@ TransmitBufAsFile (
         char buffer[LENGTH];
 
         memset(buffer, '\0', LENGTH);
-        strncpy(buffer, "FILE\n",LENGTH);
-        strncat(buffer, szRemoteFileName,LENGTH);
+        strncpy(buffer, "FILE\n", LENGTH);
+        strncat(buffer, szRemoteFileName, LENGTH);
         strncat(buffer, "\n",LENGTH);
-        if (TrueSend(s,buffer, strlen(buffer),0) <= 0)
+        if (TrueSend(s, buffer, strlen(buffer), 0) <= 0)
         {
             LOCAL_DEBUG_PRINTF("Failed to send remote Filename %s.\n", szRemoteFileName);
             return MCEDP_STATUS_INTERNAL_ERROR;
