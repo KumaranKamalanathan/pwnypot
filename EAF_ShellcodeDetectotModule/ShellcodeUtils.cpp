@@ -153,11 +153,11 @@ ShuDisassembleShellcode(
 		return MCEDP_STATUS_INTERNAL_ERROR;
 	}
 #else
-	const DWORD DIS_LENGTH = 16384;
+	const DWORD DIS_LENGTH = 65536;
 	const DWORD DIS_TMP_LENGTH = 1024;
 	CHAR szDisassembledTmp[DIS_TMP_LENGTH];
 	CHAR szDisassembled[DIS_LENGTH];
-	strncpy(szDisassembled, "", DIS_LENGTH);
+	strncpy(szDisassembled, "\n", DIS_LENGTH);
 #endif
 
 
@@ -169,12 +169,27 @@ ShuDisassembleShellcode(
 
 		for ( i = 0; i < dwDecodedInstructionsCount; i++ ) 
 #ifndef CUCKOO			
-			fprintf(ShellcodeFile, "%0*I64x (%02d) %-24s %s%s%s\n", dt != Decode64Bits ? 8 : 16, DecodedInstructions[i].offset + (DWORD)ShellcodeAddress, DecodedInstructions[i].size, (char*)DecodedInstructions[i].instructionHex.p, (char*)DecodedInstructions[i].mnemonic.p, DecodedInstructions[i].operands.length != 0 ? " " : "", (char*)DecodedInstructions[i].operands.p);
+			fprintf(ShellcodeFile, "%0*I64x (%02d) %-24s %s%s%s\n", 
+				dt != Decode64Bits ? 8 : 16, 
+				DecodedInstructions[i].offset + (DWORD)ShellcodeAddress, 
+				DecodedInstructions[i].size, 
+				(char*)DecodedInstructions[i].instructionHex.p, 
+				(char*)DecodedInstructions[i].mnemonic.p, 
+				DecodedInstructions[i].operands.length != 0 ? " " : "", 
+				(char*)DecodedInstructions[i].operands.p);
 #else
     		
 		{	
 			memset(szDisassembledTmp, '\0', DIS_TMP_LENGTH);
-			sprintf(szDisassembledTmp, "%0*I64x (%02d) %-24s %s%s%s\n", dt != Decode64Bits ? 8 : 16, DecodedInstructions[i].offset + (DWORD)ShellcodeAddress, DecodedInstructions[i].size, (char*)DecodedInstructions[i].instructionHex.p, (char*)DecodedInstructions[i].mnemonic.p, DecodedInstructions[i].operands.length != 0 ? " " : "", (char*)DecodedInstructions[i].operands.p, DIS_TMP_LENGTH);
+			sprintf(szDisassembledTmp, "%0*I64x (%02d) %-24s %s%s%s\n", 
+				dt != Decode64Bits ? 8 : 16, 
+				DecodedInstructions[i].offset + (DWORD)ShellcodeAddress, 
+				DecodedInstructions[i].size, 
+				(char*)DecodedInstructions[i].instructionHex.p, 
+				(char*)DecodedInstructions[i].mnemonic.p, 
+				DecodedInstructions[i].operands.length != 0 ? " " : "", 
+				(char*)DecodedInstructions[i].operands.p, 
+				DIS_TMP_LENGTH);
 			strncat(szDisassembled, szDisassembledTmp, DIS_LENGTH);
     	}
 #endif		
@@ -193,8 +208,8 @@ ShuDisassembleShellcode(
 #ifndef CUCKOO	
 	fclose(ShellcodeFile);
 #else	
-    LOCAL_DEBUG_PRINTF ("Trying to sprintf filename\n");
-	sprintf(szLogPath, "logs/%d_ShellcodeDisass.txt",GetCurrentProcessId(), MAX_PATH);
+
+	sprintf(szLogPath, "logs/%d_ShellcodeDisass.txt", GetCurrentProcessId(), MAX_PATH);
 	if ( TransmitBufAsFile(szDisassembled, szLogPath) != MCEDP_STATUS_SUCCESS )
 	{
     	LOCAL_DEBUG_PRINTF ("Error on transmission of file ShellcodeDisass.txt\n");

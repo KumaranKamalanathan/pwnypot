@@ -198,10 +198,10 @@ DbgReportRop(
 	if ( MCEDP_REGCONFIG.ROP.DUMP_ROP == TRUE )
 	{
 		lpAddress = (PVOID)((DWORD_PTR)lpAddress - MCEDP_REGCONFIG.ROP.ROP_MEM_FAR);
+
+		XmlLogNode = CreateXmlElement ( XmlIDLogNode, "rop_gadget");
 		for ( i = 0 ; i <= MCEDP_REGCONFIG.ROP.MAX_ROP_MEM ; i++ , lpAddress = (LPVOID)((DWORD)lpAddress + 4) )
 		{
-
-			XmlLogNode = CreateXmlElement ( XmlIDLogNode, "rop_gadget");
 			if ( LdrFindEntryForAddress((PVOID)(*(DWORD *)lpAddress), &TableEntry) == MCEDP_STATUS_SUCCESS )
 			{
 				/* get module name */
@@ -231,6 +231,7 @@ DbgReportRop(
 
 					if ( ShuDisassmbleRopInstructions( (PVOID)(*(ULONG_PTR *)lpAddress), szRopInst, MCEDP_REGCONFIG.ROP.MAX_ROP_INST ) == MCEDP_STATUS_SUCCESS )
 					{
+						XmlLogNode = CreateXmlElement ( XmlIDLogNode, "rop_gadget");
 						mxmlElementSetAttrf(XmlLogNode, "offset", "0x%p", (*(ULONG_PTR *)lpAddress - (ULONG_PTR)TableEntry->DllBase));
 						DEBUG_PRINTF(LROP, NULL, "found rop_module: \n", szTemp);
 
@@ -255,15 +256,14 @@ DbgReportRop(
 				}
 			}
 			else  {
-				XmlSubNode = mxmlNewElement( XmlLogNode, "address");
+				XmlSubNode = mxmlNewElement( XmlLogNode, "stack_val");
 	        	memset( szTemp, '\0', 1024 );
 				sprintf( szTemp, "0x%p", lpAddress);
-				mxmlNewText ( XmlSubNode, 0, szTemp );
-
-				XmlSubNode = mxmlNewElement( XmlLogNode, "val_at_addr");
+				mxmlElementSetAttr( XmlSubNode, "address", szTemp);
 	        	memset( szTemp, '\0', 1024 );
 				sprintf( szTemp, "0x%p", (*(ULONG_PTR *)lpAddress));
-				mxmlNewText ( XmlSubNode, 0, szTemp );
+				mxmlElementSetAttr( XmlSubNode, "value", szTemp);
+
 			}
 		}
 	}
