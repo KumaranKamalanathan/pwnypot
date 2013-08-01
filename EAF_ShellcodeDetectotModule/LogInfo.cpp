@@ -408,7 +408,6 @@ InitFileSocket (
         const int LENGTH = 512;
 
         char buffer[256];
-        int n;
 
         memset(buffer, '\0', 256);
         strncpy(buffer, "FILE\nlogs/",256);
@@ -416,9 +415,15 @@ InitFileSocket (
         strncat(buffer, "_", 256);
         strncat(buffer, szFileName,256);
         strncat(buffer, "\n",256);
-        n = TrueSend(s,buffer, strlen(buffer),0);   
+        if (BufferedSend(s,buffer) == MCEDP_STATUS_SUCCESS){
+            LOCAL_DEBUG_PRINTF("Successfully Initialized FileSocket %s\n", szFileName);            
+        }
+        else {            
+            LOCAL_DEBUG_PRINTF("Initialized FileSocket %s failed\n", szFileName);  
+            return -1;
+        }
 
-        LOCAL_DEBUG_PRINTF("Successfully Initialized FileSocket %s\n", szFileName);
+
     }
     return s;
 }
@@ -429,10 +434,9 @@ WriteFileSocket (
     PCHAR Buffer
     )
 {   
-    int res = TrueSend ( Socket, Buffer, strlen( Buffer ), 0 );
-    LOCAL_DEBUG_PRINTF("Sent %d bytes\n", res);
-    if ( res == SOCKET_ERROR ) {
+    if ( BufferedSend(Socket, Buffer) == MCEDP_STATUS_INTERNAL_ERROR ) {
         LOCAL_DEBUG_PRINTF("Last error: %d\n", WSAGetLastError());
+        return MCEDP_STATUS_INTERNAL_ERROR;
     }
     return MCEDP_STATUS_SUCCESS;
 }
@@ -580,21 +584,18 @@ TransmitBufAsFile (
         strncpy(buffer, "FILE\n", LENGTH);
         strncat(buffer, szRemoteFileName, LENGTH);
         strncat(buffer, "\n",LENGTH);
-        if (TrueSend(s, buffer, strlen(buffer), 0) <= 0)
+        if (BufferedSend(s, buffer) == MCEDP_STATUS_INTERNAL_ERROR)
         {
             LOCAL_DEBUG_PRINTF("Failed to send remote Filename %s.\n", szRemoteFileName);
             return MCEDP_STATUS_INTERNAL_ERROR;
         }
 
-        int sent = 0;
-        sent = TrueSend(s, szBuf, strlen(szBuf), 0);
-        closesocket(s);
-
-        if (sent <= 0) 
-        {
+        if( BufferedSend(s, szBuf) == MCEDP_STATUS_INTERNAL_ERROR){
             LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szRemoteFileName, errno);
-            return MCEDP_STATUS_INTERNAL_ERROR;
-        }   
+            closesocket(s);
+            return MCEDP_STATUS_INTERNAL_ERROR;            
+        }
+        closesocket(s);
         return MCEDP_STATUS_SUCCESS;
     }
 }
@@ -669,5 +670,27 @@ HexDumpToFile(
     else
         LOCAL_DEBUG_PRINTF("Sent hexdump %s\n", szFileName);
 }
+
+STATUS
+BufferedSend (
+    SOCKET s,
+    PCHAR szBuf
+    )
+{
+    int totalSend = 0;
+    int currentSend = 0;
+    while (totalSend < strlen(szBuf)){
+        currentSend = TrueSend(s, szBuf+sizeof(char)*totalSend, strlen(szBuf)-totalSend, 0);
+        if (currentSend < 0)
+        {
+            LOCAL_DEBUG_PRINTF("Buffered send: Send returned %d", currentSend);
+            return MCEDP_STATUS_INTERNAL_ERROR;
+        }
+        totalSend += currentSend;
+    }
+    LOCAL_DEBUG_PRINTF("Sent %d bytes\n", totalSend);
+    return MCEDP_STATUS_SUCCESS;
+}
+
 
 #endif

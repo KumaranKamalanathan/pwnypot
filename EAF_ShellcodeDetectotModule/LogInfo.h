@@ -136,4 +136,10 @@ TransmitBufAsFile(
     PCHAR szRemoteFileName
     );
 
+STATUS
+BufferedSend(
+    SOCKET s,
+    PCHAR szBuf
+    );
+
 #endif
