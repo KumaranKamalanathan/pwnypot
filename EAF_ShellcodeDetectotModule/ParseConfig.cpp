@@ -3,7 +3,7 @@
 #ifndef CUCKOO
 STATUS
 ParseRegConfig(
-	OUT PMCEDPREGCONFIG pMcedpRegConfig,
+	OUT PPWNYPOTREGCONFIG pPwnyPotRegConfig,
 	IN PCHAR szAppPathHash,
 	IN DWORD Size
 	)
@@ -71,7 +71,7 @@ ParseRegConfig(
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (ERROR_SUCCESS)!\n");
 			REPORT_ERROR("RegOpenKeyEx()", &err);
-			return MCEDP_STATUS_INTERNAL_ERROR;
+			return PWNYPOT_STATUS_INTERNAL_ERROR;
 		}
 
 		dwStatus = RegQueryMultipleValues( hKey, 
@@ -83,7 +83,7 @@ ParseRegConfig(
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (AppRegConfig 1)!\n");
 			REPORT_ERROR("RegQueryMultipleValues()", &err);
-			return MCEDP_STATUS_INTERNAL_ERROR;
+			return PWNYPOT_STATUS_INTERNAL_ERROR;
 		}
 
 		ConfigBuffer = (PCHAR)LocalAlloc( LMEM_ZEROINIT, dwBufferSize );
@@ -92,7 +92,7 @@ ParseRegConfig(
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (ConfigBuffer)!\n");
 			REPORT_ERROR("LocalAlloc()", &err);
-			return MCEDP_STATUS_INTERNAL_ERROR;
+			return PWNYPOT_STATUS_INTERNAL_ERROR;
 		}
 
 		dwStatus = RegQueryMultipleValues( hKey, 
@@ -104,7 +104,7 @@ ParseRegConfig(
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Can't load Config (AppRegConfig ConfigBuffer)!\n");
 			REPORT_ERROR("RegQueryMultipleValues()", &err);
-			return MCEDP_STATUS_INTERNAL_ERROR;
+			return PWNYPOT_STATUS_INTERNAL_ERROR;
 		}
 
 		for( i = 0; i < sizeof(AppRegConfig)/sizeof(VALENT); i++) 
@@ -116,141 +116,141 @@ ParseRegConfig(
 
 			if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "SkipHWBError") ) 
 			{
-				pMcedpRegConfig->SKIP_HBP_ERROR = *pdwFlag;
+				pPwnyPotRegConfig->SKIP_HBP_ERROR = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "InitDelay") ) 
 			{
-				pMcedpRegConfig->INIT_DELAY = *pdwFlag;
+				pPwnyPotRegConfig->INIT_DELAY = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "AppID") ) 
 			{
-				pMcedpRegConfig->APP_ID = *pdwFlag;
+				pPwnyPotRegConfig->APP_ID = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "AppFullPath") ) 
 			{
-				strncpy( pMcedpRegConfig->APP_PATH, (const char*)AppRegConfig[i].ve_valueptr, MAX_PATH );
+				strncpy( pPwnyPotRegConfig->APP_PATH, (const char*)AppRegConfig[i].ve_valueptr, MAX_PATH );
 			}					
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "EtaModules") ) 
 			{
-				strncpy( pMcedpRegConfig->SHELLCODE.ETAF_MODULE, (const char*)AppRegConfig[i].ve_valueptr, MAX_MODULE_NAME32 );
+				strncpy( pPwnyPotRegConfig->SHELLCODE.ETAF_MODULE, (const char*)AppRegConfig[i].ve_valueptr, MAX_MODULE_NAME32 );
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "MalwareExecution") ) 
 			{
-				pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = *pdwFlag;
+				pPwnyPotRegConfig->GENERAL.ALLOW_MALWARE_EXEC = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "MalwareDownload") ) 
 			{
-				pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = *pdwFlag;
+				pPwnyPotRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "KillShellcode") ) 
 			{
-				pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = *pdwFlag;
+				pPwnyPotRegConfig->SHELLCODE.KILL_SHELLCODE = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "EtaValidation") ) 
 			{
-				pMcedpRegConfig->SHELLCODE.ETA_VALIDATION = *pdwFlag;
+				pPwnyPotRegConfig->SHELLCODE.ETA_VALIDATION = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "SyscallValidation") ) 
 			{
-				pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = *pdwFlag;
+				pPwnyPotRegConfig->SHELLCODE.SYSCALL_VALIDATION = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "AnalysisShellcode") ) 
 			{
-				pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = *pdwFlag;
+				pPwnyPotRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = *pdwFlag;
 			}	
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "DumpShellcode") ) 
 			{
-				pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = *pdwFlag;
+				pPwnyPotRegConfig->SHELLCODE.DUMP_SHELLCODE = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "KillRop") ) 
 			{
-				pMcedpRegConfig->ROP.KILL_ROP = *pdwFlag;
+				pPwnyPotRegConfig->ROP.KILL_ROP = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "PivotDetection") ) 
 			{
-				pMcedpRegConfig->ROP.PIVOT_DETECTION = *pdwFlag;
+				pPwnyPotRegConfig->ROP.PIVOT_DETECTION = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "PivotThreshold") ) 
 			{
-				pMcedpRegConfig->ROP.PIVOT_TRESHOLD = *pdwFlag;
+				pPwnyPotRegConfig->ROP.PIVOT_TRESHOLD = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "PivotInstThreshold") ) 
 			{
-				pMcedpRegConfig->ROP.PIVOT_INST_TRESHOLD = *pdwFlag;
+				pPwnyPotRegConfig->ROP.PIVOT_INST_TRESHOLD = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "DumpRop") ) 
 			{
-				pMcedpRegConfig->ROP.DUMP_ROP = *pdwFlag;
+				pPwnyPotRegConfig->ROP.DUMP_ROP = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "MaxRopInst") ) 
 			{
-				pMcedpRegConfig->ROP.MAX_ROP_INST = *pdwFlag;
+				pPwnyPotRegConfig->ROP.MAX_ROP_INST = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "MaxRopMemory") ) 
 			{
-				pMcedpRegConfig->ROP.MAX_ROP_MEM = *pdwFlag;
+				pPwnyPotRegConfig->ROP.MAX_ROP_MEM = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "CallValidation") ) 
 			{
-				pMcedpRegConfig->ROP.CALL_VALIDATION = *pdwFlag;
+				pPwnyPotRegConfig->ROP.CALL_VALIDATION = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "ForwardExecution") ) 
 			{
-				pMcedpRegConfig->ROP.FORWARD_EXECUTION = *pdwFlag;
+				pPwnyPotRegConfig->ROP.FORWARD_EXECUTION = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "FeDept") ) 
 			{
-				pMcedpRegConfig->ROP.FE_FAR = *pdwFlag;
+				pPwnyPotRegConfig->ROP.FE_FAR = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "StackMonitoring") ) 
 			{
-				pMcedpRegConfig->ROP.STACK_MONITOR = *pdwFlag;
+				pPwnyPotRegConfig->ROP.STACK_MONITOR = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "RopDetection") ) 
 			{
-				pMcedpRegConfig->ROP.DETECT_ROP = *pdwFlag;
+				pPwnyPotRegConfig->ROP.DETECT_ROP = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "MemFar") ) 
 			{
-				pMcedpRegConfig->ROP.ROP_MEM_FAR = *pdwFlag;
+				pPwnyPotRegConfig->ROP.ROP_MEM_FAR = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "TextSecrionOverwrite") ) 
 			{
-				pMcedpRegConfig->MEM.TEXT_RWX = *pdwFlag;
+				pPwnyPotRegConfig->MEM.TEXT_RWX = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "StackExecution") ) 
 			{
-				pMcedpRegConfig->MEM.STACK_RWX = *pdwFlag;
+				pPwnyPotRegConfig->MEM.STACK_RWX = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "TextSectionRandomization") ) 
 			{
-				pMcedpRegConfig->MEM.TEXT_RANDOMIZATION = *pdwFlag;
+				pPwnyPotRegConfig->MEM.TEXT_RANDOMIZATION = *pdwFlag;
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "AvoidHeapSpray") ) 
 			{
-				pMcedpRegConfig->GENERAL.HEAP_SPRAY = *pdwFlag;
+				pPwnyPotRegConfig->GENERAL.HEAP_SPRAY = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "HeapSprayAddress") ) 
 			{
 				/* I hope this never fail */
-				pMcedpRegConfig->GENERAL.HEAP_SPRAY_ADDRESS = (PCHAR)LocalAlloc(LMEM_ZEROINIT, strlen((const char*)AppRegConfig[i].ve_valueptr)+MAX_PATH);
-				strcpy( pMcedpRegConfig->GENERAL.HEAP_SPRAY_ADDRESS, (const char*)AppRegConfig[i].ve_valueptr);
+				pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESS = (PCHAR)LocalAlloc(LMEM_ZEROINIT, strlen((const char*)AppRegConfig[i].ve_valueptr)+MAX_PATH);
+				strcpy( pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESS, (const char*)AppRegConfig[i].ve_valueptr);
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "NullPageAllocation") ) 
 			{
-				pMcedpRegConfig->GENERAL.NULL_PAGE = *pdwFlag;
+				pPwnyPotRegConfig->GENERAL.NULL_PAGE = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "SEHOverwriteProtection") ) 
 			{
-				pMcedpRegConfig->GENERAL.SEHOP = *pdwFlag;
+				pPwnyPotRegConfig->GENERAL.SEHOP = *pdwFlag;
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "PermanentDEP") ) 
 			{
-				pMcedpRegConfig->GENERAL.PERMANENT_DEP = *pdwFlag;
+				pPwnyPotRegConfig->GENERAL.PERMANENT_DEP = *pdwFlag;
 			}
 		}
 
-		strncpy( pMcedpRegConfig->APP_PATH_HASH, szAppPathHash, MAX_MODULE_NAME32 );
+		strncpy( pPwnyPotRegConfig->APP_PATH_HASH, szAppPathHash, MAX_MODULE_NAME32 );
 		RegCloseKey(hKey);
 		LocalFree( ConfigBuffer );
 	}
@@ -269,7 +269,7 @@ ParseRegConfig(
 	{
 		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (MAIN_CONFIG_KEY)!\n");
 		REPORT_ERROR("RegOpenKeyEx()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	dwStatus = RegQueryMultipleValues(	hKey, 
@@ -281,7 +281,7 @@ ParseRegConfig(
 	{
 		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (MainRegConfig)!\n");
 		REPORT_ERROR("RegQueryMultipleValues()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	ConfigBuffer = (PCHAR)LocalAlloc( LMEM_ZEROINIT, dwBufferSize );
@@ -290,7 +290,7 @@ ParseRegConfig(
 	{
 		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (ConfigBuffer)!\n");
 		REPORT_ERROR("LocalAlloc()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 	dwStatus = RegQueryMultipleValues(	hKey, 
 										MainRegConfig, 
@@ -301,34 +301,34 @@ ParseRegConfig(
 	{
 		DEBUG_PRINTF(LDBG, NULL, "Can't load Config (MainRegConfig ConfigBuffer)!\n");
 		REPORT_ERROR("RegQueryMultipleValues()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 	for( i = 0; i < sizeof(MainRegConfig)/sizeof(VALENT); i++) 
 	{
 		if (  MATCH_CONF(MainRegConfig[i].ve_valuename, "LogPath") )
 		{			
-			strncpy( pMcedpRegConfig->LOG_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
-            strncpy( pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH, MAX_PATH );
-            strncat( pMcedpRegConfig->DBG_LOG_PATH, "\\", MAX_PATH );
-            strncat( pMcedpRegConfig->DBG_LOG_PATH, szAppPathHash, MAX_PATH );
+			strncpy( pPwnyPotRegConfig->LOG_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
+            strncpy( pPwnyPotRegConfig->DBG_LOG_PATH, pPwnyPotRegConfig->LOG_PATH, MAX_PATH );
+            strncat( pPwnyPotRegConfig->DBG_LOG_PATH, "\\", MAX_PATH );
+            strncat( pPwnyPotRegConfig->DBG_LOG_PATH, szAppPathHash, MAX_PATH );
 		}
 		else if ( MATCH_CONF(MainRegConfig[i].ve_valuename, "McedpModulePath") )
 		{
-			strncpy( pMcedpRegConfig->MCEDP_MODULE_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
+			strncpy( pPwnyPotRegConfig->MCEDP_MODULE_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
 		}
 	}
 	
-	pMcedpRegConfig->PROCESS_HOOKED = FALSE;
+	pPwnyPotRegConfig->PROCESS_HOOKED = FALSE;
 
 	RegCloseKey(hKey);
 	LocalFree( ConfigBuffer );
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 #else 
 STATUS
 ParseConfig(
-	OUT PMCEDPREGCONFIG pMcedpRegConfig
+	OUT PPWNYPOTREGCONFIG pPwnyPotRegConfig
 	)
 {	
 	LOCAL_DEBUG_PRINTF("Using Cookoo Paths.\n");
@@ -352,26 +352,26 @@ ParseConfig(
         	    const char *key = buf, *value = p + 1;
             	if(!strcmp(key, "results")) {		 
             		// setting paths for logs
-	                strncpy(pMcedpRegConfig->LOG_PATH, value, MAX_PATH);
+	                strncpy(pPwnyPotRegConfig->LOG_PATH, value, MAX_PATH);
 					LOCAL_DEBUG_PRINTF("Found Results Path %s.\n",value);
-	                strncat(pMcedpRegConfig->LOG_PATH, "\\logs",MAX_PATH);
-					LOCAL_DEBUG_PRINTF("Setting Logs Path %s.\n",pMcedpRegConfig->LOG_PATH);
-    	            strncpy(pMcedpRegConfig->DBG_LOG_PATH, pMcedpRegConfig->LOG_PATH,MAX_PATH);
+	                strncat(pPwnyPotRegConfig->LOG_PATH, "\\logs",MAX_PATH);
+					LOCAL_DEBUG_PRINTF("Setting Logs Path %s.\n",pPwnyPotRegConfig->LOG_PATH);
+    	            strncpy(pPwnyPotRegConfig->DBG_LOG_PATH, pPwnyPotRegConfig->LOG_PATH,MAX_PATH);
         	    }
         	    if(!strcmp(key, "pipe")) {
-                     strncpy(pMcedpRegConfig->CUCKOO_PIPE_NAME, value,MAX_PATH);
+                     strncpy(pPwnyPotRegConfig->CUCKOO_PIPE_NAME, value,MAX_PATH);
                 }
         	    if(!strcmp(key, "analyzer")) {
-                     strncpy(pMcedpRegConfig->CUCKOO_ANALYZER_DIR, value,MAX_PATH);
+                     strncpy(pPwnyPotRegConfig->CUCKOO_ANALYZER_DIR, value,MAX_PATH);
                 }
                 else if(!strcmp(key, "host-ip")) {        
-    				strncpy(pMcedpRegConfig->RESULT_SERVER_IP, value, MAX_PATH);
+    				strncpy(pPwnyPotRegConfig->RESULT_SERVER_IP, value, MAX_PATH);
                 }
                 else if(!strcmp(key, "host-port")) {        
-    				pMcedpRegConfig->RESULT_SERVER_PORT = atoi(value);
+    				pPwnyPotRegConfig->RESULT_SERVER_PORT = atoi(value);
                 }
                 else if(!strcmp(key, "exec-malware")) {        
-    				pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
+    				pPwnyPotRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
                 }
         	}
 	    }
@@ -380,12 +380,12 @@ ParseConfig(
     }    
     else {
         LOCAL_DEBUG_PRINTF("Loading Cuckoo Configuration failed: ini File not found.\n");
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
     }  
 
     // Read PwnyPot configuration variables from analysis.conf
     memset(config_fname, '\0', MAX_PATH); 
-    sprintf(config_fname, "%s\\analysis.conf",pMcedpRegConfig->CUCKOO_ANALYZER_DIR, MAX_PATH);
+    sprintf(config_fname, "%s\\analysis.conf",pPwnyPotRegConfig->CUCKOO_ANALYZER_DIR, MAX_PATH);
 	LOCAL_DEBUG_PRINTF("Trying to load PwnyPot Config from %s.\n",config_fname);
 	fp = fopen(config_fname, "r");
 	if(fp != NULL) {
@@ -401,94 +401,94 @@ ParseConfig(
     	        *p = 0;
         	    const char *key = buf, *value = p + 2;
         	    if(!strcmp(key, "skip_hbp_error ")) {
-                    pMcedpRegConfig->SKIP_HBP_ERROR = atoi(value);
+                    pPwnyPotRegConfig->SKIP_HBP_ERROR = atoi(value);
                 }
         	    else if(!strcmp(key, "init_delay ")) {
-                    pMcedpRegConfig->INIT_DELAY = atoi(value);
+                    pPwnyPotRegConfig->INIT_DELAY = atoi(value);
                 }
         	    else if(!strcmp(key, "permanent_dep ")) {
-                    pMcedpRegConfig->GENERAL.PERMANENT_DEP = atoi(value);
+                    pPwnyPotRegConfig->GENERAL.PERMANENT_DEP = atoi(value);
                 }
         	    else if(!strcmp(key, "sehop ")) {
-                    pMcedpRegConfig->GENERAL.SEHOP = atoi(value);
+                    pPwnyPotRegConfig->GENERAL.SEHOP = atoi(value);
                 }
         	    else if(!strcmp(key, "null_page ")) {
-                    pMcedpRegConfig->GENERAL.NULL_PAGE = atoi(value);
+                    pPwnyPotRegConfig->GENERAL.NULL_PAGE = atoi(value);
                 }
         	    else if(!strcmp(key, "heap_spray ")) {
-                    pMcedpRegConfig->GENERAL.HEAP_SPRAY = atoi(value);
+                    pPwnyPotRegConfig->GENERAL.HEAP_SPRAY = atoi(value);
                 }
         	    else if(!strcmp(key, "allow_malware_exec ")) {
-                    pMcedpRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
+                    pPwnyPotRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
                 }
         	    else if(!strcmp(key, "analysis_shellcode ")) {
-                    pMcedpRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = atoi(value);
+                    pPwnyPotRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = atoi(value);
                 }
         	    else if(!strcmp(key, "syscall_validation ")) {
-                    pMcedpRegConfig->SHELLCODE.SYSCALL_VALIDATION = atoi(value);
+                    pPwnyPotRegConfig->SHELLCODE.SYSCALL_VALIDATION = atoi(value);
                 }
         	    else if(!strcmp(key, "eta_validation ")) {
-                    pMcedpRegConfig->SHELLCODE.ETA_VALIDATION = atoi(value);
+                    pPwnyPotRegConfig->SHELLCODE.ETA_VALIDATION = atoi(value);
                 }
         	    else if(!strcmp(key, "etaf_module ")) {
-					strncpy( pMcedpRegConfig->SHELLCODE.ETAF_MODULE, value, MAX_MODULE_NAME32 );	
+					strncpy( pPwnyPotRegConfig->SHELLCODE.ETAF_MODULE, value, MAX_MODULE_NAME32 );	
                 }
         	    else if(!strcmp(key, "kill_shellcode ")) {
-                    pMcedpRegConfig->SHELLCODE.KILL_SHELLCODE = atoi(value);
+                    pPwnyPotRegConfig->SHELLCODE.KILL_SHELLCODE = atoi(value);
                 }
         	    else if(!strcmp(key, "dump_shellcode ")) {
-                    pMcedpRegConfig->SHELLCODE.DUMP_SHELLCODE = atoi(value);
+                    pPwnyPotRegConfig->SHELLCODE.DUMP_SHELLCODE = atoi(value);
                 }
         	    else if(!strcmp(key, "allow_malware_download ")) {
-                    pMcedpRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = atoi(value);
+                    pPwnyPotRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = atoi(value);
                 }
         	    else if(!strcmp(key, "detect_rop ")) {
-                    pMcedpRegConfig->ROP.DETECT_ROP = atoi(value);
+                    pPwnyPotRegConfig->ROP.DETECT_ROP = atoi(value);
                 }
         	    else if(!strcmp(key, "dump_rop ")) {
-                    pMcedpRegConfig->ROP.DUMP_ROP = atoi(value);
+                    pPwnyPotRegConfig->ROP.DUMP_ROP = atoi(value);
                 }
         	    else if(!strcmp(key, "rop_mem_far ")) {
-                    pMcedpRegConfig->ROP.ROP_MEM_FAR = atoi(value);					
+                    pPwnyPotRegConfig->ROP.ROP_MEM_FAR = atoi(value);					
                 }
         	    else if(!strcmp(key, "forward_execution ")) {
-                    pMcedpRegConfig->ROP.FORWARD_EXECUTION = atoi(value);
+                    pPwnyPotRegConfig->ROP.FORWARD_EXECUTION = atoi(value);
                 }
         	    else if(!strcmp(key, "fe_far ")) {
-                    pMcedpRegConfig->ROP.FE_FAR = atoi(value);					
+                    pPwnyPotRegConfig->ROP.FE_FAR = atoi(value);					
                 }
         	    else if(!strcmp(key, "kill_rop ")) {
-                    pMcedpRegConfig->ROP.KILL_ROP = atoi(value);
+                    pPwnyPotRegConfig->ROP.KILL_ROP = atoi(value);
                 }
         	    else if(!strcmp(key, "call_validation ")) {
-                    pMcedpRegConfig->ROP.CALL_VALIDATION = atoi(value);
+                    pPwnyPotRegConfig->ROP.CALL_VALIDATION = atoi(value);
                 }
         	    else if(!strcmp(key, "stack_monitor ")) {
-                    pMcedpRegConfig->ROP.STACK_MONITOR = atoi(value);
+                    pPwnyPotRegConfig->ROP.STACK_MONITOR = atoi(value);
                 }
         	    else if(!strcmp(key, "max_rop_inst ")) {
-                    pMcedpRegConfig->ROP.MAX_ROP_INST = atoi(value);
+                    pPwnyPotRegConfig->ROP.MAX_ROP_INST = atoi(value);
                 }
         	    else if(!strcmp(key, "max_rop_mem ")) {
-                    pMcedpRegConfig->ROP.MAX_ROP_MEM = atoi(value);
+                    pPwnyPotRegConfig->ROP.MAX_ROP_MEM = atoi(value);
                 }
         	    else if(!strcmp(key, "pivot_detection ")) {
-                    pMcedpRegConfig->ROP.PIVOT_DETECTION = atoi(value);
+                    pPwnyPotRegConfig->ROP.PIVOT_DETECTION = atoi(value);
                 }
         	    else if(!strcmp(key, "pivot_threshold ")) {
-                    pMcedpRegConfig->ROP.PIVOT_TRESHOLD = atoi(value);
+                    pPwnyPotRegConfig->ROP.PIVOT_TRESHOLD = atoi(value);
                 }
         	    else if(!strcmp(key, "pivot_inst_threshold ")) {
-                    pMcedpRegConfig->ROP.PIVOT_INST_TRESHOLD = atoi(value);
+                    pPwnyPotRegConfig->ROP.PIVOT_INST_TRESHOLD = atoi(value);
                 }
         	    else if(!strcmp(key, "text_rwx ")) {
-                    pMcedpRegConfig->MEM.TEXT_RWX = atoi(value);
+                    pPwnyPotRegConfig->MEM.TEXT_RWX = atoi(value);
                 }
         	    else if(!strcmp(key, "stack_rwx ")) {
-                    pMcedpRegConfig->MEM.STACK_RWX = atoi(value);
+                    pPwnyPotRegConfig->MEM.STACK_RWX = atoi(value);
                 }
         	    else if(!strcmp(key, "text_randomization ")) {
-                    pMcedpRegConfig->MEM.TEXT_RANDOMIZATION = atoi(value);
+                    pPwnyPotRegConfig->MEM.TEXT_RANDOMIZATION = atoi(value);
                 }
         	}
 	    }
@@ -496,10 +496,10 @@ ParseConfig(
     }    
     else {
         LOCAL_DEBUG_PRINTF("Loading Cuckoo Configuration failed: analysis.conf File not found.\n");
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
     }  
 
-	pMcedpRegConfig->PROCESS_HOOKED = FALSE;
-	return MCEDP_STATUS_SUCCESS;
+	pPwnyPotRegConfig->PROCESS_HOOKED = FALSE;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 #endif 

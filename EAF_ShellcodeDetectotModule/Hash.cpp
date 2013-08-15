@@ -25,7 +25,7 @@ GetSHA1Hash(
 	if ( bCryptResult == FALSE )
 	{
 		REPORT_ERROR("CryptAcquireContext", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	bCryptResult = CryptCreateHash( hProv, 
@@ -37,7 +37,7 @@ GetSHA1Hash(
 	{
 		REPORT_ERROR("CryptCreateHash", &err);
 		CryptDestroyHash(hHash);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	bCryptResult = CryptHashData(hHash, (CONST PBYTE) Buffer, BufferSize, 0);
@@ -47,7 +47,7 @@ GetSHA1Hash(
 		REPORT_ERROR("CryptHashData", &err);
 		CryptReleaseContext(hProv, 0);
 		CryptDestroyHash(hHash);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	bCryptResult = CryptGetHashParam( hHash, 
@@ -61,7 +61,7 @@ GetSHA1Hash(
 		DEBUG_PRINTF( LDBG, NULL, "Hash Buffer too small\n");
 		CryptReleaseContext(hProv, 0);
 		CryptDestroyHash(hHash);
-		return MCEDP_STATUS_INSUFFICIENT_BUFFER;
+		return PWNYPOT_STATUS_INSUFFICIENT_BUFFER;
 	}
 
 	bCryptResult = CryptGetHashParam( hHash, 
@@ -75,13 +75,13 @@ GetSHA1Hash(
 		REPORT_ERROR("CryptGetHashParam", &err);
 		CryptReleaseContext(hProv, 0);
 		CryptDestroyHash(hHash);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	*HashValueSize = dwHashSize;
 	CryptReleaseContext(hProv, 0);
 	CryptDestroyHash(hHash);
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 } 
 
 

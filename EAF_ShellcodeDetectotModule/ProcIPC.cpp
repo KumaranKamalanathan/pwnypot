@@ -23,7 +23,7 @@ GetOperationData(
 	if ( hMapFile == NULL )
 	{
 		REPORT_ERROR( "OpenFileMapping()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	pOpData = (POPDATA) MapViewOfFile( hMapFile,
@@ -36,12 +36,12 @@ GetOperationData(
 	{
 		REPORT_ERROR( "MapViewOfFile()", &err);
 		CloseHandle(hMapFile);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	memcpy( pOperationData, pOpData, sizeof(OPDATA));
 	CloseHandle(hMapFile);
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -60,17 +60,17 @@ GetProcessCreateTime(
 	if ( NtQueryInformationProcess == NULL )
 	{
 		REPORT_ERROR( "GetProcAddress()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	if ( NtQueryInformationProcess( hProcess, PROCESS_TIME, ProcessTime, sizeof( KERNEL_USER_TIMES ), NULL ) != STATUS_SUCCESS )
 	{
 		REPORT_ERROR( "NtQueryInformationProcess()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	*CreateTime = ProcessTime->CreateTime;
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 // TODO : need mutex for over process sync
@@ -98,7 +98,7 @@ SetOperationData(
 	if ( hMapFile == NULL )
 	{
 		REPORT_ERROR( "OpenFileMapping()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	pOpData = (POPDATA)MapViewOfFile( hMapFile,
@@ -111,7 +111,7 @@ SetOperationData(
 	{
 		REPORT_ERROR( "MapViewOfFile()", &err);
 		CloseHandle(hMapFile);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	if ( IsBitSet( dwFlags, 31 ) ) // IPC_APP_TYPE
@@ -144,7 +144,7 @@ SetOperationData(
 	}
 
 	CloseHandle( hMapFile );
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -160,7 +160,7 @@ GetCurrentOperationDir(
 	if ( GetModuleFileName( hGlobalDllHandle, szModuleFullPath, MAX_PATH ) == 0 )
 	{
 		REPORT_ERROR("GetModuleFileName()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	if ( Dir = strrchr( szModuleFullPath, '\\' ) )
@@ -169,7 +169,7 @@ GetCurrentOperationDir(
 		if ( Dir = strrchr( szModuleFullPath, '\\' ) )
 		{
 			strncpy( szOpDir, Dir+1, dwSize);
-			return MCEDP_STATUS_SUCCESS;
+			return PWNYPOT_STATUS_SUCCESS;
 		}
 	}
 }

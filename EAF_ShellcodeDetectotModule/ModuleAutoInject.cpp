@@ -19,7 +19,7 @@ InjectDLLIntoProcess(
 	if ( lpRemoteDllPAth == NULL )
 	{
 		REPORT_ERROR("VirtualAllocEx()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
 
 	if ( WriteProcessMemory( hProcessHandle, 
@@ -29,7 +29,7 @@ InjectDLLIntoProcess(
 							 NULL) == FALSE ) 
 	{
 		REPORT_ERROR("WriteProcessMemory()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
 
     hRemoteThread = CreateRemoteThread( hProcessHandle,
@@ -43,8 +43,8 @@ InjectDLLIntoProcess(
 	if ( hRemoteThread == NULL )
 	{
 		REPORT_ERROR("CreateRemoteThread()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }

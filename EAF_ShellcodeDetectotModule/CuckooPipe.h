@@ -1,6 +1,6 @@
 #pragma once
 #include "ParseConfig.h"
-extern MCEDPREGCONFIG MCEDP_REGCONFIG;
+extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 
 int pipe(PCHAR buf);
 

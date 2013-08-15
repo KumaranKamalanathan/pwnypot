@@ -1,5 +1,5 @@
 /*
-    MCEDP is a Client side High Interaction Honeypot
+    PwnyPot is a Client side High Interaction Honeypot
     Developed by  Shahriyar Jalayeri ( Shahriyar.j {at} gmail {dot}  com )
     www.irhoneynet.org
     twitter.com/ponez
@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #pragma comment(lib, "Psapi.lib")
 
-MCEDPREGCONFIG MCEDP_REGCONFIG;
+PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
 extern int (WSAAPI *TrueConnect		 )( SOCKET s, const struct sockaddr *name, int namelen ) ;
@@ -50,28 +50,28 @@ DllMain(
 		if ( !GetModuleFileName( NULL, szAppFullName, MAX_PATH ) )
 		{
 			DEBUG_PRINTF(LDBG, NULL, "GetModuleBaseName() failed!\n");
-			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
+			return FALSE; /* PWNYPOT_STATUS_INTERNAL_ERROR */
 		}
 
-		if ( GetSHA1Hash( (PBYTE)strtolow(szAppFullName), strlen(szAppFullName), AppFullNameHash, &dwAppFullNameHashValueSize ) != MCEDP_STATUS_SUCCESS )
+		if ( GetSHA1Hash( (PBYTE)strtolow(szAppFullName), strlen(szAppFullName), AppFullNameHash, &dwAppFullNameHashValueSize ) != PWNYPOT_STATUS_SUCCESS )
 		{
 			DEBUG_PRINTF(LDBG, NULL, "GetSHA1Hash() failed!\n");
-			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
+			return FALSE; /* PWNYPOT_STATUS_INTERNAL_ERROR */
 		}
 
 		/* read and parse the config from registry */
 #ifndef CUCKOO		
-		if ( ParseRegConfig( &MCEDP_REGCONFIG, HashToStr( AppFullNameHash, dwAppFullNameHashValueSize, szAppFullNameHash, MAX_PATH) , MAX_MODULE_NAME32 ) != MCEDP_STATUS_SUCCESS )
+		if ( ParseRegConfig( &PWNYPOT_REGCONFIG, HashToStr( AppFullNameHash, dwAppFullNameHashValueSize, szAppFullNameHash, MAX_PATH) , MAX_MODULE_NAME32 ) != PWNYPOT_STATUS_SUCCESS )
 #else 
-		if ( ParseConfig( &MCEDP_REGCONFIG) != MCEDP_STATUS_SUCCESS )
+		if ( ParseConfig( &PWNYPOT_REGCONFIG) != PWNYPOT_STATUS_SUCCESS )
 #endif
 		{
 			REPORT_ERROR("ParseRegConfig()", &err);
-			return FALSE; /* MCEDP_STATUS_INTERNAL_ERROR */
+			return FALSE; /* PWNYPOT_STATUS_INTERNAL_ERROR */
 		}
 
 #ifdef CUCKOO
-		if ( InitCuckooLogs() != MCEDP_STATUS_SUCCESS ) {
+		if ( InitCuckooLogs() != PWNYPOT_STATUS_SUCCESS ) {
 			REPORT_ERROR("InitCuckooLogs()", &err);
 			return FALSE;
 		}		
@@ -79,7 +79,7 @@ DllMain(
 
 #ifndef CUCKOO
 		/* only init targeted process otherwise unload DLL from process address space. */
-		if ( _stricmp(szAppFullName, MCEDP_REGCONFIG.APP_PATH ) )
+		if ( _stricmp(szAppFullName, PWNYPOT_REGCONFIG.APP_PATH ) )
 		{
 			return FALSE;
 		}
@@ -94,14 +94,14 @@ DllMain(
 	{		
 		/* Disable Export Table Address Filtering for all running threads. */
 		/*
-		if ( DbgDisableExportAddressFiltering() != MCEDP_STATUS_SUCCESS )
+		if ( DbgDisableExportAddressFiltering() != PWNYPOT_STATUS_SUCCESS )
 		{
 			DEBUG_PRINTF(LDBG, NULL, "EAF failed to disable protection...\n");
 		}
 		*/
 
 		/* unhook functions */
-		if ( MCEDP_REGCONFIG.PROCESS_HOOKED )
+		if ( PWNYPOT_REGCONFIG.PROCESS_HOOKED )
 			HookUninstall();
 	}
 	return TRUE;
@@ -118,82 +118,82 @@ SetupShellcodeDetector(
 	XmlShellcode = CreateXmlElement(XmlLog, "shellcode");
 
 	/* check if we should delay the protection init */
-	if ( MCEDP_REGCONFIG.INIT_DELAY > 0 )
+	if ( PWNYPOT_REGCONFIG.INIT_DELAY > 0 )
 	{
 		/* Sleep for INIT_DELAY seconds */
-		Sleep(MCEDP_REGCONFIG.INIT_DELAY * SEC );
+		Sleep(PWNYPOT_REGCONFIG.INIT_DELAY * SEC );
 	}
 
 	/* init log path 
-	if ( InitLogPath( MCEDP_REGCONFIG.LOG_PATH, MAX_PATH ) != MCEDP_STATUS_SUCCESS )
+	if ( InitLogPath( PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH ) != PWNYPOT_STATUS_SUCCESS )
 	{
 		REPORT_ERROR("InitLogPath()", &err);
-		return MCEDP_STATUS_GENERAL_FAIL;
+		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
     */
 	/* check if we should enable Permanent DEP mitigation */
-	if ( MCEDP_REGCONFIG.GENERAL.PERMANENT_DEP )
+	if ( PWNYPOT_REGCONFIG.GENERAL.PERMANENT_DEP )
 	{
-		if ( EnablePermanentDep() != MCEDP_STATUS_SUCCESS )
+		if ( EnablePermanentDep() != PWNYPOT_STATUS_SUCCESS )
 		{
 			REPORT_ERROR("EnablePermanentDep()", &err);
-			return MCEDP_STATUS_GENERAL_FAIL;
+			return PWNYPOT_STATUS_GENERAL_FAIL;
 		}
 	}
 
 	/* check if we should enable NULL Page Allocation Prevention mitigation  */
-	if ( MCEDP_REGCONFIG.GENERAL.NULL_PAGE )
+	if ( PWNYPOT_REGCONFIG.GENERAL.NULL_PAGE )
 	{
-		if ( EnableNullPageProtection() != MCEDP_STATUS_SUCCESS )
+		if ( EnableNullPageProtection() != PWNYPOT_STATUS_SUCCESS )
 		{
 			REPORT_ERROR("EnableNullPageProtection()", &err);
-			return MCEDP_STATUS_GENERAL_FAIL;
+			return PWNYPOT_STATUS_GENERAL_FAIL;
 		}
 	}
 
 	/* check if we should enable Heap Spray Prevention mitigation  */
-	if ( MCEDP_REGCONFIG.GENERAL.HEAP_SPRAY )
+	if ( PWNYPOT_REGCONFIG.GENERAL.HEAP_SPRAY )
 	{
-		if ( EnableHeapSprayProtection(MCEDP_REGCONFIG.GENERAL.HEAP_SPRAY_ADDRESS) != MCEDP_STATUS_SUCCESS )
+		if ( EnableHeapSprayProtection(PWNYPOT_REGCONFIG.GENERAL.HEAP_SPRAY_ADDRESS) != PWNYPOT_STATUS_SUCCESS )
 		{
 			REPORT_ERROR("EnableNullPageProtection()", &err);
-			return MCEDP_STATUS_GENERAL_FAIL;
+			return PWNYPOT_STATUS_GENERAL_FAIL;
 		}
 	}
 
 	/* if Export Table Access Vaidation is enable then activate it! */
-	if ( MCEDP_REGCONFIG.SHELLCODE.ETA_VALIDATION )
+	if ( PWNYPOT_REGCONFIG.SHELLCODE.ETA_VALIDATION )
 	{
 		/* add exception handler for handling break points */
 		if ( !AddVectoredExceptionHandler(true, (PVECTORED_EXCEPTION_HANDLER)DbgExceptionHandler) )
 		{
 			REPORT_ERROR("AddVectoredExceptionHandler()", &err);
-			return MCEDP_STATUS_INTERNAL_ERROR;
+			return PWNYPOT_STATUS_INTERNAL_ERROR;
 		}
 		
 		/* log current loaded modules */
-		if ( LdrLoadListEntry() != MCEDP_STATUS_SUCCESS )
+		if ( LdrLoadListEntry() != PWNYPOT_STATUS_SUCCESS )
 		{
 			DEBUG_PRINTF(LDBG, NULL, "ListProcessModules() faild!\n");
-			return MCEDP_STATUS_GENERAL_FAIL;
+			return PWNYPOT_STATUS_GENERAL_FAIL;
 		}
 
 		/* enable ETA validation for all current running threads */
-		if ( DbgEnableExportAddressFiltering() != MCEDP_STATUS_SUCCESS)
+		if ( DbgEnableExportAddressFiltering() != PWNYPOT_STATUS_SUCCESS)
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Error occured in DbgEnableExportAddressFiltering()");
-			if ( !MCEDP_REGCONFIG.SKIP_HBP_ERROR )
-				return MCEDP_STATUS_GENERAL_FAIL;
+			if ( !PWNYPOT_REGCONFIG.SKIP_HBP_ERROR )
+				return PWNYPOT_STATUS_GENERAL_FAIL;
 		}
 	}
 
 	/* hook functions! */
-	if ( HookInstall() != MCEDP_STATUS_SUCCESS )
+	if ( HookInstall() != PWNYPOT_STATUS_SUCCESS )
 	{
 		DEBUG_PRINTF(LDBG, NULL, "Error in Hooking process!\n");
-		return MCEDP_STATUS_GENERAL_FAIL;
+		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
 
 	DEBUG_PRINTF(LDBG, NULL, "Functions hooked successfully!\n");
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }

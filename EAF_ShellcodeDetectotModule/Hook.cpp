@@ -34,7 +34,7 @@ HookInstall(
 	DetourAttach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
 
     /* Hook virtual memory manipulation function needs for checking rop attacks */
-	if ( MCEDP_REGCONFIG.ROP.DETECT_ROP )
+	if ( PWNYPOT_REGCONFIG.ROP.DETECT_ROP )
 	{
 		DetourAttach(&(PVOID&)VirtualAlloc_				, HookedVirtualAlloc);
 		DetourAttach(&(PVOID&)VirtualAllocEx_			, HookedVirtualAllocEx);
@@ -46,13 +46,13 @@ HookInstall(
 	}
 
     /* Hook CreateThread if ETA_VALIDATION protection is set on */
-	if ( MCEDP_REGCONFIG.SHELLCODE.ETA_VALIDATION )
+	if ( PWNYPOT_REGCONFIG.SHELLCODE.ETA_VALIDATION )
 	{
 		DetourAttach(&(PVOID&)CreateThread_				, HookedCreateThread);
 	}
 
     /* Hook function we need for loging shellcode activity */
-	if ( MCEDP_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
+	if ( PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
 	{
 		DetourAttach(&(PVOID&)URLDownloadToFileW_		, HookedURLDownloadToFileW);
 		DetourAttach(&(PVOID&)socket_					, Hookedsocket);
@@ -70,12 +70,12 @@ HookInstall(
 		TrueSocket = socket_;
 		TrueConnect = connect_;
 		TrueSend = send_;
-		MCEDP_REGCONFIG.PROCESS_HOOKED = TRUE;
-		return MCEDP_STATUS_SUCCESS;
+		PWNYPOT_REGCONFIG.PROCESS_HOOKED = TRUE;
+		return PWNYPOT_STATUS_SUCCESS;
 	}
 	else
 	{
-		return MCEDP_STATUS_GENERAL_FAIL;
+		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
 }
 
@@ -92,7 +92,7 @@ HookUninstall(
 	/* Unhooking functions */
 	DetourDetach(&(PVOID&)CreateProcessInternalW_		, HookedCreateProcessInternalW);
 
-	if ( MCEDP_REGCONFIG.ROP.DETECT_ROP )
+	if ( PWNYPOT_REGCONFIG.ROP.DETECT_ROP )
 	{
 		DetourDetach(&(PVOID&)VirtualAlloc_				, HookedVirtualAlloc);
 		DetourDetach(&(PVOID&)VirtualAllocEx_			, HookedVirtualAllocEx);
@@ -103,12 +103,12 @@ HookUninstall(
 		DetourDetach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
 	}
 
-	if ( MCEDP_REGCONFIG.SHELLCODE.ETA_VALIDATION )
+	if ( PWNYPOT_REGCONFIG.SHELLCODE.ETA_VALIDATION )
 	{
 		DetourDetach(&(PVOID&)CreateThread_				, HookedCreateThread);
 	}
 
-	if ( MCEDP_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
+	if ( PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
 	{
 		DetourDetach(&(PVOID&)CreateThread_				, HookedCreateThread);
 		DetourDetach(&(PVOID&)URLDownloadToFileW_		, HookedURLDownloadToFileW);
@@ -122,7 +122,7 @@ HookUninstall(
 	}
 
 	DetourTransactionCommit();
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 
@@ -143,10 +143,10 @@ HookedCreateThread(
 
 
 	 /* Enable breakpoint for new thread only when shellcode is not detected */
-	 if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_NOT_SET )
+	 if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_NOT_SET )
 	 {
 		 phd					= (PHWBREAKDATA)LocalAlloc(LMEM_ZEROINIT, sizeof(HWBREAKDATA));
-		 phd->Address			= PeGetExportDirectoryRVAddress(GetModuleHandle(MCEDP_REGCONFIG.SHELLCODE.ETAF_MODULE));
+		 phd->Address			= PeGetExportDirectoryRVAddress(GetModuleHandle(PWNYPOT_REGCONFIG.SHELLCODE.ETAF_MODULE));
 		 phd->dwCondition		= HW_ACCESS;				/* Breakpoint type */
 		 phd->dwSize			= 4;						/* Breakpoint size */
 		 phd->dwThreadStatus	= THREAD_ALREADY_SUSPEND;	/* this means BreakSetup() does't need to suspend thread */
@@ -220,9 +220,9 @@ HookedCreateProcessInternalW(
 	CHAR szDllFullPath[MAX_PATH];
 
 	/* apply config rules if shellcode or ROP detected */
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == MCEDP_STATUS_ROP_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == PWNYPOT_STATUS_ROP_FLAG_SET )
 	{
-		if ( MCEDP_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
+		if ( PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
 		{
 			CHAR *szApplicationNameA = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 			CHAR *szCommandLineA     = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
@@ -247,7 +247,7 @@ HookedCreateProcessInternalW(
 		}
 
         /* if malware execution is not allowd then terminate the process */
-		if ( MCEDP_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC == FALSE )
+		if ( PWNYPOT_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC == FALSE )
 		{
 			TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
 		}
@@ -273,21 +273,21 @@ HookedCreateProcessInternalW(
 		{
            
 #ifndef CUCKOO	
-			strncpy( szDllFullPath, MCEDP_REGCONFIG.MCEDP_MODULE_PATH, MAX_PATH );
-			if ( InjectDLLIntoProcess( szDllFullPath, lpProcessInformation->hProcess ) != MCEDP_STATUS_SUCCESS )
+			strncpy( szDllFullPath, PWNYPOT_REGCONFIG.PWNYPOT_MODULE_PATH, MAX_PATH );
+			if ( InjectDLLIntoProcess( szDllFullPath, lpProcessInformation->hProcess ) != PWNYPOT_STATUS_SUCCESS )
 			{
 				DEBUG_PRINTF(LDBG, NULL, "Module failed to inject itself into newly created process , PID : %d\n", lpProcessInformation->dwProcessId);
 				return bReturn;
 			}
 
 			DEBUG_PRINTF(LDBG, NULL, "Module injected itself into newly created process , PID : %d\n", lpProcessInformation->dwProcessId);
-			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
+			/* Sleep for INIT_WAIT_TIME sec and let PwnyPot init itself in newly created process
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
 			
 #else
 			DEBUG_PRINTF(LDBG, NULL, "New Process with CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
-			sprintf(buf,"PROCESS:%d,MCEDP.dll",lpProcessInformation->dwProcessId,MAX_PATH);
+			sprintf(buf,"PROCESS:%d,PwnyPot.dll",lpProcessInformation->dwProcessId,MAX_PATH);
 			pipe(buf);
 
 #endif			
@@ -304,8 +304,8 @@ HookedCreateProcessInternalW(
 		{
 #ifndef CUCKOO			
              /* TODO : We dont need this if ther process is already added into Protection List in registry, so we should remove this lines  */
-			strncpy( szDllFullPath, MCEDP_REGCONFIG.MCEDP_MODULE_PATH, MAX_PATH );
-			if ( InjectDLLIntoProcess( szDllFullPath, lpProcessInformation->hProcess ) != MCEDP_STATUS_SUCCESS )
+			strncpy( szDllFullPath, PWNYPOT_REGCONFIG.PWNYPOT_MODULE_PATH, MAX_PATH );
+			if ( InjectDLLIntoProcess( szDllFullPath, lpProcessInformation->hProcess ) != PWNYPOT_STATUS_SUCCESS )
 			{
 				DEBUG_PRINTF(LDBG, NULL, "Module failed to inject itself into newly created process , PID : %d\n", lpProcessInformation->dwProcessId);
 				ResumeThread(lpProcessInformation->hThread);
@@ -316,11 +316,11 @@ HookedCreateProcessInternalW(
 #else
 			DEBUG_PRINTF(LDBG, NULL, "New Process !without! CREATE_SUSPENDED: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
-			sprintf(buf,"PROCESS:%d,MCEDP.dll",lpProcessInformation->dwProcessId,MAX_PATH);
+			sprintf(buf,"PROCESS:%d,PwnyPot.dll",lpProcessInformation->dwProcessId,MAX_PATH);
 			DWORD len = strlen(buf);
 			pipe(buf);
 #endif				
-			/* Sleep for INIT_WAIT_TIME sec and let MCEDP init itself in newly created process
+			/* Sleep for INIT_WAIT_TIME sec and let PwnyPot init itself in newly created process
 			   TODO : use a messaging mechanism and resume process after init finished instead of sleeping! */
 			Sleep(INIT_WAIT_TIME);
 			ResumeThread(lpProcessInformation->hThread);
@@ -342,7 +342,7 @@ HookedURLDownloadToFileW(
     LPBINDSTATUSCALLBACK lpfnCB
 	)
 {
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		CHAR *szUrlA			= (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 		CHAR *szFileNameA		= (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
@@ -363,7 +363,7 @@ HookedURLDownloadToFileW(
 		/* save */
 		SaveXml( XmlLog );
 
-		if ( MCEDP_REGCONFIG.SHELLCODE.ALLOW_MALWARE_DOWNLOAD == FALSE )
+		if ( PWNYPOT_REGCONFIG.SHELLCODE.ALLOW_MALWARE_DOWNLOAD == FALSE )
 			return S_OK;
 
 		LocalFree(szUrlA);
@@ -381,7 +381,7 @@ HookedLoadLibraryExW(
 	DWORD dwFlags
 	)
 {
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		CHAR *szLibFileNameA = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 		PXMLNODE XmlLogNode;
@@ -412,7 +412,7 @@ Hookedsocket(
 	int ret_val;
 
 	ret_val = (socket_( af, type, protocol));
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		PXMLNODE XmlIDLogNode;
 
@@ -507,7 +507,7 @@ Hookedconnect(
 	int namelen
     )
 {
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		PXMLNODE XmlIDLogNode;
 		CHAR szPort[20];
@@ -537,7 +537,7 @@ Hookedlisten(
 	int backlog
 	)
 {
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		PXMLNODE XmlIDLogNode;
 		PXMLNODE XmlLogNode;
@@ -565,7 +565,7 @@ Hookedbind(
   int namelen
   )
 {
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		PXMLNODE XmlIDLogNode;
 		CHAR szPort[20];
@@ -594,7 +594,7 @@ Hookedaccept(
 	)
 {
 
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		PXMLNODE XmlIDLogNode;
 		CHAR szPort[20];
@@ -637,7 +637,7 @@ Hookedsend(
 	int flags
 	)
 {
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 	{
 		CHAR szPort[20];
         CHAR szUID[UID_SIZE];
@@ -675,7 +675,7 @@ Hookedrecv(
 	)
 {
 
-	if ( DbgGetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET && len > 1)
+	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET && len > 1)
 	{
 		CHAR szPort[20];
         CHAR szUID[UID_SIZE];

@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6876AF38-B569-487D-A17F-469A43F21A70}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>MCEDP</RootNamespace>
-    <ProjectName>MCEDP</ProjectName>
+    <RootNamespace>PwnyPot</RootNamespace>
+    <ProjectName>PwnyPot</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -186,7 +186,7 @@
     <ClCompile Include="ETAV_DebugBreak.cpp" />
     <ClCompile Include="GeneralProtections.cpp" />
     <ClCompile Include="Hash.cpp" />
-    <ClCompile Include="MCEDP_Main.cpp" />
+    <ClCompile Include="PwnyPot_Main.cpp" />
     <ClCompile Include="Hook.cpp" />
     <ClCompile Include="inih\ini.c" />
     <ClCompile Include="LdrList.cpp" />
@@ -228,7 +228,7 @@
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MCEDP.rc" />
+    <ResourceCompile Include="PwnyPot.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="lgpl.txt" />

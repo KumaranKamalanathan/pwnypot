@@ -32,7 +32,7 @@ static     int (WSAAPI *recv_                   )( SOCKET s, char *buf, int len,
 
 
 
-extern MCEDPREGCONFIG MCEDP_REGCONFIG;
+extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 extern DWORD dwEaAccessCount;
 extern BOOL bShellcodeDetected;
 extern PXMLNODE XmlLog;

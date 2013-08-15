@@ -23,7 +23,7 @@ LdrFindEntryForAddress(
     /* get current process PEB LDR */
 	Ldr = GetCurrentPeb()->Ldr;
 	if (Ldr == NULL) 
-		return MCEDP_STATUS_NO_MORE_ENTRIES;
+		return PWNYPOT_STATUS_NO_MORE_ENTRIES;
 
     /* check the first entry and see if it the Address blong to this module */
     Entry = (PLDR_DATA_TABLE_ENTRY) Ldr->EntryInProgress;
@@ -36,7 +36,7 @@ LdrFindEntryForAddress(
             if ((ULONG_PTR)Address >= (ULONG_PTR)ImageBase && (ULONG_PTR)Address < (ULONG_PTR)EndOfImage)
 			{
 				*TableEntry = Entry;
-				return MCEDP_STATUS_SUCCESS;
+				return PWNYPOT_STATUS_SUCCESS;
             }
 		}
 	}
@@ -55,14 +55,14 @@ LdrFindEntryForAddress(
 
             if ((ULONG_PTR)Address >= (ULONG_PTR)ImageBase && (ULONG_PTR)Address < (ULONG_PTR)EndOfImage) {
 				*TableEntry = Entry;
-				return MCEDP_STATUS_SUCCESS;
+				return PWNYPOT_STATUS_SUCCESS;
 			}
 		}
 
         Next = Next->Flink;
 	}
 	
-	return MCEDP_STATUS_NO_MORE_ENTRIES;
+	return PWNYPOT_STATUS_NO_MORE_ENTRIES;
 }
 
 STATUS
@@ -74,12 +74,12 @@ LdrGetModuleLoadCount(
 	PLDR_DATA_TABLE_ENTRY TableEntry;
 
     /* find the module */
-	if ( LdrFindEntryForAddress( Address, &TableEntry ) == MCEDP_STATUS_NO_MORE_ENTRIES )
-		return MCEDP_STATUS_NO_MORE_ENTRIES;
+	if ( LdrFindEntryForAddress( Address, &TableEntry ) == PWNYPOT_STATUS_NO_MORE_ENTRIES )
+		return PWNYPOT_STATUS_NO_MORE_ENTRIES;
 
     /* Get the load count */
 	*LoadCount = TableEntry->LoadCount;
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 
@@ -99,7 +99,7 @@ LdrLoadListEntry(
     /* get current process PEB LDR */
 	Ldr = GetCurrentPeb()->Ldr;
 	if (Ldr == NULL) 
-		return MCEDP_STATUS_NO_MORE_ENTRIES;
+		return PWNYPOT_STATUS_NO_MORE_ENTRIES;
 
     /* Walk "In Memory Order Module List" and simply report them */
 	Head = &Ldr->InMemoryOrderModuleList;
@@ -120,5 +120,5 @@ LdrLoadListEntry(
         Next = Next->Flink;
 	}
 	
-    return MCEDP_STATUS_SUCCESS;
+    return PWNYPOT_STATUS_SUCCESS;
 }

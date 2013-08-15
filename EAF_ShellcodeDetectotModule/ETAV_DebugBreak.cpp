@@ -21,7 +21,7 @@ DbgExceptionHandler(
 	if ( ExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_SINGLE_STEP )
 	{
 		/* If shellcode already detected , no more validation require */
-		if ( DbgGetShellcodeFlag() != MCEDP_STATUS_SHELLCODE_FLAG_SET )
+		if ( DbgGetShellcodeFlag() != PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
 		{
 			/* Validate access to export table */
 			status = DbgValidateExportTableAccess( ExceptionInfo->ExceptionRecord->ExceptionAddress, szModuleName );
@@ -30,35 +30,35 @@ DbgExceptionHandler(
 			{
 
 			/* Error occurred during validation process */
-			case MCEDP_STATUS_INTERNAL_ERROR:
+			case PWNYPOT_STATUS_INTERNAL_ERROR:
 				DEBUG_PRINTF(LDBG, NULL, "Accessing EA @%p (cant validate access du to internal error) | TID : 0x%p\t-- Count(%d)!\n",ExceptionInfo->ExceptionRecord->ExceptionAddress, dwCurrentThreadId, dwEaAccessCount);
 				break;
 
 			/* Access is valid ( by a loaded module ) */
-			case MCEDP_STATUS_VALID_ACCESS:
+			case PWNYPOT_STATUS_VALID_ACCESS:
 				DEBUG_PRINTF(LDBG, NULL, "Accessing EA @%p (%s) | TID : 0x%p\t-- Count(%d)!\n",ExceptionInfo->ExceptionRecord->ExceptionAddress, szModuleName, dwCurrentThreadId, dwEaAccessCount);
 				break;
 
 			/* Invalid access to FILTER_MODULE export table, probably by a shellcode */
-			case MCEDP_STATUS_INVALID_ACCESS:
+			case PWNYPOT_STATUS_INVALID_ACCESS:
 				/* Report detection of shellcode */
 				DEBUG_PRINTF(LDBG, NULL, "Accessing EA @%p (UNKNOWN MODULE - POSSIBLE SHELLCODE) | TID : 0x%p\t-- Count(%d)!\n",ExceptionInfo->ExceptionRecord->ExceptionAddress, dwCurrentThreadId, dwEaAccessCount);
 				
 				/* Set shellcode detection flags */
-				if ( DbgSetShellcodeFlag() == MCEDP_STATUS_SHELLCODE_FLAG_SET )
-					//DEBUG_PRINTF(LDBG, NULL, "Shellcode flag set successfully!\n");
+				if ( DbgSetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET )
+					DEBUG_PRINTF(LDBG, NULL, "Shellcode flag set successfully!\n");
 
 				/* If KILL_SHELLCODE is set, terminate process without any further shellcode analysis */
-				if ( MCEDP_REGCONFIG.SHELLCODE.KILL_SHELLCODE )
+				if ( PWNYPOT_REGCONFIG.SHELLCODE.KILL_SHELLCODE )
 					TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
 
 				/* If DEUMP_SHELLCODE is set, dump raw (binary) and dissembled shellcode in log directory */
-				if ( MCEDP_REGCONFIG.SHELLCODE.DUMP_SHELLCODE )
+				if ( PWNYPOT_REGCONFIG.SHELLCODE.DUMP_SHELLCODE )
 					ShuDumpShellcode(ExceptionInfo->ExceptionRecord->ExceptionAddress);
 
 				/*
 				//Disable Export Table Address Filtering for all running threads.
-				if ( DbgDisableExportAddressFiltering() != MCEDP_STATUS_SUCCESS )
+				if ( DbgDisableExportAddressFiltering() != PWNYPOT_STATUS_SUCCESS )
 				{
 					DEBUG_PRINTF("EAF failed to disable protection...\n");
 				}
@@ -98,7 +98,7 @@ DbgThreadSetBreakpoint(
 		REPORT_ERROR("OpenThread()", &err);
 		/* Set the Error Flag to proper value */
 		BreakpointData->dwStatus = DR_BREAK_ERROR_UNK; 
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	/* Is thread already suspend ? */
@@ -109,7 +109,7 @@ DbgThreadSetBreakpoint(
 		{
 			REPORT_ERROR("SuspendThread()",&err);
 			BreakpointData->dwStatus = DR_BREAK_ERROR_UNK;
-			return MCEDP_STATUS_INTERNAL_ERROR;
+			return PWNYPOT_STATUS_INTERNAL_ERROR;
 
 		}
 	}
@@ -119,7 +119,7 @@ DbgThreadSetBreakpoint(
 	{
 		REPORT_ERROR("GetThreadContext()",&err);
 		BreakpointData->dwStatus = DR_BREAK_ERROR_UNK;
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 	
 	/* check if Dr(n) is busy with another Hardware Breakpoint? */
@@ -154,7 +154,7 @@ DbgThreadSetBreakpoint(
 	{
 		/* All Debug Registers are busy */
 		BreakpointData->dwStatus = DR_ALL_BUSY;
-		return MCEDP_STATUS_GENERAL_FAIL;
+		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
 
 	/* Set the proper bit in Dr7 for used Debug Register and Breakpoint type */
@@ -167,7 +167,7 @@ DbgThreadSetBreakpoint(
 	{
 		REPORT_ERROR("GetThreadContext()",&err);
 		BreakpointData->dwStatus = DR_BREAK_ERROR_UNK;
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	BreakpointData->dwStatus = DR_BREAK_SET;
@@ -189,7 +189,7 @@ DbgThreadSetBreakpoint(
 	/* Resume the thread if it was not in suspend state at creation time */
 	if ( BreakpointData->dwThreadStatus != THREAD_ALREADY_SUSPEND )
 		ResumeThread(hThread);
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -207,7 +207,7 @@ DbgEnableExportAddressFiltering(
 	/* Get current Process Id and initialize the PHWBREAKDATA structure. */
 	dwCurrentPid		= GetCurrentProcessId();
 	phd					= (PHWBREAKDATA)LocalAlloc(LMEM_ZEROINIT, sizeof(HWBREAKDATA));
-	phd->Address		= PeGetExportDirectoryRVAddress(GetModuleHandle(MCEDP_REGCONFIG.SHELLCODE.ETAF_MODULE));
+	phd->Address		= PeGetExportDirectoryRVAddress(GetModuleHandle(PWNYPOT_REGCONFIG.SHELLCODE.ETAF_MODULE));
 	phd->dwCondition	= HW_ACCESS;	/* Breakpoint Type */
 	phd->dwSize			= 4;			/* Breakpoint size */
 	phd->dwThreadStatus	= 0;			
@@ -219,7 +219,7 @@ DbgEnableExportAddressFiltering(
 	{
 		REPORT_ERROR("CreateToolhelp32Snapshot", &err);
 		LocalFree(phd);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	if(!Thread32First(hThreadSnap, &te32)) 
@@ -227,7 +227,7 @@ DbgEnableExportAddressFiltering(
 		REPORT_ERROR("Thread32First", &err);
 		LocalFree(phd);
 		CloseHandle(hThreadSnap);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	do 
@@ -254,7 +254,7 @@ DbgEnableExportAddressFiltering(
 	} while(Thread32Next(hThreadSnap, &te32)); 
 
 	LocalFree(phd);
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -278,14 +278,14 @@ DbgDisableExportAddressFiltering(
 	if ( hThreadSnap == NULL )
 	{
 		REPORT_ERROR("CreateToolhelp32Snapshot", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	if(!Thread32First(hThreadSnap, &te32)) 
 	{
 		REPORT_ERROR("Thread32First", &err);
 		CloseHandle(hThreadSnap);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	do 
@@ -305,12 +305,12 @@ DbgDisableExportAddressFiltering(
 			WaitForSingleObject( hRemoveBreakThread, INFINITE);
 			GetExitCodeThread( hRemoveBreakThread, &status );
 
-			if ( status != MCEDP_STATUS_SUCCESS )
+			if ( status != PWNYPOT_STATUS_SUCCESS )
 				DEBUG_PRINTF(LDBG, NULL, "EAF fail do remove breakpoints from TID : %p", dwThreadId);
 		}
 	} while(Thread32Next(hThreadSnap, &te32)); 
 
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -326,16 +326,16 @@ DbgValidateExportTableAccess(
 	CHAR szAssciModuleName[MAX_MODULE_NAME32] = {'\0'};
 
 	/* find module in LDR module list */
-	if ( LdrFindEntryForAddress( Address, &TableEntry ) == MCEDP_STATUS_NO_MORE_ENTRIES )
-		return MCEDP_STATUS_INVALID_ACCESS;
+	if ( LdrFindEntryForAddress( Address, &TableEntry ) == PWNYPOT_STATUS_NO_MORE_ENTRIES )
+		return PWNYPOT_STATUS_INVALID_ACCESS;
 
 	/* Get module .text section start address */
 	if ( ( lpCodeSectionAddress = PeGetCodeSectionAddress( TableEntry->DllBase ) ) == NULL )
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 
 	/* Get module .text section size */
 	if ( ( dwCodeSectionSize = PeGetCodeSectionSize( TableEntry->DllBase ) ) == NULL )
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 
 	/* Check if instruction which accessed Export Table belong to any loaded module ? */
 	if ( (ULONG_PTR)Address >= (ULONG_PTR)lpCodeSectionAddress && (ULONG_PTR)Address < ( (ULONG_PTR)lpCodeSectionAddress + dwCodeSectionSize ) )
@@ -343,11 +343,11 @@ DbgValidateExportTableAccess(
 		wcstombs( szAssciModuleName, TableEntry->FullDllName.Buffer, TableEntry->FullDllName.Length );
 		strncpy( tszModuleName, szAssciModuleName, MAX_MODULE_NAME32);
 		/* Access caused by a valid module */
-		return MCEDP_STATUS_VALID_ACCESS; 
+		return PWNYPOT_STATUS_VALID_ACCESS; 
 	}
 
 	/* Address dos not belong to any loaded module, so access is invalid! */
-	return MCEDP_STATUS_INVALID_ACCESS;
+	return PWNYPOT_STATUS_INVALID_ACCESS;
 }
 
 STATUS 
@@ -368,21 +368,21 @@ DbgThreadUnSetBreakpoint(
 	if ( hThread == NULL )
 	{
 		REPORT_ERROR("OpenThread()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	/* Suspend thread for getting/setting thread context in a safe manner */
 	if ( SuspendThread(hThread) == -1 )
 	{
 			REPORT_ERROR("SuspendThread()",&err);
-			return MCEDP_STATUS_INTERNAL_ERROR;
+			return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	/* Get thread current context */
 	if ( !GetThreadContext(hThread,&ctxThreadContext) )
 	{
 		REPORT_ERROR("GetThreadContext()",&err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	/* erase all hardware breakpoints for this thread */
@@ -396,12 +396,12 @@ DbgThreadUnSetBreakpoint(
 	if ( !SetThreadContext(hThread,&ctxThreadContext) )
 	{
 		REPORT_ERROR("GetThreadContext()",&err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 	DEBUG_PRINTF(LDBG, NULL, "Breakpoints erased | TID : %p !\n", *pdwThreadId);
 	ResumeThread(hThread);
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -416,20 +416,20 @@ DbgSetShellcodeFlag(
 
     /* init log path */
 #ifdef CUCKOO
-    if ( InitShellcodeLog() != MCEDP_STATUS_SUCCESS )
+    if ( InitShellcodeLog() != PWNYPOT_STATUS_SUCCESS )
     {
         REPORT_ERROR("InitShellcodeLog()", &err);
-      	return MCEDP_STATUS_GENERAL_FAIL;
+      	return PWNYPOT_STATUS_GENERAL_FAIL;
     }    
 #else
-    if ( InitLogPath( MCEDP_REGCONFIG.LOG_PATH, MAX_PATH ) != MCEDP_STATUS_SUCCESS )
+    if ( InitLogPath( PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH ) != PWNYPOT_STATUS_SUCCESS )
 	{
 		REPORT_ERROR("InitLogPath()", &err);
-		return MCEDP_STATUS_GENERAL_FAIL;
+		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
 #endif
 
-	return MCEDP_STATUS_SHELLCODE_FLAG_SET;
+	return PWNYPOT_STATUS_SHELLCODE_FLAG_SET;
 }
 
 STATUS
@@ -439,7 +439,7 @@ DbgGetShellcodeFlag(
 {
 	/* get current value of shellcode flag */
 	if ( bShellcodeDetected )
-		return MCEDP_STATUS_SHELLCODE_FLAG_SET;
+		return PWNYPOT_STATUS_SHELLCODE_FLAG_SET;
 
-	return MCEDP_STATUS_SHELLCODE_FLAG_NOT_SET;
+	return PWNYPOT_STATUS_SHELLCODE_FLAG_NOT_SET;
 }

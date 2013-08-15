@@ -7,7 +7,7 @@
 #include "ETAV_DebugBreak.h"
 #pragma once
 
-extern MCEDPREGCONFIG MCEDP_REGCONFIG;
+extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
 

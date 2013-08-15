@@ -140,7 +140,7 @@ SaveXml(
 	CHAR szFileName[MAX_PATH];
 	CHAR szLogBuffer[8192];
 
-	strncpy(szLogDir, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
+	strncpy(szLogDir, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogDir, "\\", MAX_PATH);
 	sprintf(szFileName, "%u_ShellcodeAnalysis.xml", GetCurrentProcessId(),MAX_PATH);
 	strncat(szLogDir, szFileName , MAX_PATH);
@@ -151,12 +151,12 @@ SaveXml(
 	if ( fp == NULL )
 	{
 		REPORT_ERROR("fopen()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
     if ( mxmlSaveFile(TopElement, fp, MXML_NO_CALLBACK) == -1 )
 	{
 		REPORT_ERROR("mxmlSaveFile()", &err);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 	fflush(fp);
     fclose(fp);
@@ -167,21 +167,21 @@ SaveXml(
     if( mxmlSaveString(TopElement, szBuf, bufLenght, WhiteSpaceCb) <= 0) 
     {
     	LOCAL_DEBUG_PRINTF ( "Error on printing XML into buffer\n" );
-    	return MCEDP_STATUS_INTERNAL_ERROR;
+    	return PWNYPOT_STATUS_INTERNAL_ERROR;
 
     }
 
 	sprintf(szFileName, "logs/%u_ShellcodeAnalysis.xml", GetCurrentProcessId(), MAX_PATH);
-    if ( TransmitBufAsFile(szBuf, szFileName) != MCEDP_STATUS_SUCCESS ) 
+    if ( TransmitBufAsFile(szBuf, szFileName) != PWNYPOT_STATUS_SUCCESS ) 
     {
     	LOCAL_DEBUG_PRINTF ( "Error on transmission of file ShellcodeAnalysis.xml\n" );
-    	return MCEDP_STATUS_INTERNAL_ERROR;
+    	return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
     else 
     	LOCAL_DEBUG_PRINTF ( "Successfully transmitted ShellcodeAnalysis.xml\n" );
 
 #endif 
 
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 

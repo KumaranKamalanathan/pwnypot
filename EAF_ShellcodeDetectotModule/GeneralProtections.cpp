@@ -21,11 +21,11 @@ EnablePermanentDep(
 		if ( NT_SUCCESS(Status) )
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Permanent DEP Enabled!\n");
-			return MCEDP_STATUS_SUCCESS;
+			return PWNYPOT_STATUS_SUCCESS;
 		}
 	}
 
-	return MCEDP_STATUS_INTERNAL_ERROR;
+	return PWNYPOT_STATUS_INTERNAL_ERROR;
 }
 
 STATUS
@@ -53,11 +53,11 @@ EnableNullPageProtection(
 		if ( NT_SUCCESS(Status) )
 		{
 			DEBUG_PRINTF(LDBG, NULL, "NULL Page Allocation Prevention Enabled!\n");
-			return MCEDP_STATUS_SUCCESS;
+			return PWNYPOT_STATUS_SUCCESS;
 		}
 	}
 
-	return MCEDP_STATUS_INTERNAL_ERROR;
+	return PWNYPOT_STATUS_INTERNAL_ERROR;
 }
 
 STATUS
@@ -77,5 +77,5 @@ EnableHeapSprayProtection(
 		szHeapAddress = strtok (NULL,";");
 	}
 
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }

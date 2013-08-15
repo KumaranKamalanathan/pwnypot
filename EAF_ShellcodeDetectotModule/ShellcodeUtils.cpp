@@ -52,12 +52,12 @@ ShuDumpShellcode(
 	{
 		REPORT_ERROR("ReadProcessMemory()", &err);
 		LocalFree(ShellcodeDump);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 
 #ifndef CUCKOO
 	sprintf(szShellcodeFile, "%u_Shellcode.bin", GetCurrentProcessId(), MAX_PATH);
-	strncpy( szLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
+	strncpy( szLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeFile, MAX_PATH);
 
@@ -73,7 +73,7 @@ ShuDumpShellcode(
 	{
 		REPORT_ERROR("CreateFile()", &err);
 		LocalFree(ShellcodeDump);
-		return MCEDP_STATUS_INTERNAL_ERROR;	
+		return PWNYPOT_STATUS_INTERNAL_ERROR;	
 	}
 	WriteFile( hShellcodeFile, 
 		       ShellcodeDump,
@@ -86,13 +86,13 @@ ShuDumpShellcode(
 		REPORT_ERROR("WriteFile()", &err);
 		LocalFree(ShellcodeDump);
 		CloseHandle(hShellcodeFile);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
     
 
 #else 
 	sprintf(szShellcodeFile, "logs/%u_Shellcode.bin", GetCurrentProcessId(), MAX_PATH);
-	if ( TransmitBufAsFile((char*)ShellcodeDump, szShellcodeFile) != MCEDP_STATUS_SUCCESS)
+	if ( TransmitBufAsFile((char*)ShellcodeDump, szShellcodeFile) != PWNYPOT_STATUS_SUCCESS)
     	DEBUG_PRINTF (LSHL, NULL, "Error on transmission of file Shellcode.bin\n");
 
 	else 
@@ -102,9 +102,9 @@ ShuDumpShellcode(
     DEBUG_PRINTF(LSHL, NULL, "Shellcode Dumped from (0x%p -- 0x%p) Size ( 0x%p )\n", lpStartAddress, lpEndAddress, ((DWORD)lpEndAddress - (DWORD)lpStartAddress));
 	/* log and dump disassembled version of in-memory shelloce */
 	status = ShuDisassembleShellcode( lpStartAddress, lpStartAddress, ((DWORD)lpEndAddress - (DWORD)lpStartAddress));
-	if ( status == MCEDP_STATUS_SUCCESS )
+	if ( status == PWNYPOT_STATUS_SUCCESS )
 		DEBUG_PRINTF(LSHL, NULL, "Shellcode disassembled successfully!\n");
-	else if ( status == MCEDP_STATUS_PARTIAL_DISASSEMBLE )
+	else if ( status == PWNYPOT_STATUS_PARTIAL_DISASSEMBLE )
 		DEBUG_PRINTF(LSHL, NULL, "Only a part of Shellcode disassembled successfully!\n");
 	else
 		DEBUG_PRINTF(LSHL, NULL, "Failed to disassemble Shellcode!\n");
@@ -112,7 +112,7 @@ ShuDumpShellcode(
 	LocalFree(ShellcodeDump);
 	CloseHandle(hShellcodeFile);
 
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -140,7 +140,7 @@ ShuDisassembleShellcode(
 
 #ifndef CUCKOO
 	sprintf(szShellcodeDisassFile, "%d_ShellcodeDisass.txt",GetCurrentProcessId(), MAX_PATH);
-	strncpy( szLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH);
+	strncpy( szLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeDisassFile, MAX_PATH);
 	
@@ -150,7 +150,7 @@ ShuDisassembleShellcode(
 	{
 		REPORT_ERROR("fopen()", &err);
 		LocalFree(DecodedInstructions);
-		return MCEDP_STATUS_INTERNAL_ERROR;
+		return PWNYPOT_STATUS_INTERNAL_ERROR;
 	}
 #else
 	const DWORD DIS_LENGTH = 65536;
@@ -165,7 +165,7 @@ ShuDisassembleShellcode(
 	{
 		DecRes = distorm_decode(offset, (const unsigned char*)DumpedShellcode, dwSize, dt, DecodedInstructions, MAX_INSTRUCTIONS, (unsigned int *)&dwDecodedInstructionsCount);
 		if (DecRes == DECRES_INPUTERR)
-			return MCEDP_STATUS_GENERAL_FAIL;
+			return PWNYPOT_STATUS_GENERAL_FAIL;
 
 		for ( i = 0; i < dwDecodedInstructionsCount; i++ ) 
 #ifndef CUCKOO			
@@ -210,7 +210,7 @@ ShuDisassembleShellcode(
 #else	
 
 	sprintf(szLogPath, "logs/%d_ShellcodeDisass.txt", GetCurrentProcessId(), MAX_PATH);
-	if ( TransmitBufAsFile(szDisassembled, szLogPath) != MCEDP_STATUS_SUCCESS )
+	if ( TransmitBufAsFile(szDisassembled, szLogPath) != PWNYPOT_STATUS_SUCCESS )
 	{
     	LOCAL_DEBUG_PRINTF ("Error on transmission of file ShellcodeDisass.txt\n");
     	DEBUG_PRINTF (LSHL, NULL, "Error on transmission of file ShellcodeDisass.txt\n");
@@ -219,7 +219,7 @@ ShuDisassembleShellcode(
     	DEBUG_PRINTF (LSHL, NULL, "Successfully transmitted ShellcodeDisass.txt\n");
 
 #endif	
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -247,7 +247,7 @@ ShuDisassmbleRopInstructions(
 		
 		DecRes = distorm_decode(offset, (const unsigned char*)Address, dwSize, dt, DecodedInstructions, MAX_INSTRUCTIONS, (unsigned int *)&dwDecodedInstructionsCount);
 		if (DecRes == DECRES_INPUTERR)
-			return MCEDP_STATUS_GENERAL_FAIL;
+			return PWNYPOT_STATUS_GENERAL_FAIL;
 
 		for ( i = 0; i < dwDecodedInstructionsCount; i++ ) {
 
@@ -260,7 +260,7 @@ ShuDisassmbleRopInstructions(
 				 strstr((char*)DecodedInstructions[i].operands.p, "RET") != NULL )
 			{
 				LocalFree(DecodedInstructions);
-				return MCEDP_STATUS_SUCCESS;
+				return PWNYPOT_STATUS_SUCCESS;
 			}
 		}
 
@@ -275,5 +275,5 @@ ShuDisassmbleRopInstructions(
 	}
 
 	LocalFree(DecodedInstructions);
-	return MCEDP_STATUS_SUCCESS;
+	return PWNYPOT_STATUS_SUCCESS;
 }

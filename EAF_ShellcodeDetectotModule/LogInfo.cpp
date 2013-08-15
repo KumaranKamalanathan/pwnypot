@@ -1,7 +1,7 @@
 #include "LogInfo.h"
 #include "ParseConfig.h"
 
-extern MCEDPREGCONFIG MCEDP_REGCONFIG;
+extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 BOOL bLogPathInitSuccess = FALSE;
 
 #ifdef CUCKOO
@@ -89,7 +89,7 @@ InitLogPath(
 	SYSTEMTIME lt;
 
     if ( bLogPathInitSuccess )
-        return MCEDP_STATUS_SUCCESS;
+        return PWNYPOT_STATUS_SUCCESS;
 
 	SecureZeroMemory(szLogPath, MAX_PATH);
 	GetLocalTime( &lt);
@@ -100,16 +100,16 @@ InitLogPath(
 	if ( FolderExists( LogPath ) )
     {
         bLogPathInitSuccess = TRUE;
-		return MCEDP_STATUS_SUCCESS;
+		return PWNYPOT_STATUS_SUCCESS;
     }
 
 	if ( CreateDirectory( LogPath, NULL ) )
     {
         bLogPathInitSuccess = TRUE;
-		return MCEDP_STATUS_SUCCESS;
+		return PWNYPOT_STATUS_SUCCESS;
     }
 
-	return MCEDP_STATUS_INTERNAL_ERROR;	
+	return PWNYPOT_STATUS_INTERNAL_ERROR;	
 }
 
 
@@ -181,7 +181,7 @@ HexDumpToFile(
                         "....................................................."
                         "........................................";
     
-   strncpy( szFullLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH );
+   strncpy( szFullLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH );
    strncat(szFullLogPath, "\\", MAX_PATH);
    strncat(szFullLogPath, szFileName, MAX_PATH);
    strncat(szFullLogPath, ".txt", MAX_PATH);
@@ -241,11 +241,11 @@ DEBUG_PRINTF(
     vsnprintf_s(Buffer, sizeof Buffer, _TRUNCATE, Format, Args);
     va_end(Args);
 
-    strncpy( szFullLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH );
+    strncpy( szFullLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH );
 #ifdef __DEBUG__
     if ( dwType == LDBG )
     {
-        strncpy( szFullLogPath, MCEDP_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
+        strncpy( szFullLogPath, PWNYPOT_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
         strncat( szFullLogPath, "\\LogInfo", MAX_PATH);
     }
 #else
@@ -294,7 +294,7 @@ DEBUG_PRINTF(
     vsnprintf_s(Buffer, sizeof Buffer, _TRUNCATE, Format, Args);
     va_end(Args);
 
-    strncpy( szFullLogPath, MCEDP_REGCONFIG.LOG_PATH, MAX_PATH );
+    strncpy( szFullLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH );
 #ifdef __DEBUG__
     if (  dwType == LDBG ){
         if( LogInfoSock != -1) 
@@ -306,7 +306,7 @@ DEBUG_PRINTF(
     if ( dwType == LDBG )
         return;
 #endif
-    else if ( dwType == LROP && MCEDP_REGCONFIG.ROP.DETECT_ROP)
+    else if ( dwType == LROP && PWNYPOT_REGCONFIG.ROP.DETECT_ROP)
     {
         if ( LogRopSock != -1 ){            
             WriteFileSocket( LogRopSock, Buffer );
@@ -344,7 +344,7 @@ VOID LOCAL_DEBUG_PRINTF (
     va_start(Args, Format);
     vsnprintf_s(Buffer, sizeof Buffer, _TRUNCATE, Format, Args);
     va_end(Args);
-    strncpy( szFullLogPath, MCEDP_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
+    strncpy( szFullLogPath, PWNYPOT_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
     sprintf(szPid, "\\%u_", GetCurrentProcessId(), MAX_PATH);
     strncat( szFullLogPath, szPid, MAX_PATH);
     strncat( szFullLogPath, "LogInfo.txt", MAX_PATH);
@@ -389,8 +389,8 @@ InitFileSocket (
     SOCKADDR_IN target; 
 
     target.sin_family = AF_INET; 
-    target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
-    target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT);
+    target.sin_addr.s_addr = inet_addr (PWNYPOT_REGCONFIG.RESULT_SERVER_IP); 
+    target.sin_port = htons (PWNYPOT_REGCONFIG.RESULT_SERVER_PORT);
     s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
     if (s == INVALID_SOCKET)
     {
@@ -415,7 +415,7 @@ InitFileSocket (
         strncat(buffer, "_", 256);
         strncat(buffer, szFileName,256);
         strncat(buffer, "\n",256);
-        if (BufferedSend(s,buffer) == MCEDP_STATUS_SUCCESS){
+        if (BufferedSend(s,buffer) == PWNYPOT_STATUS_SUCCESS){
             LOCAL_DEBUG_PRINTF("Successfully Initialized FileSocket %s\n", szFileName);            
         }
         else {            
@@ -434,11 +434,11 @@ WriteFileSocket (
     PCHAR Buffer
     )
 {   
-    if ( BufferedSend(Socket, Buffer) == MCEDP_STATUS_INTERNAL_ERROR ) {
+    if ( BufferedSend(Socket, Buffer) == PWNYPOT_STATUS_INTERNAL_ERROR ) {
         LOCAL_DEBUG_PRINTF("Last error: %d\n", WSAGetLastError());
-        return MCEDP_STATUS_INTERNAL_ERROR;
+        return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
-    return MCEDP_STATUS_SUCCESS;
+    return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS 
@@ -449,30 +449,30 @@ InitCuckooLogs ()
     TrueSend = (int (WSAAPI *)(SOCKET s, const char *, int , int ))DetourFindFunction("ws2_32.dll", "send");
     LOCAL_DEBUG_PRINTF("Initializing Cuckoo Socket Logs from PID: %u\n",GetCurrentProcessId());
     if ( bLogPathInitSuccess )
-        return MCEDP_STATUS_SUCCESS;
+        return PWNYPOT_STATUS_SUCCESS;
     // init LogInfo.txt
     LogInfoSock = InitFileSocket("LogInfo.txt");
     if (LogInfoSock==-1){
-        return MCEDP_STATUS_INTERNAL_ERROR;
+        return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
 
     // init RopDetection.txt
-    if(MCEDP_REGCONFIG.ROP.DETECT_ROP)
+    if(PWNYPOT_REGCONFIG.ROP.DETECT_ROP)
     {
         LogRopSock = InitFileSocket("RopAnalysis.txt");
         if (LogRopSock==-1){
-            return MCEDP_STATUS_INTERNAL_ERROR;
+            return PWNYPOT_STATUS_INTERNAL_ERROR;
         }
     }
 
     LogShellcodeSock = InitFileSocket("LogShellcode.txt");
     if (LogShellcodeSock==-1){
-        return MCEDP_STATUS_INTERNAL_ERROR;
+        return PWNYPOT_STATUS_INTERNAL_ERROR;
     }   
 
 
     bLogPathInitSuccess = TRUE;
-    return MCEDP_STATUS_SUCCESS;
+    return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS
@@ -486,9 +486,9 @@ InitShellcodeLog ()
 {
     LOCAL_DEBUG_PRINTF("Initializing Cuckoo Shellcode Logs from PID: %u\n",GetCurrentProcessId());
     if (LogShellcodeSock!=-1){
-        return MCEDP_STATUS_SUCCESS;
+        return PWNYPOT_STATUS_SUCCESS;
     }
-    return MCEDP_STATUS_SUCCESS;
+    return PWNYPOT_STATUS_SUCCESS;
 }
 
 STATUS 
@@ -515,7 +515,7 @@ TransmitFile (
     if(fs == NULL)
     {
         LOCAL_DEBUG_PRINTF("ERROR: Failed to open file for sending %s. (errno = %d)\n", szFullPath, errno);
-        return MCEDP_STATUS_INTERNAL_ERROR;
+        return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
 
     fseek(fs, 0L, SEEK_END);
@@ -523,7 +523,7 @@ TransmitFile (
     fseek(fs, 0L, SEEK_SET);
     buffer = (char*)calloc(fileLength, sizeof(char)); 
     if(buffer == NULL)
-        return MCEDP_STATUS_INTERNAL_ERROR;
+        return PWNYPOT_STATUS_INTERNAL_ERROR;
 
 
     fread(buffer, sizeof(char), fileLength, fs);
@@ -549,31 +549,31 @@ TransmitBufAsFile (
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
     {
-        return MCEDP_STATUS_INTERNAL_ERROR;
+        return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
 
     if (wsadata.wVersion != MAKEWORD(2, 2))
     {
         WSACleanup(); //Clean up Winsock
-        return MCEDP_STATUS_INTERNAL_ERROR;
+        return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
 
     SOCKADDR_IN target; 
 
     target.sin_family = AF_INET; 
-    target.sin_addr.s_addr = inet_addr (MCEDP_REGCONFIG.RESULT_SERVER_IP); 
-    target.sin_port = htons (MCEDP_REGCONFIG.RESULT_SERVER_PORT); 
+    target.sin_addr.s_addr = inet_addr (PWNYPOT_REGCONFIG.RESULT_SERVER_IP); 
+    target.sin_port = htons (PWNYPOT_REGCONFIG.RESULT_SERVER_PORT); 
     s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
     if (s == INVALID_SOCKET)
     {
         LOCAL_DEBUG_PRINTF("ERROR: Invalid socket for file transmission.\n");
-        return MCEDP_STATUS_INTERNAL_ERROR; 
+        return PWNYPOT_STATUS_INTERNAL_ERROR; 
     }  
 
     if (TrueConnect(s, (SOCKADDR *)&target, sizeof(target)) == SOCKET_ERROR)
     {
         LOCAL_DEBUG_PRINTF("ERROR: Failed to connect to socket for file transmission.\n");
-        return MCEDP_STATUS_INTERNAL_ERROR; 
+        return PWNYPOT_STATUS_INTERNAL_ERROR; 
     }
     else
     {
@@ -584,19 +584,19 @@ TransmitBufAsFile (
         strncpy(buffer, "FILE\n", LENGTH);
         strncat(buffer, szRemoteFileName, LENGTH);
         strncat(buffer, "\n",LENGTH);
-        if (BufferedSend(s, buffer) == MCEDP_STATUS_INTERNAL_ERROR)
+        if (BufferedSend(s, buffer) == PWNYPOT_STATUS_INTERNAL_ERROR)
         {
             LOCAL_DEBUG_PRINTF("Failed to send remote Filename %s.\n", szRemoteFileName);
-            return MCEDP_STATUS_INTERNAL_ERROR;
+            return PWNYPOT_STATUS_INTERNAL_ERROR;
         }
 
-        if( BufferedSend(s, szBuf) == MCEDP_STATUS_INTERNAL_ERROR){
+        if( BufferedSend(s, szBuf) == PWNYPOT_STATUS_INTERNAL_ERROR){
             LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szRemoteFileName, errno);
             closesocket(s);
-            return MCEDP_STATUS_INTERNAL_ERROR;            
+            return PWNYPOT_STATUS_INTERNAL_ERROR;            
         }
         closesocket(s);
-        return MCEDP_STATUS_SUCCESS;
+        return PWNYPOT_STATUS_SUCCESS;
     }
 }
 
@@ -664,7 +664,7 @@ HexDumpToFile(
     memset(szTmp, '\0', tmpLength);
     sprintf(szTmp, "logs/%d_dump-%s.txt\n", GetCurrentProcessId(), szFileName, tmpLength);    
 
-    if (TransmitBufAsFile(szBuf, szTmp) == MCEDP_STATUS_INTERNAL_ERROR) 
+    if (TransmitBufAsFile(szBuf, szTmp) == PWNYPOT_STATUS_INTERNAL_ERROR) 
         LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szFileName, errno);
      
     else
@@ -684,12 +684,12 @@ BufferedSend (
         if (currentSend < 0)
         {
             LOCAL_DEBUG_PRINTF("Buffered send: Send returned %d", currentSend);
-            return MCEDP_STATUS_INTERNAL_ERROR;
+            return PWNYPOT_STATUS_INTERNAL_ERROR;
         }
         totalSend += currentSend;
     }
     LOCAL_DEBUG_PRINTF("Sent %d bytes\n", totalSend);
-    return MCEDP_STATUS_SUCCESS;
+    return PWNYPOT_STATUS_SUCCESS;
 }
 
 

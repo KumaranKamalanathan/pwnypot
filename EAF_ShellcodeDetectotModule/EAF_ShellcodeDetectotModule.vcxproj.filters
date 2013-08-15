@@ -134,7 +134,7 @@
     <ClCompile Include="Hook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MCEDP_Main.cpp">
+    <ClCompile Include="PwnyPot_Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RopDetection.cpp">
@@ -162,7 +162,7 @@
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MCEDP.rc">
+    <ResourceCompile Include="PwnyPot.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:MCEDP Setup"
+"ProjectName" = "8:PwnyPot Setup"
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
@@ -51,7 +51,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\MCEDP Setup.msi"
+        "OutputFilename" = "8:Debug\\PwnyPot Setup.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -88,7 +88,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\MCEDP Setup.msi"
+        "OutputFilename" = "8:Release\\PwnyPot Setup.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -180,8 +180,8 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_85E61A63420147339428EF7B3F796EBB"
             {
-            "SourcePath" = "8:..\\Release\\MCEDP.exe"
-            "TargetName" = "8:MCEDP.exe"
+            "SourcePath" = "8:..\\Release\\PwnyPot.exe"
+            "TargetName" = "8:PwnyPot.exe"
             "Tag" = "8:"
             "Folder" = "8:_77311911BDAF44F7BA0E552E99172D00"
             "Condition" = "8:"
@@ -238,7 +238,7 @@
                 {
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_E850DA3008EF490A800C2C10657D2F7A"
                     {
-                    "Name" = "8:MCEDP"
+                    "Name" = "8:PwnyPot"
                     "AlwaysCreate" = "11:TRUE"
                     "Condition" = "8:"
                     "Transitive" = "11:FALSE"
@@ -264,7 +264,7 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:MCEDP"
+        "ProductName" = "8:PwnyPot"
         "ProductCode" = "8:{1ECA6E79-ABA4-4331-B4D9-6FE0646F2F91}"
         "PackageCode" = "8:{755BF428-7D61-4422-B232-A22A7442EA8B}"
         "UpgradeCode" = "8:{06133DD0-8CFA-4EE9-8251-C6980C61FE7E}"
@@ -315,7 +315,7 @@
                         {
                             "{60EA8692-D2D5-43EB-80DC-7906BF13D6EF}:_76CCAEFB11064418BFED692B010A2604"
                             {
-                            "Name" = "8:MCEDP"
+                            "Name" = "8:PwnyPot"
                             "Condition" = "8:"
                             "AlwaysCreate" = "11:FALSE"
                             "DeleteAtUninstall" = "11:TRUE"
@@ -368,7 +368,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_718D22B613AA48759EE2A967BE0C13D0"
             {
-            "Name" = "8:MCEDP"
+            "Name" = "8:PwnyPot"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -382,7 +382,7 @@
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_FC74EB2FC34B4BE4A06A5CD69DC89809"
             {
-            "Name" = "8:MCEDP"
+            "Name" = "8:PwnyPot"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -795,7 +795,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_5CFFD9CAFCBB4874B565A79655B5A332"
             {
-            "SourcePath" = "8:..\\Release\\MCEDP.dll"
+            "SourcePath" = "8:..\\Release\\PwnyPot.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_77311911BDAF44F7BA0E552E99172D00"

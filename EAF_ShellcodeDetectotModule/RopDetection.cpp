@@ -14,13 +14,13 @@ ValidateCallAgainstRop(
 {
 	PNT_TIB ThreadInfo;
 	
-	if ( DbgGetRopFlag() == MCEDP_STATUS_ROP_FLAG_NOT_SET )
+	if ( DbgGetRopFlag() == PWNYPOT_STATUS_ROP_FLAG_NOT_SET )
 	{
 		/* get the thread stack range from TIB. */
 		ThreadInfo = (PNT_TIB) __readfsdword( 0x18 );
 
 		/* monitor esp value if we supposed to */
-		if ( MCEDP_REGCONFIG.ROP.STACK_MONITOR )
+		if ( PWNYPOT_REGCONFIG.ROP.STACK_MONITOR )
 		{
 			/* check if thread is passing the actual stack boundaries */
 			if ( lpEspAddress < (DWORD)ThreadInfo->StackLimit || lpEspAddress >= (DWORD)ThreadInfo->StackBase ) 
@@ -32,7 +32,7 @@ ValidateCallAgainstRop(
 		}
 
 		/* Monitor stack page permission change value if we supposed to */
-		if ( MCEDP_REGCONFIG.MEM.STACK_RWX )
+		if ( PWNYPOT_REGCONFIG.MEM.STACK_RWX )
 		{
 			if ( lpAddress > ThreadInfo->StackLimit || lpAddress <= ThreadInfo->StackBase )
 			{
@@ -49,30 +49,30 @@ ValidateCallAgainstRop(
 			}
 		}
 
-		if ( MCEDP_REGCONFIG.ROP.PIVOT_DETECTION )
+		if ( PWNYPOT_REGCONFIG.ROP.PIVOT_DETECTION )
 		{
 			/* NOT IMPLEMENTED */
 		}
 
-		if ( MCEDP_REGCONFIG.ROP.CALL_VALIDATION )
+		if ( PWNYPOT_REGCONFIG.ROP.CALL_VALIDATION )
 		{
 			/* NOT IMPLEMENTED */
 		}
 
-		if ( MCEDP_REGCONFIG.ROP.FORWARD_EXECUTION )
+		if ( PWNYPOT_REGCONFIG.ROP.FORWARD_EXECUTION )
 		{
 			/* NOT IMPLEMENTED */
 		}
 
-		if ( DbgGetRopFlag() == MCEDP_STATUS_ROP_FLAG_SET )
+		if ( DbgGetRopFlag() == PWNYPOT_STATUS_ROP_FLAG_SET )
 		{
-			if ( MCEDP_REGCONFIG.ROP.DUMP_ROP )
+			if ( PWNYPOT_REGCONFIG.ROP.DUMP_ROP )
 			{
 				DEBUG_PRINTF(LROP, NULL, "Trying to dump ROP from ESP at 0x%p and APINumber %d\n",(PVOID)lpEspAddress, RopCallee);
 				DbgReportRop((PVOID)lpEspAddress,RopCallee);
 			}
 
-			if ( MCEDP_REGCONFIG.ROP.KILL_ROP)
+			if ( PWNYPOT_REGCONFIG.ROP.KILL_ROP)
 				TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
 		}
 	}
@@ -91,15 +91,15 @@ DbgSetRopFlag(
 
     /* init log path */
 #ifndef CUCKOO
-    if ( InitLogPath( MCEDP_REGCONFIG.LOG_PATH, MAX_PATH ) != MCEDP_STATUS_SUCCESS )
+    if ( InitLogPath( PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH ) != PWNYPOT_STATUS_SUCCESS )
 	{
     	ERRORINFO err;
 		REPORT_ERROR("InitLogPath()", &err);
-		return MCEDP_STATUS_GENERAL_FAIL;
+		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
 #endif
 
-	return MCEDP_STATUS_SHELLCODE_FLAG_SET;
+	return PWNYPOT_STATUS_SHELLCODE_FLAG_SET;
 }
 
 STATUS
@@ -109,9 +109,9 @@ DbgGetRopFlag(
 {
 	/* get current value of ROP flag */
 	if ( bRopDetected )
-		return MCEDP_STATUS_ROP_FLAG_SET;
+		return PWNYPOT_STATUS_ROP_FLAG_SET;
 
-	return MCEDP_STATUS_ROP_FLAG_NOT_SET;
+	return PWNYPOT_STATUS_ROP_FLAG_NOT_SET;
 }
 
 STATUS
@@ -125,13 +125,13 @@ DbgGetRopModule(
 	DWORD ModuleCount = 0;
 
     /* translate StackPointerAddress to module name */
-	if ( LdrFindEntryForAddress((PVOID)(*(DWORD *)StackPointerAddress), &TableEntry) == MCEDP_STATUS_SUCCESS )
+	if ( LdrFindEntryForAddress((PVOID)(*(DWORD *)StackPointerAddress), &TableEntry) == PWNYPOT_STATUS_SUCCESS )
 	{
 		wcstombs( ModuleFullName, TableEntry->FullDllName.Buffer, dwSize );
-		return MCEDP_STATUS_SUCCESS;
+		return PWNYPOT_STATUS_SUCCESS;
 	} 
 
-	return MCEDP_STATUS_INTERNAL_ERROR;
+	return PWNYPOT_STATUS_INTERNAL_ERROR;
 }
 
 VOID
@@ -188,21 +188,21 @@ DbgReportRop(
 	}
 
     /* Get the module that used for rop gadgets */
-	if ( DbgGetRopModule( lpAddress, szAssciFullModuleName, MAX_MODULE_NAME32) == MCEDP_STATUS_SUCCESS )
+	if ( DbgGetRopModule( lpAddress, szAssciFullModuleName, MAX_MODULE_NAME32) == PWNYPOT_STATUS_SUCCESS )
 	{
 		DEBUG_PRINTF(LROP, NULL, "Rop Module name: %s\n", szAssciFullModuleName);
 		mxmlElementSetAttr( XmlIDLogNode, "module", szAssciFullModuleName);
 	}
 
     /* Dump possible ROP gadgets */
-	if ( MCEDP_REGCONFIG.ROP.DUMP_ROP == TRUE )
+	if ( PWNYPOT_REGCONFIG.ROP.DUMP_ROP == TRUE )
 	{
-		lpAddress = (PVOID)((DWORD_PTR)lpAddress - MCEDP_REGCONFIG.ROP.ROP_MEM_FAR);
+		lpAddress = (PVOID)((DWORD_PTR)lpAddress - PWNYPOT_REGCONFIG.ROP.ROP_MEM_FAR);
 
 		XmlLogNode = CreateXmlElement ( XmlIDLogNode, "rop_gadget");
-		for ( i = 0 ; i <= MCEDP_REGCONFIG.ROP.MAX_ROP_MEM ; i++ , lpAddress = (LPVOID)((DWORD)lpAddress + 4) )
+		for ( i = 0 ; i <= PWNYPOT_REGCONFIG.ROP.MAX_ROP_MEM ; i++ , lpAddress = (LPVOID)((DWORD)lpAddress + 4) )
 		{
-			if ( LdrFindEntryForAddress((PVOID)(*(DWORD *)lpAddress), &TableEntry) == MCEDP_STATUS_SUCCESS )
+			if ( LdrFindEntryForAddress((PVOID)(*(DWORD *)lpAddress), &TableEntry) == PWNYPOT_STATUS_SUCCESS )
 			{
 				/* get module name */
 				wcstombs( szAssciModuleName, TableEntry->FullDllName.Buffer, TableEntry->FullDllName.Length );
@@ -229,7 +229,7 @@ DbgReportRop(
 				if ( (*(ULONG_PTR *)lpAddress) >= (ULONG_PTR)lpCodeSectionAddress && (*(ULONG_PTR *)lpAddress) < ( (ULONG_PTR)lpCodeSectionAddress + dwCodeSectionSize ) )
 				{
 
-					if ( ShuDisassmbleRopInstructions( (PVOID)(*(ULONG_PTR *)lpAddress), szRopInst, MCEDP_REGCONFIG.ROP.MAX_ROP_INST ) == MCEDP_STATUS_SUCCESS )
+					if ( ShuDisassmbleRopInstructions( (PVOID)(*(ULONG_PTR *)lpAddress), szRopInst, PWNYPOT_REGCONFIG.ROP.MAX_ROP_INST ) == PWNYPOT_STATUS_SUCCESS )
 					{
 						XmlLogNode = CreateXmlElement ( XmlIDLogNode, "rop_gadget");
 						mxmlElementSetAttrf(XmlLogNode, "offset", "0x%p", (*(ULONG_PTR *)lpAddress - (ULONG_PTR)TableEntry->DllBase));

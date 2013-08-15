@@ -5,11 +5,11 @@
 #include "LogInfo.h"
 #include "inih\ini.h"
 
-#define APP_CONFIG_KEY			"Software\\MCEDP\\Applications\\"
-#define MAIN_CONFIG_KEY			"Software\\MCEDP"
+#define APP_CONFIG_KEY			"Software\\PwnyPot\\Applications\\"
+#define MAIN_CONFIG_KEY			"Software\\PwnyPot"
 #define MATCH_CONF(s, n)		_stricmp(s, n) == 0
 
-typedef struct _MCEDPREGCONFIG
+typedef struct _PWNYPOTREGCONFIG
 {
 	BOOL PROCESS_HOOKED;						// IMPLEMENTED
 	BOOL SKIP_HBP_ERROR;						// IMPLEMENTED
@@ -20,7 +20,7 @@ typedef struct _MCEDPREGCONFIG
 #ifndef CUCKOO    
 	CHAR APP_PATH_HASH[MAX_PATH];   			// IMPLEMENTED
 	CHAR APP_PATH[MAX_PATH];					// IMPLEMENTED
-	CHAR MCEDP_MODULE_PATH[MAX_PATH];			// IMPLEMENTED
+	CHAR PWNYPOT_MODULE_PATH[MAX_PATH];			// IMPLEMENTED
 #else
 	CHAR RESULT_SERVER_IP[MAX_PATH];			// IMPLEMENTED
 	DWORD RESULT_SERVER_PORT;					// IMPLEMENTED
@@ -69,22 +69,22 @@ typedef struct _MCEDPREGCONFIG
 		BOOL ALLOW_MALWARE_EXEC;				// IMPLEMENTED
 	} GENERAL;
 
-} MCEDPREGCONFIG, *PMCEDPREGCONFIG;
+} PWNYPOTREGCONFIG, *PPWNYPOTREGCONFIG;
 
-extern MCEDPREGCONFIG MCEDP_REGCONFIG;
+extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 
 extern HMODULE hGlobalDllHandle;
 
 #ifndef CUCKOO
 STATUS
 ParseRegConfig(
-	OUT PMCEDPREGCONFIG pMcedpRegConfig,
+	OUT PPWNYPOTREGCONFIG pMcedpRegConfig,
 	IN PCHAR szAppPathHash,
 	IN DWORD Size
 	);
 #else
 STATUS
 ParseConfig(
-	OUT PMCEDPREGCONFIG pMcedpRegConfig
+	OUT PPWNYPOTREGCONFIG pPwnyPotRegConfig
 	);
 #endif

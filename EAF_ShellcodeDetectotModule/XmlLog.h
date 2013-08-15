@@ -2,7 +2,7 @@
 #include "LogInfo.h"
 #include "ParseConfig.h"
 
-extern MCEDPREGCONFIG MCEDP_REGCONFIG;
+extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 typedef mxml_node_t XMLNODE;
 typedef mxml_node_t* PXMLNODE;
 
