@@ -146,7 +146,7 @@ HookedCreateThread(
 	 if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_NOT_SET )
 	 {
 		 phd					= (PHWBREAKDATA)LocalAlloc(LMEM_ZEROINIT, sizeof(HWBREAKDATA));
-		 phd->Address			= PeGetExportDirectoryRVAddress(GetModuleHandle(PWNYPOT_REGCONFIG.SHELLCODE.ETAF_MODULE));
+		 phd->Address			= PeGetExportDirectoryRVAddress(GetModuleHandle(PWNYPOT_REGCONFIG.SHELLCODE.ETA_MODULE));
 		 phd->dwCondition		= HW_ACCESS;				/* Breakpoint type */
 		 phd->dwSize			= 4;						/* Breakpoint size */
 		 phd->dwThreadStatus	= THREAD_ALREADY_SUSPEND;	/* this means BreakSetup() does't need to suspend thread */

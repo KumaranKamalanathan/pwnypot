@@ -207,7 +207,7 @@ DbgEnableExportAddressFiltering(
 	/* Get current Process Id and initialize the PHWBREAKDATA structure. */
 	dwCurrentPid		= GetCurrentProcessId();
 	phd					= (PHWBREAKDATA)LocalAlloc(LMEM_ZEROINIT, sizeof(HWBREAKDATA));
-	phd->Address		= PeGetExportDirectoryRVAddress(GetModuleHandle(PWNYPOT_REGCONFIG.SHELLCODE.ETAF_MODULE));
+	phd->Address		= PeGetExportDirectoryRVAddress(GetModuleHandle(PWNYPOT_REGCONFIG.SHELLCODE.ETA_MODULE));
 	phd->dwCondition	= HW_ACCESS;	/* Breakpoint Type */
 	phd->dwSize			= 4;			/* Breakpoint size */
 	phd->dwThreadStatus	= 0;			

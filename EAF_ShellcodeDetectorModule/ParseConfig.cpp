@@ -132,7 +132,7 @@ ParseRegConfig(
 			}					
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "EtaModules") ) 
 			{
-				strncpy( pPwnyPotRegConfig->SHELLCODE.ETAF_MODULE, (const char*)AppRegConfig[i].ve_valueptr, MAX_MODULE_NAME32 );
+				strncpy( pPwnyPotRegConfig->SHELLCODE.ETA_MODULE, (const char*)AppRegConfig[i].ve_valueptr, MAX_MODULE_NAME32 );
 			}			
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "MalwareExecution") ) 
 			{
@@ -430,8 +430,8 @@ ParseConfig(
         	    else if(!strcmp(key, "eta_validation ")) {
                     pPwnyPotRegConfig->SHELLCODE.ETA_VALIDATION = atoi(value);
                 }
-        	    else if(!strcmp(key, "etaf_module ")) {
-					strncpy( pPwnyPotRegConfig->SHELLCODE.ETAF_MODULE, value, MAX_MODULE_NAME32 );	
+        	    else if(!strcmp(key, "eta_module ")) {
+					strncpy( pPwnyPotRegConfig->SHELLCODE.ETA_MODULE, value, MAX_MODULE_NAME32 );	
                 }
         	    else if(!strcmp(key, "kill_shellcode ")) {
                     pPwnyPotRegConfig->SHELLCODE.KILL_SHELLCODE = atoi(value);

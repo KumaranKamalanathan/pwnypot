@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PwnyPot", "EAF_ShellcodeDetectotModule\EAF_ShellcodeDetectotModule.vcxproj", "{6876AF38-B569-487D-A17F-469A43F21A70}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PwnyPot", "EAF_ShellcodeDetectotModule\EAF_ShellcodeDetectorModule.vcxproj", "{6876AF38-B569-487D-A17F-469A43F21A70}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PwnyPot Setup", "PwnyPot Setup\PwnyPot Setup.vdproj", "{E10DF065-8C8A-4633-BF0E-D0F2197198AD}"
 EndProject
