@@ -16,6 +16,13 @@ extern "C" /* ROP detection hooks */
 	PVOID MapViewOfFileEx_ = (PVOID)MapViewOfFileEx;
 	/* static  HANDLE (WINAPI *HeapCreate_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
 	PVOID HeapCreate_ = (PVOID)HeapCreate;
+	/* static  HANDLE (WINAPI *WriteProcessMemory_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
+	//PVOID WriteProcessMemory_ = (PVOID)WriteProcessMemory;
+	/* static  HANDLE (WINAPI *SetProcessDEPPolicy_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
+	PVOID SetProcessDEPPolicy_ = (PVOID)SetProcessDEPPolicy;
+	/* static  HANDLE (WINAPI *NtSetInformationProcess_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
+	PVOID NtSetInformationProcess_ = (PVOID)NtSetInformationProcess;
+
 }
 
 STATUS
@@ -43,6 +50,9 @@ HookInstall(
 		DetourAttach(&(PVOID&)MapViewOfFile_			, HookedMapViewOfFile);
 		DetourAttach(&(PVOID&)MapViewOfFileEx_			, HookedMapViewOfFileEx);
 		DetourAttach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
+		/*DetourAttach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);
+		DetourAttach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);
+		DetourAttach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);*/
 	}
 
     /* Hook CreateThread if ETA_VALIDATION protection is set on */
@@ -101,6 +111,9 @@ HookUninstall(
 		DetourDetach(&(PVOID&)MapViewOfFile_			, HookedMapViewOfFile);
 		DetourDetach(&(PVOID&)MapViewOfFileEx_			, HookedMapViewOfFileEx);
 		DetourDetach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
+		/*DetourDetach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);
+		DetourDetach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);
+		DetourDetach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);*/
 	}
 
 	if ( PWNYPOT_REGCONFIG.SHELLCODE.ETA_VALIDATION )

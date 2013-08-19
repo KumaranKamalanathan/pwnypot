@@ -12,14 +12,16 @@ extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
 
 typedef enum _ROP_CALLEE { 
-	CalleeVirtualAlloc          = 0,
-	CalleeVirtualAllocEx        = 1,
-	CalleeVirtualProtect        = 2,
-	CalleeVirtualProtectEx      = 3,
-	CalleeMapViewOfFile         = 4,
-	CalleeMapViewOfFileEx		= 5,
-	CalleeHeapCreate			= 6,
-	CalleeWriteProcessMemory	= 7,
+	CalleeVirtualAlloc      	    = 0,
+	CalleeVirtualAllocEx  	    	= 1,
+	CalleeVirtualProtectEx       	= 2,
+	CalleeVirtualProtectEx      	= 3,
+	CalleeMapViewOfFile     	    = 4,
+	CalleeMapViewOfFileEx			= 5,
+	CalleeHeapCreate				= 6,
+	CalleeWriteProcessMemory		= 7,
+	CalleeSetProcessDEPPolicy 		= 8,
+	CalleeNtSetInformationProcess 	= 9,
 } ROP_CALLEE;
 
 extern "C"
