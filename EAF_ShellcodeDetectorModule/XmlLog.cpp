@@ -142,7 +142,7 @@ SaveXml(
 
 	strncpy(szLogDir, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogDir, "\\", MAX_PATH);
-	sprintf(szFileName, "%u_ShellcodeAnalysis.xml", GetCurrentProcessId(),MAX_PATH);
+	sprintf(szFileName, "%u_ShellcodeAnalysis", GetCurrentProcessId(),MAX_PATH);
 	strncat(szLogDir, szFileName , MAX_PATH);
 
 
@@ -171,14 +171,14 @@ SaveXml(
 
     }
 
-	sprintf(szFileName, "logs/%u_ShellcodeAnalysis.xml", GetCurrentProcessId(), MAX_PATH);
+	sprintf(szFileName, "logs/%u_ShellcodeAnalysis", GetCurrentProcessId(), MAX_PATH);
     if ( TransmitBufAsFile(szBuf, szFileName) != PWNYPOT_STATUS_SUCCESS ) 
     {
-    	LOCAL_DEBUG_PRINTF ( "Error on transmission of file ShellcodeAnalysis.xml\n" );
+    	LOCAL_DEBUG_PRINTF ( "Error on transmission of file ShellcodeAnalysis\n" );
     	return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
     else 
-    	LOCAL_DEBUG_PRINTF ( "Successfully transmitted ShellcodeAnalysis.xml\n" );
+    	LOCAL_DEBUG_PRINTF ( "Successfully transmitted ShellcodeAnalysis\n" );
 
 #endif 
 

@@ -78,7 +78,7 @@ extern HMODULE hGlobalDllHandle;
 #ifndef CUCKOO
 STATUS
 ParseRegConfig(
-	OUT PPWNYPOTREGCONFIG pMcedpRegConfig,
+	OUT PPWNYPOTREGCONFIG pPwnyPotRegConfig,
 	IN PCHAR szAppPathHash,
 	IN DWORD Size
 	);

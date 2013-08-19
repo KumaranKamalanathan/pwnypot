@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by MCEDP.rc
+// Used by PwnyPot.rc
 
 // Next default values for new objects
 // 

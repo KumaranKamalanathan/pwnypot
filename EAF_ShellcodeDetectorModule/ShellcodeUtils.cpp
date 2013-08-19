@@ -56,7 +56,7 @@ ShuDumpShellcode(
 	}
 
 #ifndef CUCKOO
-	sprintf(szShellcodeFile, "%u_Shellcode.bin", GetCurrentProcessId(), MAX_PATH);
+	sprintf(szShellcodeFile, "%u_ShellcodeBin", GetCurrentProcessId(), MAX_PATH);
 	strncpy( szLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeFile, MAX_PATH);
@@ -91,12 +91,12 @@ ShuDumpShellcode(
     
 
 #else 
-	sprintf(szShellcodeFile, "logs/%u_Shellcode.bin", GetCurrentProcessId(), MAX_PATH);
+	sprintf(szShellcodeFile, "logs/%u_ShellcodeBin", GetCurrentProcessId(), MAX_PATH);
 	if ( TransmitBufAsFile((char*)ShellcodeDump, szShellcodeFile) != PWNYPOT_STATUS_SUCCESS)
-    	DEBUG_PRINTF (LSHL, NULL, "Error on transmission of file Shellcode.bin\n");
+    	DEBUG_PRINTF (LSHL, NULL, "Error on transmission of file ShellcodeBin\n");
 
 	else 
-    	DEBUG_PRINTF (LSHL, NULL, "Successfully transmitted Shellcode.bin\n");
+    	DEBUG_PRINTF (LSHL, NULL, "Successfully transmitted ShellcodeBin\n");
 
 #endif	
     DEBUG_PRINTF(LSHL, NULL, "Shellcode Dumped from (0x%p -- 0x%p) Size ( 0x%p )\n", lpStartAddress, lpEndAddress, ((DWORD)lpEndAddress - (DWORD)lpStartAddress));
