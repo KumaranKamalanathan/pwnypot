@@ -188,12 +188,14 @@ DbgReportRop(
 	case CalleeWriteProcessMemory:
 		mxmlElementSetAttr( XmlIDLogNode, "function", "WriteProcessMemory");
 		break;
+/*
 	case CalleeSetProcessDEPPolicy:
 		mxmlElementSetAttr( XmlIDLogNode, "function", "SetProcessDEPPolicy");
 		break;
 	case CalleeNtSetInformationProcess:
 		mxmlElementSetAttr( XmlIDLogNode, "function", "NtSetInformationProcess");
 		break;
+*/
 	}
 
     /* Get the module that used for rop gadgets */

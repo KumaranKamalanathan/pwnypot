@@ -139,7 +139,7 @@ ShuDisassembleShellcode(
 	DecodedInstructions = (_DecodedInst *)LocalAlloc(LMEM_ZEROINIT, MAX_INSTRUCTIONS * sizeof(_DecodedInst));
 
 #ifndef CUCKOO
-	sprintf(szShellcodeDisassFile, "%d_ShellcodeDisass.txt",GetCurrentProcessId(), MAX_PATH);
+	sprintf(szShellcodeDisassFile, "%d_ShellcodeDisass",GetCurrentProcessId(), MAX_PATH);
 	strncpy( szLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogPath, "\\", MAX_PATH);
 	strncat(szLogPath, szShellcodeDisassFile, MAX_PATH);
@@ -209,7 +209,7 @@ ShuDisassembleShellcode(
 	fclose(ShellcodeFile);
 #else	
 
-	sprintf(szLogPath, "logs/%d_ShellcodeDisass.txt", GetCurrentProcessId(), MAX_PATH);
+	sprintf(szLogPath, "logs/%d_ShellcodeDisass", GetCurrentProcessId(), MAX_PATH);
 	if ( TransmitBufAsFile(szDisassembled, szLogPath) != PWNYPOT_STATUS_SUCCESS )
 	{
     	LOCAL_DEBUG_PRINTF ("Error on transmission of file ShellcodeDisass.txt\n");

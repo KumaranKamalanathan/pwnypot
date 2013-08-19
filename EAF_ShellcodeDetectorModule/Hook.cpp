@@ -19,9 +19,9 @@ extern "C" /* ROP detection hooks */
 	/* static  HANDLE (WINAPI *WriteProcessMemory_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
 	//PVOID WriteProcessMemory_ = (PVOID)WriteProcessMemory;
 	/* static  HANDLE (WINAPI *SetProcessDEPPolicy_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
-	PVOID SetProcessDEPPolicy_ = (PVOID)SetProcessDEPPolicy;
+	//PVOID SetProcessDEPPolicy_ = (PVOID)SetProcessDEPPolicy;
 	/* static  HANDLE (WINAPI *NtSetInformationProcess_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
-	PVOID NtSetInformationProcess_ = (PVOID)NtSetInformationProcess;
+	//PVOID NtSetInformationProcess_ = (PVOID)NtSetInformationProcess;
 
 }
 

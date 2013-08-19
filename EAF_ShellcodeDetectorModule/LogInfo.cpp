@@ -184,7 +184,6 @@ HexDumpToFile(
    strncpy( szFullLogPath, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH );
    strncat(szFullLogPath, "\\", MAX_PATH);
    strncat(szFullLogPath, szFileName, MAX_PATH);
-   strncat(szFullLogPath, ".txt", MAX_PATH);
 
     fp = fopen(szFullLogPath, "a");
     if ( fp == NULL )
@@ -347,7 +346,7 @@ VOID LOCAL_DEBUG_PRINTF (
     strncpy( szFullLogPath, PWNYPOT_REGCONFIG.DBG_LOG_PATH, MAX_PATH );
     sprintf(szPid, "\\%u_", GetCurrentProcessId(), MAX_PATH);
     strncat( szFullLogPath, szPid, MAX_PATH);
-    strncat( szFullLogPath, "LogInfo.txt", MAX_PATH);
+    strncat( szFullLogPath, "LogInfo", MAX_PATH);
 
     fflush(stdout);
     fflush(stderr);
@@ -451,7 +450,7 @@ InitCuckooLogs ()
     if ( bLogPathInitSuccess )
         return PWNYPOT_STATUS_SUCCESS;
     // init LogInfo.txt
-    LogInfoSock = InitFileSocket("LogInfo.txt");
+    LogInfoSock = InitFileSocket("LogInfo");
     if (LogInfoSock==-1){
         return PWNYPOT_STATUS_INTERNAL_ERROR;
     }
@@ -459,13 +458,13 @@ InitCuckooLogs ()
     // init RopDetection.txt
     if(PWNYPOT_REGCONFIG.ROP.DETECT_ROP)
     {
-        LogRopSock = InitFileSocket("RopAnalysis.txt");
+        LogRopSock = InitFileSocket("RopAnalysis");
         if (LogRopSock==-1){
             return PWNYPOT_STATUS_INTERNAL_ERROR;
         }
     }
 
-    LogShellcodeSock = InitFileSocket("LogShellcode.txt");
+    LogShellcodeSock = InitFileSocket("LogShellcode");
     if (LogShellcodeSock==-1){
         return PWNYPOT_STATUS_INTERNAL_ERROR;
     }   
@@ -662,7 +661,7 @@ HexDumpToFile(
 
     strncat(szBuf,"\n", dumpLength);
     memset(szTmp, '\0', tmpLength);
-    sprintf(szTmp, "logs/%d_dump-%s.txt\n", GetCurrentProcessId(), szFileName, tmpLength);    
+    sprintf(szTmp, "logs/%d_dump-%s\n", GetCurrentProcessId(), szFileName, tmpLength);    
 
     if (TransmitBufAsFile(szBuf, szTmp) == PWNYPOT_STATUS_INTERNAL_ERROR) 
         LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szFileName, errno);
