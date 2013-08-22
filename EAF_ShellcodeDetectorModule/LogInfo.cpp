@@ -590,7 +590,7 @@ TransmitBufAsFile (
         }
 
         if( BufferedSend(s, szBuf) == PWNYPOT_STATUS_INTERNAL_ERROR){
-            LOCAL_DEBUG_PRINTF("ERROR: Failed to send hexdump %s. (errno = %d)\n", szRemoteFileName, errno);
+            LOCAL_DEBUG_PRINTF("ERROR: Failed to send file %s. (errno = %d)\n", szRemoteFileName, errno);
             closesocket(s);
             return PWNYPOT_STATUS_INTERNAL_ERROR;            
         }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "ParseConfig.h"
 #include "LogInfo.h"
+#include "Hook.h"
 #pragma once
 
 #define ProcessExecuteFlags				0x22
@@ -11,15 +12,6 @@
 #define NT_SUCCESS(Status)				(((NTSTATUS)(Status)) >= 0)
 
 extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
-
-typedef
-NTSTATUS
-(NTAPI *NtSetInformationProcess_)(
-	__in HANDLE ProcessHandle, 
-	__in ULONG ProcessInformationClass,
-	__in_bcount(ProcessInformationLength) PVOID ProcessInformation,
-	__in ULONG ProcessInformationLength
-	);
 
 typedef
 NTSTATUS

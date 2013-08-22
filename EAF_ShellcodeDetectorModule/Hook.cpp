@@ -18,10 +18,6 @@ extern "C" /* ROP detection hooks */
 	PVOID HeapCreate_ = (PVOID)HeapCreate;
 	/* static  HANDLE (WINAPI *WriteProcessMemory_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
 	//PVOID WriteProcessMemory_ = (PVOID)WriteProcessMemory;
-	/* static  HANDLE (WINAPI *SetProcessDEPPolicy_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
-	//PVOID SetProcessDEPPolicy_ = (PVOID)SetProcessDEPPolicy;
-	/* static  HANDLE (WINAPI *NtSetInformationProcess_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
-	//PVOID NtSetInformationProcess_ = (PVOID)NtSetInformationProcess;
 
 }
 
@@ -33,6 +29,7 @@ HookInstall(
 
 	LONG error;
 	CreateProcessInternalW_ = (BOOL (WINAPI *)(HANDLE, LPCWSTR, LPWSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCWSTR, LPSTARTUPINFOW, LPPROCESS_INFORMATION, PHANDLE))GetProcAddress(GetModuleHandle("KERNEL32.DLL"), "CreateProcessInternalW");
+	NtSetInformationProcess_ = (t_NtSetInformationProcess)(GetProcAddress(GetModuleHandle("NTDLL.DLL"), "NtSetInformationProcess"));
 	DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
@@ -50,9 +47,9 @@ HookInstall(
 		DetourAttach(&(PVOID&)MapViewOfFile_			, HookedMapViewOfFile);
 		DetourAttach(&(PVOID&)MapViewOfFileEx_			, HookedMapViewOfFileEx);
 		DetourAttach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
-		/*DetourAttach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);
 		DetourAttach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);
-		DetourAttach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);*/
+		DetourAttach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);
+		//DetourAttach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);		
 	}
 
     /* Hook CreateThread if ETA_VALIDATION protection is set on */
@@ -96,6 +93,7 @@ HookUninstall(
 {
 	DEBUG_PRINTF(LDBG,NULL,"Uninstalling Hooks\n");
 	CreateProcessInternalW_ = (BOOL (WINAPI *)(HANDLE, LPCWSTR, LPWSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCWSTR, LPSTARTUPINFOW, LPPROCESS_INFORMATION, PHANDLE))GetProcAddress(GetModuleHandle("KERNEL32.DLL"), "CreateProcessInternalW");
+	NtSetInformationProcess_ = (t_NtSetInformationProcess)(GetProcAddress(GetModuleHandle("NTDLL.DLL"), "NtSetInformationProcess"));
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 
@@ -111,9 +109,9 @@ HookUninstall(
 		DetourDetach(&(PVOID&)MapViewOfFile_			, HookedMapViewOfFile);
 		DetourDetach(&(PVOID&)MapViewOfFileEx_			, HookedMapViewOfFileEx);
 		DetourDetach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
-		/*DetourDetach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);
-		DetourDetach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);
-		DetourDetach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);*/
+		DetourDetach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);	
+		DetourDetach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);
+		//DetourDetach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);	
 	}
 
 	if ( PWNYPOT_REGCONFIG.SHELLCODE.ETA_VALIDATION )
@@ -711,4 +709,61 @@ Hookedrecv(
 	}
 
 	return (recv_( s, buf, len, flags));
+}
+
+BOOL
+WINAPI
+HookedSetProcessDEPPolicy(
+	DWORD dwFlags)
+{
+	PXMLNODE XmlIDLogNode;
+	XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
+	mxmlElementSetAttr(XmlIDLogNode, "type", "10");
+	mxmlElementSetAttr(XmlIDLogNode, "api", "SetProcessDEPPolicy");
+	mxmlElementSetAttrf(XmlIDLogNode, "value", "%d", dwFlags);
+	if (PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE) 
+	{
+		SaveXml( XmlLog );
+		return SetProcessDEPPolicy_(dwFlags);
+	}
+	else 
+	{	
+		if (dwFlags == 0)
+		{
+			DEBUG_PRINTF(LSHL, NULL, "Stopping Process because it was trying to disable DEP.\n");
+			SaveXml( XmlLog );
+			TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
+		}
+	}
+}
+
+NTSTATUS
+WINAPI
+HookedNtSetInformationProcess(
+	HANDLE ProcessHandle,
+    ULONG ProcessInformationClass,
+    PVOID ProcessInformation,
+    ULONG ProcessInformationLength )
+{
+	if (ProcessInformationClass == ProcessExecuteFlags){
+		PXMLNODE XmlIDLogNode;
+		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
+		mxmlElementSetAttr(XmlIDLogNode, "type", "10");
+		mxmlElementSetAttr(XmlIDLogNode, "api", "NtSetInformationProcess");
+		mxmlElementSetAttrf(XmlIDLogNode, "value", "0x%p", (*(ULONG_PTR *)ProcessInformation));
+		if (PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE) 
+		{
+			SaveXml( XmlLog );
+			DEBUG_PRINTF(LSHL, NULL, "HookedNtSetInformationProcess is called with ProcessExecuteFlags.\n");
+			return NtSetInformationProcess_(ProcessHandle, ProcessInformationClass, ProcessInformation, ProcessInformationLength);
+		}
+		else 
+		{				 
+			if (((*(ULONG_PTR *)ProcessInformation) & MEM_EXECUTE_OPTION_ENABLE) == 0x2 )
+			{
+				DEBUG_PRINTF(LSHL, NULL, "Stopping Process because it was trying to disable DEP.\n");
+				TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
+			}
+		}
+	}
 }

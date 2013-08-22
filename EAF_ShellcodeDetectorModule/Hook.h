@@ -2,6 +2,7 @@
 #define _WINSOCKAPI_
 #include <WinSock2.h>
 #include <Windows.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <tlhelp32.h> 
 #include <time.h>
@@ -13,9 +14,11 @@
 #include "XmlLog.h"
 #include "RopDetection.h"
 #include "detours\detours.h"
+#include "GeneralProtections.h"
 #pragma comment(lib,"urlmon.lib")
 #pragma comment(lib,"ws2_32.lib")
 #pragma comment(lib,"detours\\detours_nodll.lib")
+#pragma  comment(lib,"advapi32.lib")
 
 static    BOOL (WINAPI *CreateProcessInternalW_ )(HANDLE hToken, LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation, PHANDLE hNewToken);
 static  HANDLE (WINAPI *CreateThread_           )(LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId) = CreateThread;
@@ -29,8 +32,17 @@ static     int (WSAAPI *listen_                 )( SOCKET s, int backlog ) = lis
 static     int (WSAAPI *bind_                   )( SOCKET s, const struct sockaddr *name, int namelen ) = bind;
 static     int (WSAAPI *send_                   )( SOCKET s, const char *buf, int len, int flags ) = send;
 static     int (WSAAPI *recv_                   )( SOCKET s, char *buf, int len, int flags ) = recv;
+static    BOOL (WINAPI *SetProcessDEPPolicy_	)(DWORD dwFlags) = SetProcessDEPPolicy;
+static NTSTATUS(NTAPI  *NtSetInformationProcess_)(HANDLE hProcess, ULONG ProcessInformationClass, __in_bcount(ProcessInformationLength)PVOID ProcessInformation, ULONG ProcessInformationLength);
 
-
+typedef
+NTSTATUS
+(NTAPI *t_NtSetInformationProcess)(
+	__in HANDLE ProcessHandle, 
+	__in ULONG ProcessInformationClass,
+	__in_bcount(ProcessInformationLength) PVOID ProcessInformation,
+	__in ULONG ProcessInformationLength
+	);
 
 extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 extern DWORD dwEaAccessCount;
@@ -249,4 +261,17 @@ Hookedrecv(
 	int flags
 	);
 
+BOOL
+WINAPI 
+HookedSetProcessDEPPolicy(
+	DWORD dwFlags
+	);
 
+NTSTATUS
+WINAPI 
+HookedNtSetInformationProcess(
+	__in HANDLE ProcessHandle,
+    __in ULONG ProcessInformationClass,
+    __in_bcount (ProcessInformationLength) PVOID ProcessInformation,
+    __in ULONG ProcessInformationLength
+	);

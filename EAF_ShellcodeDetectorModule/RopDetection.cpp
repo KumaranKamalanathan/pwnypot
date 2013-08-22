@@ -49,6 +49,9 @@ ValidateCallAgainstRop(
 			}
 		}
 
+		/* check if WriteProcessMemory is live-patched to inject shellcode in executable memory */
+		
+
 		if ( PWNYPOT_REGCONFIG.ROP.PIVOT_DETECTION )
 		{
 			/* NOT IMPLEMENTED */

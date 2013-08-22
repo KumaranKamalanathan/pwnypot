@@ -131,16 +131,6 @@ SetupShellcodeDetector(
 		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
     */
-	/* check if we should enable Permanent DEP mitigation */
-	if ( PWNYPOT_REGCONFIG.GENERAL.PERMANENT_DEP )
-	{
-		if ( EnablePermanentDep() != PWNYPOT_STATUS_SUCCESS )
-		{
-			REPORT_ERROR("EnablePermanentDep()", &err);
-			return PWNYPOT_STATUS_GENERAL_FAIL;
-		}
-	}
-
 	/* check if we should enable NULL Page Allocation Prevention mitigation  */
 	if ( PWNYPOT_REGCONFIG.GENERAL.NULL_PAGE )
 	{
@@ -192,6 +182,16 @@ SetupShellcodeDetector(
 	{
 		DEBUG_PRINTF(LDBG, NULL, "Error in Hooking process!\n");
 		return PWNYPOT_STATUS_GENERAL_FAIL;
+	}
+
+	/* check if we should enable Permanent DEP mitigation */
+	if ( PWNYPOT_REGCONFIG.GENERAL.PERMANENT_DEP )
+	{
+		if ( EnablePermanentDep() != PWNYPOT_STATUS_SUCCESS )
+		{
+			REPORT_ERROR("EnablePermanentDep()", &err);
+			return PWNYPOT_STATUS_GENERAL_FAIL;
+		}
 	}
 
 	DEBUG_PRINTF(LDBG, NULL, "Functions hooked successfully!\n");

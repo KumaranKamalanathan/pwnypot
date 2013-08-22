@@ -7,14 +7,11 @@ EnablePermanentDep(
 {
 	NTSTATUS Status;
 	ULONG ExecuteFlags;
-	NtSetInformationProcess_ NtSetInformationProcess;
-
-	NtSetInformationProcess = (NtSetInformationProcess_)(GetProcAddress(GetModuleHandle("NTDLL.DLL"), "NtSetInformationProcess"));
-	if ( NtSetInformationProcess != NULL )
+	if ( NtSetInformationProcess_ != NULL )
 	{
         /* Set up proper flags, call NtSetInformationProcess to disble RW memory execution and make it permanent */
 		ExecuteFlags = MEM_EXECUTE_OPTION_DISABLE | MEM_EXECUTE_OPTION_PERMANENT;
-		Status = NtSetInformationProcess( GetCurrentProcess(),
+		Status = NtSetInformationProcess_( GetCurrentProcess(),
 										  ProcessExecuteFlags,
 										  &ExecuteFlags,
 										  sizeof(ExecuteFlags));
