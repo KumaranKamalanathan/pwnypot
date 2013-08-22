@@ -50,7 +50,10 @@ ValidateCallAgainstRop(
 		}
 
 		/* check if WriteProcessMemory is live-patched to inject shellcode in executable memory */
-		
+		if (RopCallee == CalleeWriteProcessMemory)
+		{
+			DEBUG_PRINTF(LROP,NULL,"WriteProcessMemory call detected.\n");
+		}
 
 		if ( PWNYPOT_REGCONFIG.ROP.PIVOT_DETECTION )
 		{
@@ -282,7 +285,7 @@ DbgReportRop(
 		}
 	}
 
-	DEBUG_PRINTF(LROP, NULL, "Trying to save ROP gadget XML File\n");
+	DEBUG_PRINTF(LDBG, NULL, "Trying to save ROP gadget XML File\n");
 	SaveXml( XmlLog );
 	LocalFree(szRopInst);
 }

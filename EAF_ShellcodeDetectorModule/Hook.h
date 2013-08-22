@@ -51,7 +51,7 @@ extern PXMLNODE XmlLog;
 extern PXMLNODE XmlShellcode;
 extern int (WSAAPI *TrueConnect		 )( SOCKET s, const struct sockaddr *name, int namelen ) ;
 extern SOCKET (WSAAPI *TrueSocket    )( int af, int type, int protocol );
-extern     int (WSAAPI *TrueSend   )( SOCKET s, const char *buf, int len, int flags );
+extern int (WSAAPI *TrueSend   )( SOCKET s, const char *buf, int len, int flags );
 
 #define INIT_WAIT_TIME 2000
 
@@ -193,6 +193,17 @@ HookedHeapCreate(
 	DWORD flOptions,
 	SIZE_T dwInitialSize,
 	SIZE_T dwMaximumSize
+);
+
+extern "C"
+BOOL
+WINAPI 
+HookedWriteProcessMemory(
+  __in 		HANDLE hProcess,
+  __in 		LPVOID lpBaseAddress,
+  __in 		LPCVOID lpBuffer,
+  __in 		SIZE_T nSize,
+  __out 	SIZE_T *lpNumberOfBytesWritten
 );
 
 SOCKET

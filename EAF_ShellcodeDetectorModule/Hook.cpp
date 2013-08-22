@@ -17,7 +17,7 @@ extern "C" /* ROP detection hooks */
 	/* static  HANDLE (WINAPI *HeapCreate_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
 	PVOID HeapCreate_ = (PVOID)HeapCreate;
 	/* static  HANDLE (WINAPI *WriteProcessMemory_			   )(DWORD flOptions, SIZE_T dwInitialSize, SIZE_T dwMaximumSize) = HeapCreate; */
-	//PVOID WriteProcessMemory_ = (PVOID)WriteProcessMemory;
+	PVOID WriteProcessMemory_ = (PVOID)WriteProcessMemory;
 
 }
 
@@ -721,7 +721,7 @@ HookedSetProcessDEPPolicy(
 	mxmlElementSetAttr(XmlIDLogNode, "type", "10");
 	mxmlElementSetAttr(XmlIDLogNode, "api", "SetProcessDEPPolicy");
 	mxmlElementSetAttrf(XmlIDLogNode, "value", "%d", dwFlags);
-	if (PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE) 
+	if (PWNYPOT_REGCONFIG.ROP.DETECT_ROP) 
 	{
 		SaveXml( XmlLog );
 		return SetProcessDEPPolicy_(dwFlags);
@@ -751,7 +751,7 @@ HookedNtSetInformationProcess(
 		mxmlElementSetAttr(XmlIDLogNode, "type", "10");
 		mxmlElementSetAttr(XmlIDLogNode, "api", "NtSetInformationProcess");
 		mxmlElementSetAttrf(XmlIDLogNode, "value", "0x%p", (*(ULONG_PTR *)ProcessInformation));
-		if (PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE) 
+		if (PWNYPOT_REGCONFIG.ROP.DETECT_ROP) 
 		{
 			SaveXml( XmlLog );
 			DEBUG_PRINTF(LSHL, NULL, "HookedNtSetInformationProcess is called with ProcessExecuteFlags.\n");

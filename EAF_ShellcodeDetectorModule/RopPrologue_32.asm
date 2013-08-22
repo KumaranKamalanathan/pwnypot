@@ -5,13 +5,14 @@ OPTION CASEMAP :NONE
 _ValidateCallAgainstRop PROTO SYSCALL
 
 .FARDATA
-EXTERN VirtualAlloc_	:DWORD
-EXTERN VirtualProtect_	:DWORD
-EXTERN VirtualAllocEx_	:DWORD
-EXTERN VirtualProtectEx_:DWORD
-EXTERN MapViewOfFile_	:DWORD
-EXTERN MapViewOfFileEx_	:DWORD
-EXTERN HeapCreate_		:DWORD
+EXTERN VirtualAlloc_		:DWORD
+EXTERN VirtualProtect_		:DWORD
+EXTERN VirtualAllocEx_		:DWORD
+EXTERN VirtualProtectEx_	:DWORD
+EXTERN MapViewOfFile_		:DWORD
+EXTERN MapViewOfFileEx_		:DWORD
+EXTERN HeapCreate_			:DWORD
+EXTERN WriteProcessMemory_	:DWORD
 
 .CODE
 
@@ -172,5 +173,29 @@ HookedHeapCreate PROC flOptions:DWORD, dwInitialSize:DWORD, dwMaximumSize:DWORD
 	call	HeapCreate_  
 	ret		0Ch 
 HookedHeapCreate ENDP
+
+HookedWriteProcessMemory PROC hProcess:DWORD, lpBaseAddress:DWORD, lpBuffer:DWORD, nSize:DWORD, lpNumberOfBytesWritten:DWORD
+	xor		eax, eax 
+	push	eax
+	mov		ecx, DWORD PTR [lpBaseAddress]  
+	push	ecx
+	push	7
+	lea		edx, [ebp+4]
+	push	edx	; lpEspAddress
+	call	_ValidateCallAgainstRop
+	add		esp, 10h	
+	mov		eax, DWORD PTR [lpNumberOfBytesWritten]  
+	push	eax  	
+	mov		ecx, DWORD PTR [nSize]  
+	push	ecx  	
+	mov		edx, DWORD PTR [lpBuffer]  
+	push	edx  
+	mov		eax, DWORD PTR [lpBaseAddress]  
+	push	eax  
+	mov		ecx, DWORD PTR [hProcess]  
+	push	ecx  
+	call	WriteProcessMemory_  
+	ret		14h 
+HookedWriteProcessMemory ENDP
 
 END
