@@ -49,10 +49,28 @@ ValidateCallAgainstRop(
 			}
 		}
 
-		/* check if WriteProcessMemory is live-patched to inject shellcode in executable memory */
+		/* check if WriteProcessMemory is live-patched to inject shellcode in executable memory 
+		 * offset for code after WriteProcessMemory: 0xbc, address windows xp: 0x7C802213 (after:7C8022CF)
+		 */
 		if (RopCallee == CalleeWriteProcessMemory)
 		{
+			CHAR szModuleName [MAX_MODULE_NAME32];
+			PXMLNODE XmlIDLogNode;
+			PXMLNODE XmlData;
+			XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
+		    mxmlElementSetAttr(XmlIDLogNode, "type", "11");
+		    mxmlElementSetAttrf(XmlIDLogNode, "address", "%p", (*(ULONG_PTR *)lpAddress));
+			XmlData = CreateXmlElement( XmlIDLogNode, "data");
+			mxmlNewText( XmlData, 0, ((CHAR *)lpEspAddress) );	
 			DEBUG_PRINTF(LROP,NULL,"WriteProcessMemory call detected.\n");
+			if(DbgGetRopModule(lpAddress, szModuleName, MAX_MODULE_NAME32) == PWNYPOT_STATUS_SUCCESS)
+			{
+		    	mxmlElementSetAttrf(XmlIDLogNode, "module", "%s", szModuleName);
+			}
+			if( (*(ULONG_PTR *)lpAddress) == 0x7C8022CF || (*(ULONG_PTR *)lpAddress) == 0x7C802213) 
+			{
+		    	mxmlElementSetAttr(XmlIDLogNode, "address_info", "Known WinXP WriteProcessMemory Address used to avoid DEP.");
+			}
 		}
 
 		if ( PWNYPOT_REGCONFIG.ROP.PIVOT_DETECTION )
@@ -160,7 +178,6 @@ DbgReportRop(
 	PXMLNODE XmlSubNode;
 
 	XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
-    // type
     mxmlElementSetAttr(XmlIDLogNode, "type", "0");
 
     // data

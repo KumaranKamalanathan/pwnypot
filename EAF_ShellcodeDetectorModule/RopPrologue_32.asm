@@ -175,7 +175,7 @@ HookedHeapCreate PROC flOptions:DWORD, dwInitialSize:DWORD, dwMaximumSize:DWORD
 HookedHeapCreate ENDP
 
 HookedWriteProcessMemory PROC hProcess:DWORD, lpBaseAddress:DWORD, lpBuffer:DWORD, nSize:DWORD, lpNumberOfBytesWritten:DWORD
-	xor		eax, eax 
+	mov		eax, DWORD PTR [lpBuffer] 
 	push	eax
 	mov		ecx, DWORD PTR [lpBaseAddress]  
 	push	ecx
