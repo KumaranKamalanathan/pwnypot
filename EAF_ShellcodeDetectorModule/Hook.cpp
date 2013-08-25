@@ -49,7 +49,7 @@ HookInstall(
 		DetourAttach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
 		DetourAttach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);
 		DetourAttach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);
-		//DetourAttach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);		
+		DetourAttach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);		
 	}
 
     /* Hook CreateThread if ETA_VALIDATION protection is set on */
@@ -94,6 +94,7 @@ HookUninstall(
 	DEBUG_PRINTF(LDBG,NULL,"Uninstalling Hooks\n");
 	CreateProcessInternalW_ = (BOOL (WINAPI *)(HANDLE, LPCWSTR, LPWSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCWSTR, LPSTARTUPINFOW, LPPROCESS_INFORMATION, PHANDLE))GetProcAddress(GetModuleHandle("KERNEL32.DLL"), "CreateProcessInternalW");
 	NtSetInformationProcess_ = (t_NtSetInformationProcess)(GetProcAddress(GetModuleHandle("NTDLL.DLL"), "NtSetInformationProcess"));
+	LdrHotPatchRoutine_ = (t_LdrHotPatchRoutine)(GetProcAddress(GetModuleHandle("NTDLL.DLL"), "LdrHotPatchRoutine"));
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 
@@ -110,8 +111,9 @@ HookUninstall(
 		DetourDetach(&(PVOID&)MapViewOfFileEx_			, HookedMapViewOfFileEx);
 		DetourDetach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
 		DetourDetach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);	
+		DetourDetach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);	
 		DetourDetach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);
-		//DetourDetach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);	
+		DetourDetach(&(PVOID&)LdrHotPatchRoutine_		, HookedLdrHotPatchRoutine);
 	}
 
 	if ( PWNYPOT_REGCONFIG.SHELLCODE.ETA_VALIDATION )
@@ -766,4 +768,23 @@ HookedNtSetInformationProcess(
 			}
 		}
 	}
+}
+
+VOID 
+NTAPI
+HookedLdrHotPatchRoutine(
+	HotPatchBuffer * s_HotPatchBuffer)
+{
+	PXMLNODE XmlIDLogNode;
+	XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
+	mxmlElementSetAttr(XmlIDLogNode, "type", "10");
+	mxmlElementSetAttr(XmlIDLogNode, "api", "LdrHotPatchRoutine");
+	mxmlElementSetAttr(XmlIDLogNode, "unc_path", "LdrHotPatchRoutine");
+	SaveXml( XmlLog );
+	DEBUG_PRINTF(LSHL, NULL, "HookedLdrHotPatchRoutine called with path: %s, %s", s_HotPatchBuffer->PatcherNameOffset, s_HotPatchBuffer->PatcheeNameOffset);
+	if (PWNYPOT_REGCONFIG.GENERAL->ALLOW_MALWARE_DOWNLOAD)
+	{
+		LdrHotPatchRoutine_(s_HotPatchBuffer);
+	}
+	
 }

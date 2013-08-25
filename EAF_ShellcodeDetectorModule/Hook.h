@@ -20,6 +20,19 @@
 #pragma comment(lib,"detours\\detours_nodll.lib")
 #pragma  comment(lib,"advapi32.lib")
 
+/* parameter struct for LdrHotPatchRoutine as documented in https://docs.google.com/file/d/0B46UFFNOX3K7bl8zWmFvRGVlamM  */
+struct HotPatchBuffer
+{
+    ULONG NotSoSure01;        
+    ULONG NotSoSure02;
+    USHORT PatcherNameOffset;
+    USHORT PatcherNameLen; 
+    USHORT PatcheeNameOffset; 
+	USHORT PatcheeNameLen;    
+	USHORT UnknownNameOffset;
+    USHORT UnknownNameLen;
+};
+
 static    BOOL (WINAPI *CreateProcessInternalW_ )(HANDLE hToken, LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation, PHANDLE hNewToken);
 static  HANDLE (WINAPI *CreateThread_           )(LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId) = CreateThread;
 static HRESULT (WINAPI *URLDownloadToFileW_     )(LPUNKNOWN pCaller, LPCWSTR szURL, LPCWSTR szFileName, DWORD dwReserved, LPBINDSTATUSCALLBACK lpfnCB ) = URLDownloadToFileW;
@@ -34,6 +47,8 @@ static     int (WSAAPI *send_                   )( SOCKET s, const char *buf, in
 static     int (WSAAPI *recv_                   )( SOCKET s, char *buf, int len, int flags ) = recv;
 static    BOOL (WINAPI *SetProcessDEPPolicy_	)(DWORD dwFlags) = SetProcessDEPPolicy;
 static NTSTATUS(NTAPI  *NtSetInformationProcess_)(HANDLE hProcess, ULONG ProcessInformationClass, __in_bcount(ProcessInformationLength)PVOID ProcessInformation, ULONG ProcessInformationLength);
+static    void (NTAPI *LdrHotPatchRoutine_		)(HotPatchBuffer * s_HotPatchBuffer);
+
 
 typedef
 NTSTATUS
@@ -42,6 +57,12 @@ NTSTATUS
 	__in ULONG ProcessInformationClass,
 	__in_bcount(ProcessInformationLength) PVOID ProcessInformation,
 	__in ULONG ProcessInformationLength
+	);
+
+typedef
+VOID
+(NTAPI *t_LdrHotPatchRoutine)(
+	HotPatchBuffer * s_HotPatchBuffer
 	);
 
 extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
@@ -279,10 +300,16 @@ HookedSetProcessDEPPolicy(
 	);
 
 NTSTATUS
-WINAPI 
+NTAPI 
 HookedNtSetInformationProcess(
 	__in HANDLE ProcessHandle,
     __in ULONG ProcessInformationClass,
     __in_bcount (ProcessInformationLength) PVOID ProcessInformation,
     __in ULONG ProcessInformationLength
+	);
+
+VOID
+NTAPI 
+HookedLdrHotPatchRoutine(
+	HotPatchBuffer * s_HotPatchBuffer
 	);
