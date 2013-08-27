@@ -10,6 +10,7 @@
 #include "LogInfo.h"
 #include "ETAV_DebugBreak.h"
 #include "GeneralProtections.h"
+#include "SEHOP.h"
 #include "Hash.h"
 #include <Psapi.h>
 #include <stdlib.h>
@@ -84,6 +85,7 @@ DllMain(
 			return FALSE;
 		}
 #endif
+		DEBUG_PRINTF(LDBG, NULL, "LdrHotPatchRoutine is at %p\n", GetProcAddress(GetModuleHandle("NTDLL32.DLL"), "LdrHotPatchRoutine"));
 		hDetectorThread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)SetupShellcodeDetector, NULL, 0, NULL);
 		if ( hDetectorThread != NULL )
 		{

@@ -756,7 +756,7 @@ HookedNtSetInformationProcess(
 		if (PWNYPOT_REGCONFIG.ROP.DETECT_ROP) 
 		{
 			SaveXml( XmlLog );
-			DEBUG_PRINTF(LSHL, NULL, "HookedNtSetInformationProcess is called with ProcessExecuteFlags.\n");
+			DEBUG_PRINTF(LSHL, NULL, "HookedNtSetInformationProcess is called with ProcessExecuteFlags value: %p.\n", (*(ULONG_PTR *)ProcessInformation) );
 			return NtSetInformationProcess_(ProcessHandle, ProcessInformationClass, ProcessInformation, ProcessInformationLength);
 		}
 		else 
@@ -780,11 +780,17 @@ HookedLdrHotPatchRoutine(
 	mxmlElementSetAttr(XmlIDLogNode, "type", "10");
 	mxmlElementSetAttr(XmlIDLogNode, "api", "LdrHotPatchRoutine");
 	mxmlElementSetAttr(XmlIDLogNode, "unc_path", "LdrHotPatchRoutine");
-	SaveXml( XmlLog );
 	DEBUG_PRINTF(LSHL, NULL, "HookedLdrHotPatchRoutine called with path: %s, %s", s_HotPatchBuffer->PatcherNameOffset, s_HotPatchBuffer->PatcheeNameOffset);
-	if (PWNYPOT_REGCONFIG.GENERAL->ALLOW_MALWARE_DOWNLOAD)
+	if (PWNYPOT_REGCONFIG.SHELLCODE.ALLOW_MALWARE_DOWNLOAD)
 	{
+		mxmlElementSetAttr(XmlIDLogNode, "downloaded_dll", "1");
+		SaveXml( XmlLog );
 		LdrHotPatchRoutine_(s_HotPatchBuffer);
+	}
+	else {
+		mxmlElementSetAttr(XmlIDLogNode, "downloaded_dll", "0");
+		SaveXml( XmlLog );
+		DEBUG_PRINTF(LSHL, NULL, "Denied downloading of library because of ALLOW_MALWARE_DOWNLOAD=0");
 	}
 	
 }

@@ -71,6 +71,7 @@ ValidateCallAgainstRop(
 			{
 		    	mxmlElementSetAttr(XmlIDLogNode, "address_info", "Known WinXP WriteProcessMemory Address used to avoid DEP.");
 			}
+			SaveXml( XmlLog );
 		}
 
 		if ( PWNYPOT_REGCONFIG.ROP.PIVOT_DETECTION )
@@ -273,7 +274,7 @@ DbgReportRop(
         				memset( szTemp, '\0', 1024 );
 						sprintf( szTemp, "%s", szRopInst );	
 						mxmlNewText( XmlSubNode, 0, szTemp );	
-						DEBUG_PRINTF(LROP, NULL, "found rop_inst: %s \n", szTemp);
+						DEBUG_PRINTF(LROP, NULL, "found rop_inst: \n%s \n", szTemp);
 					} 
 					else
 					{

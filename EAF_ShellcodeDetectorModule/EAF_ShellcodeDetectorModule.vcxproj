@@ -177,6 +177,7 @@
     <ClInclude Include="PEUtils.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RopDetection.h" />
+    <ClInclude Include="SEHOP.h" />
     <ClInclude Include="ShellcodeUtils.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="XmlLog.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="ParseConfig.cpp" />
     <ClCompile Include="PEUtils.cpp" />
     <ClCompile Include="RopDetection.cpp" />
+    <ClCompile Include="SEHOP.cpp" />
     <ClCompile Include="ShellcodeUtils.cpp" />
     <ClCompile Include="XmlLog.cpp" />
   </ItemGroup>

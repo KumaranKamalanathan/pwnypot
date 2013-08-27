@@ -6,9 +6,9 @@
 #pragma once
 
 #define ProcessExecuteFlags				0x22
-#define MEM_EXECUTE_OPTION_DISABLE		0x01
-#define MEM_EXECUTE_OPTION_ENABLE		0x02
-#define MEM_EXECUTE_OPTION_PERMANENT	0x08
+#define MEM_EXECUTE_OPTION_DISABLE		0x1
+#define MEM_EXECUTE_OPTION_ENABLE		0x2
+#define MEM_EXECUTE_OPTION_PERMANENT	0x8
 #define NT_SUCCESS(Status)				(((NTSTATUS)(Status)) >= 0)
 
 extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
@@ -39,3 +39,7 @@ STATUS
 EnableHeapSprayProtection(
 	IN PCHAR szHeapAddressArray
 	);
+
+STATUS 
+EnableGlobalSEHOP(
+	VOID);
