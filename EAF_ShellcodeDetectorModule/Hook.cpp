@@ -30,6 +30,7 @@ HookInstall(
 	LONG error;
 	CreateProcessInternalW_ = (BOOL (WINAPI *)(HANDLE, LPCWSTR, LPWSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCWSTR, LPSTARTUPINFOW, LPPROCESS_INFORMATION, PHANDLE))GetProcAddress(GetModuleHandle("KERNEL32.DLL"), "CreateProcessInternalW");
 	NtSetInformationProcess_ = (t_NtSetInformationProcess)(GetProcAddress(GetModuleHandle("NTDLL.DLL"), "NtSetInformationProcess"));
+	LdrHotPatchRoutine_ = (t_LdrHotPatchRoutine)(GetProcAddress(GetModuleHandle("NTDLL.DLL"), "LdrHotPatchRoutine"));
 	DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
@@ -49,7 +50,8 @@ HookInstall(
 		DetourAttach(&(PVOID&)HeapCreate_				, HookedHeapCreate);
 		DetourAttach(&(PVOID&)SetProcessDEPPolicy_		, HookedSetProcessDEPPolicy);
 		DetourAttach(&(PVOID&)NtSetInformationProcess_	, HookedNtSetInformationProcess);
-		DetourAttach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);		
+		DetourAttach(&(PVOID&)WriteProcessMemory_		, HookedWriteProcessMemory);
+		DetourAttach(&(PVOID&)LdrHotPatchRoutine_		, HookedLdrHotPatchRoutine);		
 	}
 
     /* Hook CreateThread if ETA_VALIDATION protection is set on */
@@ -230,7 +232,6 @@ HookedCreateProcessInternalW(
 	)
 {
 	BOOL bReturn;
-	CHAR szDllFullPath[MAX_PATH];
 
 	/* apply config rules if shellcode or ROP detected */
 	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == PWNYPOT_STATUS_ROP_FLAG_SET )
@@ -359,7 +360,6 @@ HookedURLDownloadToFileW(
 	{
 		CHAR *szUrlA			= (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 		CHAR *szFileNameA		= (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
-		PXMLNODE XmlLogNode;
 		PXMLNODE XmlIDLogNode;
 
 		if ( szURL != NULL )
@@ -737,6 +737,7 @@ HookedSetProcessDEPPolicy(
 			TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
 		}
 	}
+	return 0;
 }
 
 NTSTATUS
@@ -768,6 +769,7 @@ HookedNtSetInformationProcess(
 			}
 		}
 	}
+	return 0;
 }
 
 VOID 

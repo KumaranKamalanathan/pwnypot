@@ -543,7 +543,6 @@ TransmitBufAsFile (
 {
     SOCKET s;
     WSADATA wsadata;
-    CHAR szFullPath[MAX_PATH];
     
     int error = WSAStartup(MAKEWORD(2, 2), &wsadata);
     if (error)
@@ -609,7 +608,6 @@ HexDumpToFile(
 {
     UINT dp, p;
     SOCKET s;
-    WSADATA wsadata;
     const UINT dumpLength = 65536;
     const int tmpLength = 1024;
     CHAR szBuf[dumpLength];
