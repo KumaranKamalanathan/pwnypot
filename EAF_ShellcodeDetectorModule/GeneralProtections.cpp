@@ -76,12 +76,3 @@ EnableHeapSprayProtection(
 
 	return PWNYPOT_STATUS_SUCCESS;
 }
-
-STATUS 
-EnableGlobalSEHOP(
-	VOID
-	)
-{
-	
-	return PWNYPOT_STATUS_SUCCESS;	
-}

@@ -73,7 +73,7 @@ extern int (WSAAPI *TrueConnect		 )( SOCKET s, const struct sockaddr *name, int 
 extern SOCKET (WSAAPI *TrueSocket    )( int af, int type, int protocol );
 extern int (WSAAPI *TrueSend   )( SOCKET s, const char *buf, int len, int flags );
 
-#define INIT_WAIT_TIME 1000
+#define INIT_WAIT_TIME 2000
 
 STATUS
 HookInstall(

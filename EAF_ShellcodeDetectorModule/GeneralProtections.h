@@ -39,7 +39,3 @@ STATUS
 EnableHeapSprayProtection(
 	IN PCHAR szHeapAddressArray
 	);
-
-STATUS 
-EnableGlobalSEHOP(
-	VOID);

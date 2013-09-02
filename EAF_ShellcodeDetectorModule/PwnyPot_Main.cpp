@@ -195,6 +195,17 @@ SetupShellcodeDetector(
 		}
 	}
 
+	/* enable SEHOP for this process? */
+	if ( PWNYPOT_REGCONFIG.GENERAL.SEHOP )
+	{
+		if ( EnableSEHOP() != PWNYPOT_STATUS_SUCCESS )
+		{
+			DEBUG_PRINTF(LDBG, NULL, "Error occured in EnableSEHOP()\n");
+			return PWNYPOT_STATUS_GENERAL_FAIL;
+		}
+		DEBUG_PRINTF(LDBG, NULL, "SEHOP enabled for this process.\n");
+	}
+
 	DEBUG_PRINTF(LDBG, NULL, "Functions hooked successfully!\n");
 	return PWNYPOT_STATUS_SUCCESS;
 }

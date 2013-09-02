@@ -684,7 +684,7 @@ BufferedSend (
             return PWNYPOT_STATUS_INTERNAL_ERROR;
         }
         totalSend += currentSend;
-    LOCAL_DEBUG_PRINTF("Continuing sending. Setn %d/%d bytes\n", totalSend, strlen(szBuf));
+    LOCAL_DEBUG_PRINTF("Continuing sending. Sent %d/%d bytes\n", totalSend, strlen(szBuf));
     }
     LOCAL_DEBUG_PRINTF("Sent %d bytes\n", totalSend);
     return PWNYPOT_STATUS_SUCCESS;

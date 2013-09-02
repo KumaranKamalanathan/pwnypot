@@ -411,6 +411,7 @@ ParseConfig(
                 }
         	    else if(!strcmp(key, "sehop ")) {
                     pPwnyPotRegConfig->GENERAL.SEHOP = atoi(value);
+                    LOCAL_DEBUG_PRINTF("SEHOP %s.\n",value);
                 }
         	    else if(!strcmp(key, "null_page ")) {
                     pPwnyPotRegConfig->GENERAL.NULL_PAGE = atoi(value);
