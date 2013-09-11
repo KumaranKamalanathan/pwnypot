@@ -1,3 +1,4 @@
+#pragma once
 #include <Windows.h>
 #include "ParseConfig.h"
 #include "Hook.h"
@@ -5,7 +6,6 @@
 #define PROCESS_EXECUTE_FLAG 0x22
 #define SEHOP_FLAG 0x40
 
-#pragma once
 
 typedef
 NTSTATUS (NTAPI *t_NtQueryInformationProcess)(
@@ -35,3 +35,24 @@ STATUS
 EnablePwnyPotSEHOP (
     VOID
     );
+
+STATUS
+VerifyExceptionChain (
+    VOID
+    );
+
+unsigned int 
+GetByte(
+    LPVOID address, 
+    int byte
+    );
+
+struct EXCEPTION_REGISTRATION
+{
+   EXCEPTION_REGISTRATION *prev;
+   DWORD handler;
+};
+
+extern "C" {
+    void ValidateExceptionChain(void);
+}   

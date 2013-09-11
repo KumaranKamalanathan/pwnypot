@@ -230,6 +230,18 @@
     </MASM>
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="ExceptionChainValidation.asm">
+      <ObjectFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFile>
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="ExceptionChainValidation.asm">
+      <ObjectFile Condition="'$(Configuration)|$(Platform)'=='CuckooDebug|Win32'">$(IntDir)</ObjectFile>
+      <FileType>Document</FileType>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="PwnyPot.rc" />
   </ItemGroup>
   <ItemGroup>

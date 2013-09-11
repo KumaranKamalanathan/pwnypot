@@ -168,6 +168,11 @@
     </MASM>
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="ExceptionChainValidation.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="PwnyPot.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
