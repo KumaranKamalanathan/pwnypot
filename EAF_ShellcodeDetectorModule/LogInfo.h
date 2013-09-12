@@ -51,6 +51,7 @@ typedef struct _ERRORINFO {
 	CHAR	*CompletErrorMsg;
 } ERRORINFO, *PERRORINFO; 
 
+extern "C"
 VOID 
 DEBUG_PRINTF(
 	IN DWORD dwType,

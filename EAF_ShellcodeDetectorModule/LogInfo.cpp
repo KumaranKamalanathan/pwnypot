@@ -223,6 +223,7 @@ HexDumpToFile(
     return;
 }
 
+extern "C"
 VOID 
 DEBUG_PRINTF(
     IN DWORD dwType,
@@ -276,6 +277,7 @@ DEBUG_PRINTF(
 
 #else 
 
+extern "C"
 VOID 
 DEBUG_PRINTF(
     IN DWORD dwType,
