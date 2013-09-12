@@ -6,18 +6,18 @@ EnableSEHOP(
     )
 {
     BOOL bIsVista = IsWindowsVistaOrLater();
-    /* if below Vista, enable PwnyPot SEHOP */
+    /* if Vista or newer, enable Native SEHOP of the Process*/
     if (bIsVista) 
     {
-        DEBUG_PRINTF(LDBG, NULL, "Trying to enable PwnyPot SEHOP\n");
-        return EnablePwnyPotSEHOP();
-    }
-
-    /* if Vista or newer, enable Native SEHOP of the Process*/
-    else 
-    {   
         DEBUG_PRINTF(LDBG, NULL, "Trying to enable native SEHOP\n");
         return EnableNativeSEHOP();
+    }
+
+    /* if below Vista, enable PwnyPot SEHOP */
+    else 
+    {   
+        DEBUG_PRINTF(LDBG, NULL, "Trying to enable PwnyPot SEHOP\n");
+        return EnablePwnyPotSEHOP();
     } 
 }
 
@@ -150,8 +150,6 @@ EnablePwnyPotSEHOP (
 
         /* Address in KiUserExceptionDispatcher after overwritten Prologue */
         JmpBackAddress = ((unsigned int)KiUserExceptionDispatcher+8);
-        unsigned char bytes2 [bytes_to_read];
-        ReadProcessMemory(GetCurrentProcess(), KiUserExceptionDispatcher, (LPVOID)bytes2, bytes_to_read, &bytes_read);
         return PWNYPOT_STATUS_SUCCESS;
     }
     return PWNYPOT_STATUS_GENERAL_FAIL;

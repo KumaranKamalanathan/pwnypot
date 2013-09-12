@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include "ParseConfig.h"
+#include "LogInfo.h"
 #include "Hook.h"
 
 #define PROCESS_EXECUTE_FLAG 0x22
@@ -33,11 +34,6 @@ EnableNativeSEHOP (
 
 STATUS
 EnablePwnyPotSEHOP (
-    VOID
-    );
-
-STATUS
-VerifyExceptionChain (
     VOID
     );
 
