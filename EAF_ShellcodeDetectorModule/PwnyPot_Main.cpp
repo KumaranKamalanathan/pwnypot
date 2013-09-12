@@ -132,6 +132,19 @@ SetupShellcodeDetector(
 		return PWNYPOT_STATUS_GENERAL_FAIL;
 	}
     */
+
+
+	/* enable SEHOP for this process? */
+	if ( PWNYPOT_REGCONFIG.GENERAL.SEHOP )
+	{
+		if ( EnableSEHOP() != PWNYPOT_STATUS_SUCCESS )
+		{
+			DEBUG_PRINTF(LDBG, NULL, "Error occured in EnableSEHOP()\n");
+			return PWNYPOT_STATUS_GENERAL_FAIL;
+		}
+		DEBUG_PRINTF(LDBG, NULL, "SEHOP enabled for this process.\n");
+	}
+
 	/* check if we should enable NULL Page Allocation Prevention mitigation  */
 	if ( PWNYPOT_REGCONFIG.GENERAL.NULL_PAGE )
 	{
@@ -147,7 +160,7 @@ SetupShellcodeDetector(
 	{
 		if ( EnableHeapSprayProtection(PWNYPOT_REGCONFIG.GENERAL.HEAP_SPRAY_ADDRESS) != PWNYPOT_STATUS_SUCCESS )
 		{
-			REPORT_ERROR("EnableNullPageProtection()", &err);
+			REPORT_ERROR("EnableHeapSprayProtection()", &err);
 			return PWNYPOT_STATUS_GENERAL_FAIL;
 		}
 	}
@@ -193,17 +206,6 @@ SetupShellcodeDetector(
 			REPORT_ERROR("EnablePermanentDep()", &err);
 			return PWNYPOT_STATUS_GENERAL_FAIL;
 		}
-	}
-
-	/* enable SEHOP for this process? */
-	if ( PWNYPOT_REGCONFIG.GENERAL.SEHOP )
-	{
-		if ( EnableSEHOP() != PWNYPOT_STATUS_SUCCESS )
-		{
-			DEBUG_PRINTF(LDBG, NULL, "Error occured in EnableSEHOP()\n");
-			return PWNYPOT_STATUS_GENERAL_FAIL;
-		}
-		DEBUG_PRINTF(LDBG, NULL, "SEHOP enabled for this process.\n");
 	}
 
 	DEBUG_PRINTF(LDBG, NULL, "Functions hooked successfully!\n");
