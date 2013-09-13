@@ -250,7 +250,7 @@ HookedCreateProcessInternalW(
 
 			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 			/* type */
-			mxmlElementSetAttr(XmlIDLogNode, "type", "1");
+			mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_EXEC);
 			mxmlElementSetAttr(XmlIDLogNode, "exec_process", szApplicationNameA);
 			mxmlElementSetAttr(XmlIDLogNode, "exec_cmd", szCommandLineA);
 			/* save */
@@ -370,7 +370,7 @@ HookedURLDownloadToFileW(
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		/* type */
-		mxmlElementSetAttr(XmlIDLogNode, "type", "2");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_DL2FILE);
 		mxmlElementSetAttr(XmlIDLogNode, "download_url", (PCHAR)szUrlA);
 		mxmlElementSetAttr(XmlIDLogNode, "download_filename", (PCHAR)szFileNameA);
 		/* save */
@@ -431,7 +431,7 @@ Hookedsocket(
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		mxmlElementSetAttr(XmlIDLogNode, "type", "3");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_SOCKET);
 		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", ret_val);
 		// socket
 		switch (af) 
@@ -529,7 +529,7 @@ Hookedconnect(
 		
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		mxmlElementSetAttr(XmlIDLogNode, "type", "4");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_CONNECT);
 		// connect
 		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		mxmlElementSetAttr( XmlIDLogNode, "connect_ip", inet_ntoa(sdata->sin_addr));
@@ -557,7 +557,7 @@ Hookedlisten(
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		mxmlElementSetAttr(XmlIDLogNode, "type", "5");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_LISTEN);
 		// listen
 		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		XmlLogNode = mxmlNewElement( XmlIDLogNode, "listen_desc");
@@ -587,7 +587,7 @@ Hookedbind(
 
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		mxmlElementSetAttr(XmlIDLogNode, "type", "6");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_BIND);
 		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		mxmlElementSetAttr(XmlIDLogNode, "bind_ip", inet_ntoa(sdata->sin_addr));
 		mxmlElementSetAttr(XmlIDLogNode, "bind_port", _itoa(htons(sdata->sin_port),szPort, 10));
@@ -613,28 +613,22 @@ Hookedaccept(
 		CHAR szPort[20];
 		sockaddr_in *sdata;
 		sdata = (sockaddr_in *)addr;
+		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_ACCEPT);
 
 		if ( addr != NULL && addrlen != NULL )
 		{
-			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
-			// type
-			mxmlElementSetAttr(XmlIDLogNode, "type", "7");
 			mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 			mxmlElementSetAttr(XmlIDLogNode, "accept_ip", inet_ntoa(sdata->sin_addr));
 			mxmlElementSetAttr(XmlIDLogNode, "accept_port", _itoa(htons(sdata->sin_port),szPort, 10));
-			// save
-			SaveXml( XmlLog );
 		}
 		else
 		{
-			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
-			// type
-			mxmlElementSetAttr(XmlIDLogNode, "type", "7");
 			mxmlElementSetAttr(XmlIDLogNode, "accept_ip", "NULL");
 			mxmlElementSetAttr(XmlIDLogNode, "accept_port", "NULL");
-			// save
-			SaveXml( XmlLog );
 		}
+		// save
+		SaveXml( XmlLog );
 	}
 
 
@@ -662,7 +656,7 @@ Hookedsend(
 		{
 			XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 			// type
-			mxmlElementSetAttr(XmlIDLogNode, "type", "8");
+			mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_SEND);
 			getpeername( s, (sockaddr *)&sdata, &sock_len);
 			mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 			mxmlElementSetAttr(XmlIDLogNode, "send_ip", inet_ntoa(sdata.sin_addr));
@@ -698,7 +692,7 @@ Hookedrecv(
 			
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 		// type
-		mxmlElementSetAttr(XmlIDLogNode, "type", "9");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_RECV);
 		getpeername( s, (sockaddr *)&sdata, &sock_len);
 		mxmlElementSetAttrf(XmlIDLogNode, "socket", "%d", s);
 		mxmlElementSetAttr(XmlIDLogNode, "recv_ip", inet_ntoa(sdata.sin_addr));
@@ -716,11 +710,12 @@ Hookedrecv(
 BOOL
 WINAPI
 HookedSetProcessDEPPolicy(
-	DWORD dwFlags)
+	DWORD dwFlags
+	)
 {
 	PXMLNODE XmlIDLogNode;
 	XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
-	mxmlElementSetAttr(XmlIDLogNode, "type", "10");
+	mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_API);
 	mxmlElementSetAttr(XmlIDLogNode, "api", "SetProcessDEPPolicy");
 	mxmlElementSetAttrf(XmlIDLogNode, "value", "%d", dwFlags);
 	if (PWNYPOT_REGCONFIG.ROP.DETECT_ROP) 
@@ -746,12 +741,13 @@ HookedNtSetInformationProcess(
 	HANDLE ProcessHandle,
     ULONG ProcessInformationClass,
     PVOID ProcessInformation,
-    ULONG ProcessInformationLength )
+    ULONG ProcessInformationLength 
+    )
 {
 	if (ProcessInformationClass == ProcessExecuteFlags){
 		PXMLNODE XmlIDLogNode;
 		XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
-		mxmlElementSetAttr(XmlIDLogNode, "type", "10");
+		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_API);
 		mxmlElementSetAttr(XmlIDLogNode, "api", "NtSetInformationProcess");
 		mxmlElementSetAttrf(XmlIDLogNode, "value", "0x%p", (*(ULONG_PTR *)ProcessInformation));
 		if (PWNYPOT_REGCONFIG.ROP.DETECT_ROP) 
@@ -775,11 +771,12 @@ HookedNtSetInformationProcess(
 VOID 
 NTAPI
 HookedLdrHotPatchRoutine(
-	HotPatchBuffer * s_HotPatchBuffer)
+	HotPatchBuffer * s_HotPatchBuffer
+	)
 {
 	PXMLNODE XmlIDLogNode;
 	XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
-	mxmlElementSetAttr(XmlIDLogNode, "type", "10");
+	mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_API);
 	mxmlElementSetAttr(XmlIDLogNode, "api", "LdrHotPatchRoutine");
 	mxmlElementSetAttr(XmlIDLogNode, "unc_path", "LdrHotPatchRoutine");
 	DEBUG_PRINTF(LSHL, NULL, "HookedLdrHotPatchRoutine called with path: %s, %s", s_HotPatchBuffer->PatcherNameOffset, s_HotPatchBuffer->PatcheeNameOffset);

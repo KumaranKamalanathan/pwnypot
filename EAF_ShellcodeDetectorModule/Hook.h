@@ -19,6 +19,20 @@
 #pragma comment(lib,"detours\\detours_nodll.lib")
 #pragma  comment(lib,"advapi32.lib")
 
+#define ANALYSIS_TYPE_ROP 		"0"
+#define ANALYSIS_TYPE_EXEC 		"1"
+#define ANALYSIS_TYPE_DL2FILE	"2"
+#define ANALYSIS_TYPE_SOCKET	"3"
+#define ANALYSIS_TYPE_CONNECT	"4"
+#define ANALYSIS_TYPE_LISTEN	"5"
+#define ANALYSIS_TYPE_BIND		"6"
+#define ANALYSIS_TYPE_ACCEPT	"7"
+#define ANALYSIS_TYPE_SEND		"8"
+#define ANALYSIS_TYPE_RECV		"9"
+#define ANALYSIS_TYPE_API		"10"
+#define ANALYSIS_TYPE_WPM		"11"
+#define ANALYSIS_TYPE_SEH		"12"
+
 /* parameter struct for LdrHotPatchRoutine as documented in https://docs.google.com/file/d/0B46UFFNOX3K7bl8zWmFvRGVlamM  */
 struct HotPatchBuffer
 {
