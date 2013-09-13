@@ -1,5 +1,10 @@
 #include "SEHOP.h"
 
+extern "C" {    
+    unsigned int JmpBackAddress;
+}
+
+
 STATUS 
 EnableSEHOP(
     VOID
@@ -7,7 +12,7 @@ EnableSEHOP(
 {
     BOOL bIsVista = IsWindowsVistaOrLater();
     /* if Vista or newer, enable Native SEHOP of the Process*/
-    if (bIsVista) 
+    if (bIsVista && !PWNYPOT_REGCONFIG.GENERAL.FORCE_SEHOP) 
     {
         DEBUG_PRINTF(LDBG, NULL, "Trying to enable native SEHOP\n");
         return EnableNativeSEHOP();
@@ -72,10 +77,6 @@ EnableNativeSEHOP (
     return PWNYPOT_STATUS_GENERAL_FAIL;
 }
 
-extern "C" {    
-    unsigned int JmpBackAddress;
-}
-
 STATUS
 EnablePwnyPotSEHOP (
     VOID
@@ -112,7 +113,7 @@ EnablePwnyPotSEHOP (
         int i = (int) bIsXP;
         int j=0;
         while(verification_bytes[i] == bytes[j]){
-            if(j == bytes_read-1) {
+            if(j == bytes_read-1-(int)bIsXP) {
                 bValid = TRUE;
                 break;
             }
@@ -122,7 +123,7 @@ EnablePwnyPotSEHOP (
     }
     else 
     {
-        DEBUG_PRINTF(LDBG, NULL, "Check NTDLL Version: Unknown DLL Version.");
+        DEBUG_PRINTF(LDBG, NULL, "Check NTDLL Version: Unknown DLL Version.\n");
         return PWNYPOT_STATUS_GENERAL_FAIL;
     }
 
@@ -152,6 +153,7 @@ EnablePwnyPotSEHOP (
         JmpBackAddress = ((unsigned int)KiUserExceptionDispatcher+8);
         return PWNYPOT_STATUS_SUCCESS;
     }
+    DEBUG_PRINTF(LDBG, NULL, "Could not Validate NTDLL.DLL\n");
     return PWNYPOT_STATUS_GENERAL_FAIL;
 }
 
@@ -159,4 +161,15 @@ EnablePwnyPotSEHOP (
 unsigned int GetByte(LPVOID address, int byte)
 {
     return ((unsigned int)address >> 8*byte) & 0xff;
+}
+
+extern "C"
+VOID
+IllegalExceptionHandler(
+    DWORD ChainStart,
+    DWORD IllegalHandler,
+    DWORD NextField
+    )
+{
+    DEBUG_PRINTF(LDBG, NULL, "Chain starts at: %x - Illegal Handler at: %x - Next-Field: %x\n",  ChainStart, IllegalHandler, NextField);
 }

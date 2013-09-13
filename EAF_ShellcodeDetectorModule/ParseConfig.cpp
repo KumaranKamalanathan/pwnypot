@@ -409,9 +409,11 @@ ParseConfig(
         	    else if(!strcmp(key, "permanent_dep ")) {
                     pPwnyPotRegConfig->GENERAL.PERMANENT_DEP = atoi(value);
                 }
-        	    else if(!strcmp(key, "sehop ")) {
+                else if(!strcmp(key, "sehop ")) {
                     pPwnyPotRegConfig->GENERAL.SEHOP = atoi(value);
-                    LOCAL_DEBUG_PRINTF("SEHOP %s.\n",value);
+                }
+                else if(!strcmp(key, "force_pwnypot_sehop ")) {
+                    pPwnyPotRegConfig->GENERAL.FORCE_SEHOP = atoi(value);
                 }
         	    else if(!strcmp(key, "null_page ")) {
                     pPwnyPotRegConfig->GENERAL.NULL_PAGE = atoi(value);
