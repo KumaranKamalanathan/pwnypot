@@ -2,29 +2,34 @@
 .model flat, c
 option casemap :none
 
-printf proto c :vararg 
 _DEBUG_PRINTF proto syscall
-
+_IllegalExceptionHandler proto syscall
 extern JmpBackAddress:dword
 
 .data
-msg BYTE "Found illegal next field\n",0 
-msg2 BYTE "Found illegal handler\n",0 
-msgStart BYTE "Starting Chain Validation\n",0 
-msgEnd BYTE "Chain Validation completed. No Attack\n",0 
+msg BYTE "Found illegal next field",0ah, 0h
+msg2 BYTE "Found illegal handler",0ah, 0h
+msgStart BYTE "Starting Chain Validation",0ah, 0h
+msgEnd BYTE "Chain Validation completed. No Attack", 0ah, 0h 
 
 .code
 ValidateExceptionChain proc 
 	assume fs:nothing			; To ignore MASM warning of using fs register
 
+  	push offset msgStart
+  	push 0
+  	push 2
+  	call _DEBUG_PRINTF
+  	add esp,12
+
 	mov ecx,fs:[0]				; load address of exception registration into ecx 
 	add ecx,4					; (is in memory directly after next field)
-	mov ecx,[ecx]				; get address of exception handler
-	push ecx
+	push [ecx]
 	call ValidateHandler		; Validate Exception Handler
 	add esp,4
 	cmp eax,0
-	jnz ReportError2			; 
+	jnz ReportIllegalHandler	; 
+	mov ecx,[ecx]				; get address of exception handler
 
 	mov ebx,[fs:[0]]
 	cmp ebx,-1					; check if next field is valid
@@ -34,14 +39,14 @@ ValidateExceptionChain proc
 	;TODO: Validate Exception Handlers
 	mov ecx,ebx
 	add ecx,4
-	mov ecx,[ecx]
-	push ecx
+	push [ecx]
 	call ValidateHandler
 	add esp,4
 	cmp eax,0
-	jnz ReportError2
+	jnz ReportIllegalHandler
+	mov ecx,[ecx]
 	
-	mov ebx,[ebx]				; load next field into eax
+	mov ebx,[ebx]				; load the "next" field into ebx
 	cmp ebx,0					; check if non valid next field (NULL)
 	jz ReportError
 
@@ -53,6 +58,12 @@ ValidateExceptionChain proc
 	CLD
 	mov ecx,dword ptr ss:[esp+4]
 	mov ebx,dword ptr ss:[esp]
+
+	push offset msgEnd
+	push 0
+	push 2
+	call _DEBUG_PRINTF
+  	add esp,12
 
 	push JmpBackAddress			; jump back to KiUserExceptionDispatcher after Prologue
 	ret
@@ -66,11 +77,16 @@ ValidateExceptionChain proc
 	push JmpBackAddress			; jump back to KiUserExceptionDispatcher after Prologue
 	ret	
 
-  ReportError2:
-	push offset msg2
-	push 0
-	push 2
-	call _DEBUG_PRINTF
+  ReportIllegalHandler:
+  	push offset msg2
+  	push 0
+  	push 2
+  	call _DEBUG_PRINTF
+  	add esp,12
+	push [ebx]
+	push ecx
+	push fs:[0]
+	call _IllegalExceptionHandler
 	add esp,12
 	push JmpBackAddress			; jump back to KiUserExceptionDispatcher after Prologue
 	ret	
