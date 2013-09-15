@@ -1,3 +1,4 @@
+#pragma once
 #include "LogInfo.h"
 #include "ParseConfig.h"
 
@@ -288,7 +289,6 @@ DEBUG_PRINTF(
 {
     CHAR Buffer[1024] = {0};
     CHAR szFullLogPath[MAX_PATH];
-    FILE *fp;
     va_list Args;
 
     va_start(Args, Format);
@@ -391,7 +391,7 @@ InitFileSocket (
 
     target.sin_family = AF_INET; 
     target.sin_addr.s_addr = inet_addr (PWNYPOT_REGCONFIG.RESULT_SERVER_IP); 
-    target.sin_port = htons (PWNYPOT_REGCONFIG.RESULT_SERVER_PORT);
+    target.sin_port = htons ((unsigned int)PWNYPOT_REGCONFIG.RESULT_SERVER_PORT);
     s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
     if (s == INVALID_SOCKET)
     {
@@ -562,7 +562,7 @@ TransmitBufAsFile (
 
     target.sin_family = AF_INET; 
     target.sin_addr.s_addr = inet_addr (PWNYPOT_REGCONFIG.RESULT_SERVER_IP); 
-    target.sin_port = htons (PWNYPOT_REGCONFIG.RESULT_SERVER_PORT); 
+    target.sin_port = htons ((unsigned int)PWNYPOT_REGCONFIG.RESULT_SERVER_PORT); 
     s = TrueSocket (AF_INET, SOCK_STREAM, IPPROTO_TCP); 
     if (s == INVALID_SOCKET)
     {
@@ -609,7 +609,6 @@ HexDumpToFile(
     ) 
 {
     UINT dp, p;
-    SOCKET s;
     const UINT dumpLength = 65536;
     const int tmpLength = 1024;
     CHAR szBuf[dumpLength];
@@ -686,9 +685,8 @@ BufferedSend (
             return PWNYPOT_STATUS_INTERNAL_ERROR;
         }
         totalSend += currentSend;
-    LOCAL_DEBUG_PRINTF("Continuing sending. Sent %d/%d bytes\n", totalSend, strlen(szBuf));
     }
-    LOCAL_DEBUG_PRINTF("Sent %d bytes\n", totalSend);
+    LOCAL_DEBUG_PRINTF("Sent %d / %d  bytes\n", totalSend, strlen(szBuf));
     return PWNYPOT_STATUS_SUCCESS;
 }
 

@@ -1,5 +1,4 @@
 #pragma once
-#define _WINSOCKAPI_
 #include <WinSock2.h>
 #include <Windows.h>
 #include <stdio.h>

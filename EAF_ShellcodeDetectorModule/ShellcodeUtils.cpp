@@ -7,13 +7,15 @@ ShuDumpShellcode(
 {
 	LPVOID	lpStartAddress;
 	LPVOID	lpEndAddress;
-	CHAR szLogPath[MAX_PATH];
 	CHAR szShellcodeFile[MAX_PATH];
 	BYTE *ShellcodeDump;
 	DWORD dwRead;
+#ifndef CUCKOO	
+	CHAR szLogPath[MAX_PATH];
 	DWORD dwWrite;
+#endif
 	ERRORINFO err;
-	HANDLE hShellcodeFile;
+	HANDLE hShellcodeFile = NULL;
 	STATUS status;
 
 	lpStartAddress	= Address;
@@ -130,9 +132,10 @@ ShuDisassembleShellcode(
 	DWORD dwNext;
 	DWORD i;
 	CHAR szLogPath[MAX_PATH];
+#ifndef CUCKOO	
 	CHAR szShellcodeDisassFile[MAX_PATH];
-	ERRORINFO err;
 	FILE *ShellcodeFile;
+#endif
 
 	offset = 0;
 	dwDecodedInstructionsCount = 0;

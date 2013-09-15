@@ -58,7 +58,7 @@ ValidateCallAgainstRop(
 			PXMLNODE XmlIDLogNode;
 			PXMLNODE XmlData;
 			XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
-		    mxmlElementSetAttr(XmlIDLogNode, "type", "11");
+		    mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_WPM);
 		    mxmlElementSetAttrf(XmlIDLogNode, "address", "%p", (*(ULONG_PTR *)lpAddress));
 			XmlData = CreateXmlElement( XmlIDLogNode, "data");
 			mxmlNewText( XmlData, 0, ((CHAR *)lpEspAddress) );	

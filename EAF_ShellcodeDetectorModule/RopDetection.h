@@ -1,3 +1,5 @@
+#pragma once
+#define _WINSOCKAPI_
 #include <Windows.h>
 #include <stdlib.h>
 #include "ParseConfig.h"
@@ -5,7 +7,7 @@
 #include "XmlLog.h"
 #include "LogInfo.h"
 #include "ETAV_DebugBreak.h"
-#pragma once
+#include "Hook.h"
 
 extern PWNYPOTREGCONFIG PWNYPOT_REGCONFIG;
 extern PXMLNODE XmlLog;
