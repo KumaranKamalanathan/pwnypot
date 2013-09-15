@@ -167,9 +167,23 @@ extern "C"
 VOID
 IllegalExceptionHandler(
     DWORD ChainStart,
-    DWORD IllegalHandler,
-    DWORD NextField
+    DWORD IllegalHandlerAddress,
+    DWORD IllegalHandlerValue,
+    DWORD NextFieldAddress,
+    DWORD NextFieldValue
     )
 {
-    DEBUG_PRINTF(LDBG, NULL, "Chain starts at: %x - Illegal Handler at: %x - Next-Field: %x\n",  ChainStart, IllegalHandler, NextField);
+    PXMLNODE XmlIDLogNode;
+    PXMLNODE XmlData;
+    XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
+    mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_SEH);
+    mxmlElementSetAttrf(XmlIDLogNode, "chain_start", "%p", (*(ULONG_PTR *)ChainStart));
+    XmlData = CreateXmlElement(XmlIDLogNode, "handler");
+    mxmlElementSetAttrf(XmlData, "address", "%p", (*(ULONG_PTR *)IllegalHandlerAddress));
+    mxmlElementSetAttrf(XmlData, "value", "%p", (*(ULONG_PTR *)IllegalHandlerValue));
+    XmlData = CreateXmlElement(XmlIDLogNode, "next_field");
+    mxmlElementSetAttrf(XmlData, "address", "%p", (*(ULONG_PTR *)NextFieldAddress));
+    mxmlElementSetAttrf(XmlData, "value", "%p", (*(ULONG_PTR *)NextFieldValue));
+    DEBUG_PRINTF(LDBG, NULL, "Chain starts at: %x - Illegal Handler at: %x - Next-Field: %x\n",  ChainStart, IllegalHandlerAddress, NextFieldAddress);
+    SaveXml(XmlLog);
 }

@@ -8,6 +8,9 @@
 #define SEHOP_FLAG 0x40
 
 
+extern PXMLNODE XmlLog;
+extern PXMLNODE XmlShellcode;
+
 typedef
 NTSTATUS (NTAPI *t_NtQueryInformationProcess)(
     __in       HANDLE ProcessHandle,
