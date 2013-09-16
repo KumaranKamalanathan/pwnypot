@@ -21,9 +21,7 @@ typedef enum _ROP_CALLEE {
 	CalleeMapViewOfFile     	    = 4,
 	CalleeMapViewOfFileEx			= 5,
 	CalleeHeapCreate				= 6,
-	CalleeWriteProcessMemory		= 7,
-/*	CalleeSetProcessDEPPolicy 		= 8,
-	CalleeNtSetInformationProcess 	= 9,*/
+	CalleeWriteProcessMemory		= 7
 } ROP_CALLEE;
 
 extern "C"
