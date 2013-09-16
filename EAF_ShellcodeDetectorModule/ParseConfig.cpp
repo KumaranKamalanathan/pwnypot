@@ -314,7 +314,7 @@ ParseRegConfig(
 		}
 		else if ( MATCH_CONF(MainRegConfig[i].ve_valuename, "McedpModulePath") )
 		{
-			strncpy( pPwnyPotRegConfig->MCEDP_MODULE_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
+			strncpy( pPwnyPotRegConfig->PWNYPOT_MODULE_PATH, (const char*)MainRegConfig[i].ve_valueptr, MAX_PATH );
 		}
 	}
 	

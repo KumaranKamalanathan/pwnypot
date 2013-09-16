@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include <Winsock2.h>
 #include "ParseConfig.h"
 #include "LogInfo.h"
 #include "Hook.h"

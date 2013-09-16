@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include <Winsock2.h>
 #include <stdio.h>
 #include <tlhelp32.h> 
 #include <time.h>

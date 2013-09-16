@@ -4,7 +4,7 @@
     www.irhoneynet.org
     twitter.com/ponez
 */
-
+#pragma once
 #include "Hook.h"
 #include "ParseConfig.h"
 #include "LogInfo.h"

@@ -232,7 +232,9 @@ HookedCreateProcessInternalW(
 	)
 {
 	BOOL bReturn;
-
+#ifndef CUCKOO
+	CHAR szDllFullPath[MAX_PATH];
+#endif
 	/* apply config rules if shellcode or ROP detected */
 	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == PWNYPOT_STATUS_ROP_FLAG_SET )
 	{

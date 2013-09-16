@@ -1,6 +1,5 @@
 #pragma once
-#define _WINSOCKAPI_
-#include <Windows.h>
+#include <Winsock2.h>
 #include <stdlib.h>
 #include "ParseConfig.h"
 #include "LdrList.h"

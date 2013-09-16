@@ -1,6 +1,7 @@
-#include <Windows.h>
-#include "LogInfo.h"
 #pragma once
+#include <Winsock2.h>
+#include "LogInfo.h"
+
 
 STATUS
 InjectDLLIntoProcess(

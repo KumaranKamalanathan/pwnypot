@@ -1,3 +1,4 @@
+#pragma once
 #include "geoip\GeoIP.h"
 #include "LogInfo.h"
 #include "ParseConfig.h"

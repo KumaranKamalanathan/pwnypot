@@ -1,3 +1,4 @@
+#pragma once
 #include "mxml\src\mxml-2.7\mxml.h"
 #include "LogInfo.h"
 #include "ParseConfig.h"

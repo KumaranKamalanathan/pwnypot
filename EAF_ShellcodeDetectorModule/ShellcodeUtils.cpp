@@ -135,6 +135,7 @@ ShuDisassembleShellcode(
 #ifndef CUCKOO	
 	CHAR szShellcodeDisassFile[MAX_PATH];
 	FILE *ShellcodeFile;
+	ERRORINFO err;
 #endif
 
 	offset = 0;

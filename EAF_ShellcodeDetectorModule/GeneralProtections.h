@@ -1,9 +1,9 @@
-#include <Windows.h>
+#pragma once
+#include <Winsock2.h>
 #include <stdlib.h>
 #include "ParseConfig.h"
 #include "LogInfo.h"
 #include "Hook.h"
-#pragma once
 
 #define ProcessExecuteFlags				0x22
 #define MEM_EXECUTE_OPTION_DISABLE		0x1

@@ -138,7 +138,6 @@ SaveXml(
 	ERRORINFO err;
 	CHAR szLogDir[MAX_PATH];
 	CHAR szFileName[MAX_PATH];
-	CHAR szLogBuffer[8192];
 
 	strncpy(szLogDir, PWNYPOT_REGCONFIG.LOG_PATH, MAX_PATH);
 	strncat(szLogDir, "\\", MAX_PATH);
@@ -161,24 +160,23 @@ SaveXml(
 	fflush(fp);
     fclose(fp);
 #else     
-    const int bufLenght = 16384;
-    CHAR szBuf[bufLenght];
+  const int bufLenght = 16384;
+  CHAR szBuf[bufLenght];
 	CHAR szFileName[MAX_PATH];
-    if( mxmlSaveString(TopElement, szBuf, bufLenght, WhiteSpaceCb) <= 0) 
-    {
-    	LOCAL_DEBUG_PRINTF ( "Error on printing XML into buffer\n" );
-    	return PWNYPOT_STATUS_INTERNAL_ERROR;
-
-    }
+  if( mxmlSaveString(TopElement, szBuf, bufLenght, WhiteSpaceCb) <= 0) 
+  {
+  	LOCAL_DEBUG_PRINTF ( "Error on printing XML into buffer\n" );
+  	return PWNYPOT_STATUS_INTERNAL_ERROR;
+  }
 
 	sprintf(szFileName, "logs/%u_ShellcodeAnalysis", GetCurrentProcessId(), MAX_PATH);
-    if ( TransmitBufAsFile(szBuf, szFileName) != PWNYPOT_STATUS_SUCCESS ) 
-    {
-    	LOCAL_DEBUG_PRINTF ( "Error on transmission of file ShellcodeAnalysis\n" );
-    	return PWNYPOT_STATUS_INTERNAL_ERROR;
-    }
-    else 
-    	LOCAL_DEBUG_PRINTF ( "Successfully transmitted ShellcodeAnalysis\n" );
+  if ( TransmitBufAsFile(szBuf, szFileName) != PWNYPOT_STATUS_SUCCESS ) 
+  {
+  	LOCAL_DEBUG_PRINTF ( "Error on transmission of file ShellcodeAnalysis\n" );
+  	return PWNYPOT_STATUS_INTERNAL_ERROR;
+  }
+  else 
+   	LOCAL_DEBUG_PRINTF ( "Successfully transmitted ShellcodeAnalysis\n" );
 
 #endif 
 

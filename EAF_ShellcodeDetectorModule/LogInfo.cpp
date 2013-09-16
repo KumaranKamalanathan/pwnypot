@@ -9,6 +9,8 @@ BOOL bLogPathInitSuccess = FALSE;
 SOCKET LogInfoSock = -1;
 SOCKET LogRopSock = -1;
 SOCKET LogShellcodeSock = -1;
+#else 
+BOOL bLogStart = FALSE;
 #endif
 
 

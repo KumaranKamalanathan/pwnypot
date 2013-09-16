@@ -1,4 +1,5 @@
-#include <Windows.h>
+#pragma once
+#include <Winsock2.h>
 #include <stdlib.h>
 #include "LogInfo.h"
 #define MAX_HASH_SIZE 256

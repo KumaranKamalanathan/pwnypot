@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include <Winsock2.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "LogInfo.h"

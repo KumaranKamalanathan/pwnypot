@@ -1,8 +1,8 @@
+#pragma once
 #include "LogInfo.h"
 #include "ParseConfig.h"
 #include <Psapi.h>
 #pragma comment(lib, "Psapi.lib")
-#pragma once
 
 //#define HONEYCLIENT
 
