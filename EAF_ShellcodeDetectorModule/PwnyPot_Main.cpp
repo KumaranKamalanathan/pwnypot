@@ -204,7 +204,9 @@ SetupShellcodeDetector(
 		if ( EnablePermanentDep() != PWNYPOT_STATUS_SUCCESS )
 		{
 			REPORT_ERROR("EnablePermanentDep()", &err);
+#ifndef CUCKOO			
 			return PWNYPOT_STATUS_GENERAL_FAIL;
+#endif
 		}
 	}
 

@@ -73,7 +73,7 @@ REPORT_ERROR_EX(
 		/* allocate memory for completed error message */
 		ErrorInfo->CompletErrorMsg = (CHAR *) LocalAlloc( LMEM_ZEROINIT, 512 );
         _snprintf( ErrorInfo->CompletErrorMsg , MAX_ERROR_MSG, "[!] ERROR : %s failed with error %d (%s)\n", Function, ErrorInfo->dwErrorNum, ErrorInfo->ErrorMsg );
-		LOCAL_DEBUG_PRINTF("%s",ErrorInfo->CompletErrorMsg);
+		DEBUG_PRINTF(LDBG, NULL, "%s",ErrorInfo->CompletErrorMsg);
         /* This should free by caller */
         LocalFree(ErrorInfo->CompletErrorMsg);
 	}

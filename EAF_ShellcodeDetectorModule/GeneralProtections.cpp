@@ -7,15 +7,12 @@ EnablePermanentDep(
 {
 	NTSTATUS Status;
 	ULONG ExecuteFlags;
-	if ( NtSetInformationProcess_ != NULL )
+	if ( HookedNtSetInformationProcess != NULL )
 	{
         /* Set up proper flags, call NtSetInformationProcess to disble RW memory execution and make it permanent */
 		ExecuteFlags = MEM_EXECUTE_OPTION_DISABLE | MEM_EXECUTE_OPTION_PERMANENT;
-		Status = NtSetInformationProcess_( GetCurrentProcess(),
-										  ProcessExecuteFlags,
-										  &ExecuteFlags,
-										  sizeof(ExecuteFlags));
-		if ( NT_SUCCESS(Status) )
+		Status = HookedNtSetInformationProcess(GetCurrentProcess(), ProcessExecuteFlags, &ExecuteFlags, sizeof(ExecuteFlags));
+		if ( NT_SUCCESS(Status) || GetLastError() == 183 )
 		{
 			DEBUG_PRINTF(LDBG, NULL, "Permanent DEP Enabled!\n");
 			return PWNYPOT_STATUS_SUCCESS;
