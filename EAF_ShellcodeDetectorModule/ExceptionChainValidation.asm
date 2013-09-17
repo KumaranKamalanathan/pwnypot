@@ -84,10 +84,12 @@ ValidateExceptionChain proc
   	call _DEBUG_PRINTF
   	add esp,12
 	push [ebx]
+  	push ebx
+	push [ecx]
 	push ecx
 	push fs:[0]
 	call _IllegalExceptionHandler
-	add esp,12
+	add esp,20
 	push JmpBackAddress			; jump back to KiUserExceptionDispatcher after Prologue
 	ret	
 
