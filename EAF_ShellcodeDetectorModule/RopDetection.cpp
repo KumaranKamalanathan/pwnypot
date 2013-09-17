@@ -44,8 +44,8 @@ ValidateCallAgainstRop(
 				{
 #ifdef CUCKOO					
 					CHAR szAssciFullModuleName[MAX_MODULE_NAME32];
-					DbgGetRopModule( lpAddress, szAssciFullModuleName, MAX_MODULE_NAME32);
-					if (strncmp(szAssciFullModuleName, PWNYPOT_REGCONFIG.DLL_PATH) != 0 ) 
+					DbgGetRopModule( (PVOID)lpEspAddress, szAssciFullModuleName, MAX_MODULE_NAME32);
+					if (strncmp(szAssciFullModuleName, PWNYPOT_REGCONFIG.DLL_PATH, MAX_MODULE_NAME32) != 0 ) 
 					{
 #endif 
 						DbgSetRopFlag();
