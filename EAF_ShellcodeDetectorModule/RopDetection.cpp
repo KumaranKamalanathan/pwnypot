@@ -42,9 +42,18 @@ ValidateCallAgainstRop(
 					 ( flProtect & PAGE_EXECUTE_READ )      ||
 					 ( flProtect & PAGE_EXECUTE_WRITECOPY ) )
 				{
-					/* set ROP flag */
-					DbgSetRopFlag();
-					DEBUG_PRINTF(LROP,NULL,"ROP Detected by STACK_RWX, stack permission changed to be executable!\n");
+#ifdef CUCKOO					
+					CHAR szAssciFullModuleName[MAX_MODULE_NAME32];
+					DbgGetRopModule( lpAddress, szAssciFullModuleName, MAX_MODULE_NAME32);
+					if (strncmp(szAssciFullModuleName, PWNYPOT_REGCONFIG.DLL_PATH) != 0 ) 
+					{
+#endif 
+						DbgSetRopFlag();
+						DEBUG_PRINTF(LROP,NULL,"ROP Detected by STACK_RWX, stack permission changed to be executable!\n");
+
+#ifdef CUCKOO					
+					} 
+#endif 
 				}
 			}
 		}

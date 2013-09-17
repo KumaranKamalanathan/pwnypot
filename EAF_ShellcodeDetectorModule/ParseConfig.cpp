@@ -370,8 +370,8 @@ ParseConfig(
                 else if(!strcmp(key, "host-port")) {        
     				pPwnyPotRegConfig->RESULT_SERVER_PORT = atoi(value);
                 }
-                else if(!strcmp(key, "exec-malware")) {        
-    				pPwnyPotRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
+                else if(!strcmp(key, "dll-path")) {        
+                    strncpy(pPwnyPotRegConfig->DLL_PATH, value, MAX_PATH);
                 }
         	}
 	    }
