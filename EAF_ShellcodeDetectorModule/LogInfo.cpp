@@ -478,12 +478,6 @@ InitCuckooLogs ()
     return PWNYPOT_STATUS_SUCCESS;
 }
 
-STATUS
-CloseCuckooLogs ()
-{
-    closesocket(LogInfoSock);
-}
-
 STATUS 
 InitShellcodeLog ()
 {
