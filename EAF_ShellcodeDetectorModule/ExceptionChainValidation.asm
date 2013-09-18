@@ -28,7 +28,7 @@ ValidateExceptionChain proc
 	call ValidateHandler		; Validate Exception Handler
 	add esp,4
 	cmp eax,0
-	jnz ReportIllegalHandler	; 
+	jz ReportIllegalHandler	; 
 	mov ecx,[ecx]				; get address of exception handler
 
 	mov ebx,[fs:[0]]
@@ -43,7 +43,7 @@ ValidateExceptionChain proc
 	call ValidateHandler
 	add esp,4
 	cmp eax,0
-	jnz ReportIllegalHandler
+	jz ReportIllegalHandler
 	mov ecx,[ecx]
 	
 	mov ebx,[ebx]				; load the "next" field into ebx
@@ -74,15 +74,9 @@ ValidateExceptionChain proc
 	push 2
 	call _DEBUG_PRINTF
 	add esp,12
-	push JmpBackAddress			; jump back to KiUserExceptionDispatcher after Prologue
-	ret	
+	jmp DispatcherPrologue	
 
   ReportIllegalHandler:
-  	push offset msg2
-  	push 0
-  	push 2
-  	call _DEBUG_PRINTF
-  	add esp,12
 	push [ebx]
   	push ebx
 	push [ecx]
@@ -90,8 +84,7 @@ ValidateExceptionChain proc
 	push fs:[0]
 	call _IllegalExceptionHandler
 	add esp,20
-	push JmpBackAddress			; jump back to KiUserExceptionDispatcher after Prologue
-	ret	
+	jmp DispatcherPrologue		; jump back to KiUserExceptionDispatcher after Prologue
 
 ValidateExceptionChain endp
 
@@ -105,7 +98,7 @@ ValidateHandler proc address:dword
 	call IsPopInst
 	add esp,4
 	cmp eax,1					
-	jz returnOk
+	jnz returnOk
 
 	mov edx,address				; is 2nd byte also a pop inst?
 	shr edx,16
@@ -114,26 +107,28 @@ ValidateHandler proc address:dword
 	call IsPopInst
 	add esp,4
 	cmp eax,1
-	jz returnOk
+	jnz returnOk
 
 	mov edx,address				; is 3rd byte a ret inst?
 	shr edx,8
 	and edx,0ffh
 	push edx 
-	call IsPopInst
+	call IsRetInst
 	add esp,4
 	cmp eax,1
-	jnz return
+	jz return
 
 returnOk:
 	mov eax,1					; everything is ok
+	ret
 return:
+	mov eax,0
 	ret
 ValidateHandler endp
 
 ; Returns 1 if instruction is some form of pop, otherwise 0
 IsPopInst proc inst:dword	
-	mov eax,0					; assume byte is no pop inst
+	mov eax,1					; assume byte is  pop inst
 
 	cmp inst,7h					; POP ES
 	jz return  
@@ -149,7 +144,7 @@ IsPopInst proc inst:dword
 	cmp inst,61h				; POPA
 	jz return 
 
-	mov eax,1					; opcode for pop inst found
+	mov eax,0					; opcode for pop inst not found
 
 return:
 	ret
@@ -159,7 +154,7 @@ IsPopInst endp
 
 ; Returns 1 if instruction is some form of ret, otherwise 0
 IsRetInst proc inst:dword	
-	mov eax,0					; assume byte is no ret inst
+	mov eax,1					; assume byte is ret inst
 
 	cmp inst,0c2h				; ret
 	jz return 
@@ -173,7 +168,7 @@ IsRetInst proc inst:dword
 	cmp inst,0cah				; retf
 	jz return 
 
-	mov eax,1					; opcode for ret inst found
+	mov eax,0					; opcode for ret inst not found
 
 return:
 	ret
