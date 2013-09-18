@@ -2,6 +2,7 @@
 
 extern "C" {    
     unsigned int JmpBackAddress;
+    BOOL bSehopSimple;
 }
 
 
@@ -185,6 +186,25 @@ IllegalExceptionHandler(
     mxmlElementSetAttrf(XmlData, "address", "%p", (*(ULONG_PTR *)NextFieldAddress));
     mxmlElementSetAttrf(XmlData, "value", "%p", (*(ULONG_PTR *)NextFieldValue));
     DEBUG_PRINTF(LDBG, NULL, "Chain starts at: %x - Illegal Handler at: %x - Next-Field: %x\n",  ChainStart, IllegalHandlerAddress, NextFieldAddress);
+    SaveXml(XmlLog);
+    if(!PWNYPOT_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC)
+    {        
+        TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
+    }
+}
+
+extern "C"
+VOID
+InvalidChain(
+    DWORD ChainStart
+    )
+{
+    PXMLNODE XmlIDLogNode;
+    PXMLNODE XmlData;
+    XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
+    mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_SEH);
+    mxmlElementSetAttrf(XmlIDLogNode, "chain_start", "%p", (*(ULONG_PTR *)ChainStart));
+    DEBUG_PRINTF(LDBG, NULL, "Chain starts at: %x \n",  ChainStart);
     SaveXml(XmlLog);
     if(!PWNYPOT_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC)
     {        

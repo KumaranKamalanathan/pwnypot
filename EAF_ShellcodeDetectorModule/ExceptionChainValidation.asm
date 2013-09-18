@@ -4,7 +4,9 @@ option casemap :none
 
 _DEBUG_PRINTF proto syscall
 _IllegalExceptionHandler proto syscall
+_InvalidChain proto syscall
 extern JmpBackAddress:dword
+extern bSehopSimple:dword
 
 .data
 msg BYTE "Found illegal next field",0ah, 0h
@@ -16,12 +18,12 @@ msgEnd BYTE "Chain Validation completed. No Attack", 0ah, 0h
 ValidateExceptionChain proc 
 	assume fs:nothing			; To ignore MASM warning of using fs register
 
-  	push offset msgStart
-  	push 0
-  	push 2
-  	call _DEBUG_PRINTF
-  	add esp,12
+  	cmp bSehopSimple,1
+  	jnz Advanced
+  	call CheckChain
+  	jmp DispatcherPrologue
 
+  Advanced:
 	mov ecx,fs:[0]				; load address of exception registration into ecx 
 	add ecx,4					; (is in memory directly after next field)
 	push [ecx]
@@ -36,7 +38,6 @@ ValidateExceptionChain proc
 	jz DispatcherPrologue		; There is no next Exception Registration, jump over WalkChain
 
   WalkChain:					; Walk through Chain of Exception Registrations	
-	;TODO: Validate Exception Handlers
 	mov ecx,ebx
 	add ecx,4
 	push [ecx]
@@ -172,7 +173,32 @@ IsRetInst proc inst:dword
 
 return:
 	ret
-
 IsRetInst endp
+
+
+
+CheckChain proc
+    mov ecx, fs:[0]
+  WalkChain:
+    cmp ecx, -1
+    jz finish
+    cmp ecx,0
+    jz fail
+    mov ecx, [ecx]
+    add eax, 1
+    jmp WalkChain
+
+  fail:
+  	push fs:[0]
+  	call _InvalidChain
+  	add esp,4
+
+  finish:
+  	ret
+
+CheckChain endp
+
+Continue proc
+Continue endp
 
 end

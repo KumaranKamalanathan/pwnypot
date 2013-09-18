@@ -406,11 +406,16 @@ ParseConfig(
         	    else if(!strcmp(key, "init_delay ")) {
                     pPwnyPotRegConfig->INIT_DELAY = atoi(value);
                 }
+
+                /* GENERAL */
         	    else if(!strcmp(key, "permanent_dep ")) {
                     pPwnyPotRegConfig->GENERAL.PERMANENT_DEP = atoi(value);
                 }
                 else if(!strcmp(key, "sehop ")) {
                     pPwnyPotRegConfig->GENERAL.SEHOP = atoi(value);
+                }
+                else if(!strcmp(key, "sehop_simple ")) {
+                    pPwnyPotRegConfig->GENERAL.SEHOP_SIMPLE = atoi(value);
                 }
                 else if(!strcmp(key, "force_pwnypot_sehop ")) {
                     pPwnyPotRegConfig->GENERAL.FORCE_SEHOP = atoi(value);
@@ -424,6 +429,8 @@ ParseConfig(
         	    else if(!strcmp(key, "allow_malware_exec ")) {
                     pPwnyPotRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
                 }
+
+                /* SHELLCODE */
         	    else if(!strcmp(key, "analysis_shellcode ")) {
                     pPwnyPotRegConfig->SHELLCODE.ANALYSIS_SHELLCODE = atoi(value);
                 }
@@ -445,6 +452,8 @@ ParseConfig(
         	    else if(!strcmp(key, "allow_malware_download ")) {
                     pPwnyPotRegConfig->SHELLCODE.ALLOW_MALWARE_DOWNLOAD = atoi(value);
                 }
+
+                /* ROP */
         	    else if(!strcmp(key, "detect_rop ")) {
                     pPwnyPotRegConfig->ROP.DETECT_ROP = atoi(value);
                 }
@@ -484,6 +493,8 @@ ParseConfig(
         	    else if(!strcmp(key, "pivot_inst_threshold ")) {
                     pPwnyPotRegConfig->ROP.PIVOT_INST_TRESHOLD = atoi(value);
                 }
+
+                /* MEMORY */
         	    else if(!strcmp(key, "text_rwx ")) {
                     pPwnyPotRegConfig->MEM.TEXT_RWX = atoi(value);
                 }
