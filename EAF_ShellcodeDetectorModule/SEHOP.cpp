@@ -186,4 +186,8 @@ IllegalExceptionHandler(
     mxmlElementSetAttrf(XmlData, "value", "%p", (*(ULONG_PTR *)NextFieldValue));
     DEBUG_PRINTF(LDBG, NULL, "Chain starts at: %x - Illegal Handler at: %x - Next-Field: %x\n",  ChainStart, IllegalHandlerAddress, NextFieldAddress);
     SaveXml(XmlLog);
+    if(!PWNYPOT_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC)
+    {        
+        TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
+    }
 }
