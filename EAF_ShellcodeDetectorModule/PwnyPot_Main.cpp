@@ -36,6 +36,13 @@ DllMain(
     LPVOID lpReserved
 	)
 {
+#ifdef _DEBUG
+	BOOL infinity = TRUE;
+	while(infinity)
+	{
+		
+	}
+#endif
 	BYTE AppFullNameHash[MAX_HASH_SIZE];
 #ifndef CUCKOO	
 	CHAR szAppFullNameHash[MAX_PATH];
