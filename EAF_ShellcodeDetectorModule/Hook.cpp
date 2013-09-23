@@ -238,11 +238,11 @@ HookedCreateProcessInternalW(
 	/* apply config rules if shellcode or ROP detected */
 	if ( DbgGetShellcodeFlag() == PWNYPOT_STATUS_SHELLCODE_FLAG_SET || DbgGetRopFlag() == PWNYPOT_STATUS_ROP_FLAG_SET )
 	{
+		PXMLNODE XmlIDLogNode;
 		if ( PWNYPOT_REGCONFIG.SHELLCODE.ANALYSIS_SHELLCODE )
 		{
 			CHAR *szApplicationNameA = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
 			CHAR *szCommandLineA     = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);
-			PXMLNODE XmlIDLogNode;
 
 			if ( lpApplicationName != NULL )
 				wcstombs( szApplicationNameA, lpApplicationName, 1024);
@@ -256,7 +256,6 @@ HookedCreateProcessInternalW(
 			mxmlElementSetAttr(XmlIDLogNode, "exec_process", szApplicationNameA);
 			mxmlElementSetAttr(XmlIDLogNode, "exec_cmd", szCommandLineA);
 			/* save */
-			SaveXml( XmlLog );
 
 			LocalFree(szApplicationNameA);
 			LocalFree(szCommandLineA);
@@ -265,6 +264,7 @@ HookedCreateProcessInternalW(
         /* if malware execution is not allowd then terminate the process */
 		if ( PWNYPOT_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC == FALSE )
 		{
+			SaveXml( XmlLog );
 			TerminateProcess(GetCurrentProcess(), STATUS_ACCESS_VIOLATION);
 		}
 
@@ -272,7 +272,11 @@ HookedCreateProcessInternalW(
         BOOL res = (CreateProcessInternalW_( hToken, lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory, lpStartupInfo, lpProcessInformation, hNewToken));
  
  #ifdef CUCKOO
-			LOCAL_DEBUG_PRINTF("Executing Malware with cuckoomon.dll: %d\n", lpProcessInformation->dwProcessId);
+			CHAR *pid     = (CHAR *)LocalAlloc(LMEM_ZEROINIT, 1024);        	
+        	sprintf(pid, "%d", lpProcessInformation->dwProcessId);
+			mxmlElementSetAttr(XmlIDLogNode, "exec_pid", pid);
+			SaveXml( XmlLog );
+			DEBUG_PRINTF(LDBG, NULL, "Executing Malware with cuckoomon.dll: %d\n", lpProcessInformation->dwProcessId);
 			char buf[MAX_PATH];
 			sprintf(buf,"PROCESS:%d,cuckoomon.dll",lpProcessInformation->dwProcessId,MAX_PATH);
 			pipe(buf);
