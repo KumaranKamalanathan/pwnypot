@@ -32,18 +32,28 @@
 #define ANALYSIS_TYPE_WPM		"11"
 #define ANALYSIS_TYPE_SEH		"12"
 
-/* parameter struct for LdrHotPatchRoutine as documented in https://docs.google.com/file/d/0B46UFFNOX3K7bl8zWmFvRGVlamM  */
-struct HotPatchBuffer
+/* parameter struct for LdrHotPatchRoutine as documented in https://docs.google.com/file/d/0B46UFFNOX3K7bl8zWmFvRGVlamM / https://github.com/0vercl0k/stuffz/blob/master/LdrHotPatchRoutine.c */
+typedef struct
 {
-    ULONG NotSoSure01;        
-    ULONG NotSoSure02;
+    ULONG o1;
+    ULONG o2;
+
     USHORT PatcherNameOffset;
-    USHORT PatcherNameLen; 
-    USHORT PatcheeNameOffset; 
-	USHORT PatcheeNameLen;    
-	USHORT UnknownNameOffset;
-    USHORT UnknownNameLen;
-};
+    USHORT PatcherNameLen;
+
+    USHORT PatcheeNameOffset;
+    USHORT PatcheeNameLen;
+
+    USHORT UnknowNameOffset;
+    USHORT UnknowNameLen;
+} HOTPATCH;
+
+typedef struct
+{
+    HOTPATCH a;
+    WCHAR PatcherName[100];
+    WCHAR PatcheeName[100];
+} HotPatchBuffer;
 
 static    BOOL (WINAPI *CreateProcessInternalW_ )(HANDLE hToken, LPCWSTR lpApplicationName, LPWSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation, PHANDLE hNewToken);
 static  HANDLE (WINAPI *CreateThread_           )(LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags, LPDWORD lpThreadId) = CreateThread;

@@ -724,7 +724,7 @@ HookedSetProcessDEPPolicy(
 	mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_API);
 	mxmlElementSetAttr(XmlIDLogNode, "api", "SetProcessDEPPolicy");
 	mxmlElementSetAttrf(XmlIDLogNode, "value", "%d", dwFlags);
-	if (PWNYPOT_REGCONFIG.ROP.DETECT_ROP) 
+	if (PWNYPOT_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC) 
 	{
 		SaveXml( XmlLog );
 		return SetProcessDEPPolicy_(dwFlags);
@@ -756,9 +756,9 @@ HookedNtSetInformationProcess(
 		mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_API);
 		mxmlElementSetAttr(XmlIDLogNode, "api", "NtSetInformationProcess");
 		mxmlElementSetAttrf(XmlIDLogNode, "value", "0x%p", (*(ULONG_PTR *)ProcessInformation));
-		if (PWNYPOT_REGCONFIG.ROP.DETECT_ROP) 
+		SaveXml( XmlLog );
+		if (PWNYPOT_REGCONFIG.GENERAL.ALLOW_MALWARE_EXEC) 
 		{
-			SaveXml( XmlLog );
 			DEBUG_PRINTF(LSHL, NULL, "HookedNtSetInformationProcess is called with ProcessExecuteFlags value: %p.\n", (*(ULONG_PTR *)ProcessInformation) );
 			return NtSetInformationProcess_(ProcessHandle, ProcessInformationClass, ProcessInformation, ProcessInformationLength);
 		}
@@ -780,20 +780,20 @@ HookedLdrHotPatchRoutine(
 	HotPatchBuffer * s_HotPatchBuffer
 	)
 {
+	DEBUG_PRINTF(LSHL, NULL, "HookedLdrHotPatchRoutine called.\n");
 	PXMLNODE XmlIDLogNode;
 	XmlIDLogNode = mxmlNewElement( XmlShellcode, "row");
 	mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_API);
 	mxmlElementSetAttr(XmlIDLogNode, "api", "LdrHotPatchRoutine");
-	mxmlElementSetAttr(XmlIDLogNode, "unc_path", "LdrHotPatchRoutine");
-	DEBUG_PRINTF(LSHL, NULL, "HookedLdrHotPatchRoutine called with path: %s, %s", s_HotPatchBuffer->PatcherNameOffset, s_HotPatchBuffer->PatcheeNameOffset);
+	mxmlElementSetAttrf(XmlIDLogNode, "value", "%ls,%ls", s_HotPatchBuffer->PatcherName,  s_HotPatchBuffer->PatcheeName);
 	if (PWNYPOT_REGCONFIG.SHELLCODE.ALLOW_MALWARE_DOWNLOAD)
 	{
-		mxmlElementSetAttr(XmlIDLogNode, "downloaded_dll", "1");
+		//mxmlElementSetAttr(XmlIDLogNode, "downloaded_dll", "1");
 		SaveXml( XmlLog );
 		LdrHotPatchRoutine_(s_HotPatchBuffer);
 	}
 	else {
-		mxmlElementSetAttr(XmlIDLogNode, "downloaded_dll", "0");
+		//mxmlElementSetAttr(XmlIDLogNode, "downloaded_dll", "0");
 		SaveXml( XmlLog );
 		DEBUG_PRINTF(LSHL, NULL, "Denied downloading of library because of ALLOW_MALWARE_DOWNLOAD=0");
 	}
