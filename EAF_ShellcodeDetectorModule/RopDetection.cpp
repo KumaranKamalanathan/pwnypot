@@ -45,7 +45,7 @@ ValidateCallAgainstRop(
 #ifdef CUCKOO					
 					CHAR szAssciFullModuleName[MAX_MODULE_NAME32];
 					DbgGetRopModule( (PVOID)lpEspAddress, szAssciFullModuleName, MAX_MODULE_NAME32);
-					if (strncmp(szAssciFullModuleName, PWNYPOT_REGCONFIG.DLL_PATH, MAX_MODULE_NAME32) != 0 ) 
+					if (strncmp(szAssciFullModuleName, PWNYPOT_REGCONFIG.DLL_PATH, MAX_MODULE_NAME32) != 0  && strncmp(szAssciFullModuleName, "C:\\Windows\\system32\\IEFRAME.dll", MAX_MODULE_NAME32)!=0) 
 					{
 #endif 
 						DbgSetRopFlag();
@@ -60,26 +60,29 @@ ValidateCallAgainstRop(
 
 		/* check if WriteProcessMemory is live-patched to inject shellcode in executable memory 
 		 * offset for code after WriteProcessMemory: 0xbc, address windows xp: 0x7C802213 (after:7C8022CF)
+		 * lpAddress ist lpBaseAddress from the original WPM call, flProtect contains buffer to write
 		 */
 		if (RopCallee == CalleeWriteProcessMemory)
-		{
+		{			
 			CHAR szModuleName [MAX_MODULE_NAME32];
 			PXMLNODE XmlIDLogNode;
 			PXMLNODE XmlData;
+			SecureZeroMemory(szModuleName, MAX_MODULE_NAME32);
 			XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
 		    mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_WPM);
-		    mxmlElementSetAttrf(XmlIDLogNode, "address", "%p", (*(ULONG_PTR *)lpAddress));
-			XmlData = CreateXmlElement( XmlIDLogNode, "data");
-			mxmlNewText( XmlData, 0, ((CHAR *)lpEspAddress) );	
+		    mxmlElementSetAttrf(XmlIDLogNode, "address", "%p", lpAddress);
+		    mxmlElementSetAttrf(XmlIDLogNode, "data", "%s", flProtect);
+			//XmlData = CreateXmlElement( XmlIDLogNode, "data");
+			//mxmlNewText( XmlData, 0, ((CHAR *)lpEspAddress) );	
 			DEBUG_PRINTF(LROP,NULL,"WriteProcessMemory call detected.\n");
-			if(DbgGetRopModule(lpAddress, szModuleName, MAX_MODULE_NAME32) == PWNYPOT_STATUS_SUCCESS)
+			/*if(DbgGetRopModule(lpAddress, szModuleName, MAX_MODULE_NAME32) == PWNYPOT_STATUS_SUCCESS)
 			{
 		    	mxmlElementSetAttrf(XmlIDLogNode, "module", "%s", szModuleName);
 			}
 			if( (*(ULONG_PTR *)lpAddress) == 0x7C8022CF || (*(ULONG_PTR *)lpAddress) == 0x7C802213) 
 			{
 		    	mxmlElementSetAttr(XmlIDLogNode, "address_info", "Known WinXP WriteProcessMemory Address used to avoid DEP.");
-			}
+			}*/
 			SaveXml( XmlLog );
 		}
 
