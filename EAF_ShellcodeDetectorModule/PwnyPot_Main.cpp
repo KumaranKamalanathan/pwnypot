@@ -165,7 +165,7 @@ SetupShellcodeDetector(
 	/* check if we should enable Heap Spray Prevention mitigation  */
 	if ( PWNYPOT_REGCONFIG.GENERAL.HEAP_SPRAY )
 	{
-		if ( EnableHeapSprayProtection(PWNYPOT_REGCONFIG.GENERAL.HEAP_SPRAY_ADDRESS) != PWNYPOT_STATUS_SUCCESS )
+		if ( EnableHeapSprayProtection(PWNYPOT_REGCONFIG.GENERAL.HEAP_SPRAY_ADDRESSES) != PWNYPOT_STATUS_SUCCESS )
 		{
 			REPORT_ERROR("EnableHeapSprayProtection()", &err);
 			return PWNYPOT_STATUS_GENERAL_FAIL;

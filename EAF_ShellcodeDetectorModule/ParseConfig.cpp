@@ -233,8 +233,8 @@ ParseRegConfig(
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "HeapSprayAddress") ) 
 			{
 				/* I hope this never fail */
-				pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESS = (PCHAR)LocalAlloc(LMEM_ZEROINIT, strlen((const char*)AppRegConfig[i].ve_valueptr)+MAX_PATH);
-				strcpy( pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESS, (const char*)AppRegConfig[i].ve_valueptr);
+				pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESSES = (PCHAR)LocalAlloc(LMEM_ZEROINIT, strlen((const char*)AppRegConfig[i].ve_valueptr)+MAX_PATH);
+				strcpy( pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESSES, (const char*)AppRegConfig[i].ve_valueptr);
 			}
 			else if ( MATCH_CONF(AppRegConfig[i].ve_valuename, "NullPageAllocation") ) 
 			{
@@ -425,6 +425,11 @@ ParseConfig(
                 }
         	    else if(!strcmp(key, "heap_spray ")) {
                     pPwnyPotRegConfig->GENERAL.HEAP_SPRAY = atoi(value);
+                }                
+                else if(!strcmp(key, "heap_spray_addresses ")) {
+                    /* I hope this never fail */
+                    pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESSES = (PCHAR)LocalAlloc(LMEM_ZEROINIT, strlen(value)+MAX_PATH);
+                    strcpy( pPwnyPotRegConfig->GENERAL.HEAP_SPRAY_ADDRESSES, value);
                 }
         	    else if(!strcmp(key, "allow_malware_exec ")) {
                     pPwnyPotRegConfig->GENERAL.ALLOW_MALWARE_EXEC = atoi(value);
