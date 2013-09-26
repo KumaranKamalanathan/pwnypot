@@ -3,6 +3,7 @@
 OPTION CASEMAP :NONE
 
 _ValidateCallAgainstRop PROTO SYSCALL
+_ValidateWPM PROTO SYSCALL
 
 .FARDATA
 EXTERN VirtualAlloc_		:DWORD
@@ -179,11 +180,10 @@ HookedWriteProcessMemory PROC hProcess:DWORD, lpBaseAddress:DWORD, lpBuffer:DWOR
 	push	eax
 	mov		ecx, DWORD PTR [lpBaseAddress]  
 	push	ecx
-	push	7
 	lea		edx, [ebp+4]
 	push	edx	; lpEspAddress
-	call	_ValidateCallAgainstRop
-	add		esp, 10h	
+	call	_ValidateWPM
+	add		esp, 0Ch	
 	mov		eax, DWORD PTR [lpNumberOfBytesWritten]  
 	push	eax  	
 	mov		ecx, DWORD PTR [nSize]  

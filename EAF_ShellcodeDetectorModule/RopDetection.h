@@ -32,6 +32,14 @@ ValidateCallAgainstRop(
 	IN DWORD flProtect
 	);
 
+extern "C"
+VOID
+ValidateWPM(
+	IN ULONG_PTR lpEspAddress,
+	IN LPVOID lpBaseAddress, 
+	IN LPCVOID buffer
+	);
+
 STATUS
 DbgGetRopModule(
 	IN PVOID StackPointerAddress,

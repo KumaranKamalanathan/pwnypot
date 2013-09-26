@@ -58,34 +58,6 @@ ValidateCallAgainstRop(
 			}
 		}
 
-		/* check if WriteProcessMemory is live-patched to inject shellcode in executable memory 
-		 * offset for code after WriteProcessMemory: 0xbc, address windows xp: 0x7C802213 (after:7C8022CF)
-		 * lpAddress ist lpBaseAddress from the original WPM call, flProtect contains buffer to write
-		 */
-		if (RopCallee == CalleeWriteProcessMemory)
-		{			
-			CHAR szModuleName [MAX_MODULE_NAME32];
-			PXMLNODE XmlIDLogNode;
-			PXMLNODE XmlData;
-			SecureZeroMemory(szModuleName, MAX_MODULE_NAME32);
-			XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
-		    mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_WPM);
-		    mxmlElementSetAttrf(XmlIDLogNode, "address", "%p", lpAddress);
-		    mxmlElementSetAttrf(XmlIDLogNode, "data", "%s", flProtect);
-			//XmlData = CreateXmlElement( XmlIDLogNode, "data");
-			//mxmlNewText( XmlData, 0, ((CHAR *)lpEspAddress) );	
-			DEBUG_PRINTF(LROP,NULL,"WriteProcessMemory call detected.\n");
-			/*if(DbgGetRopModule(lpAddress, szModuleName, MAX_MODULE_NAME32) == PWNYPOT_STATUS_SUCCESS)
-			{
-		    	mxmlElementSetAttrf(XmlIDLogNode, "module", "%s", szModuleName);
-			}
-			if( (*(ULONG_PTR *)lpAddress) == 0x7C8022CF || (*(ULONG_PTR *)lpAddress) == 0x7C802213) 
-			{
-		    	mxmlElementSetAttr(XmlIDLogNode, "address_info", "Known WinXP WriteProcessMemory Address used to avoid DEP.");
-			}*/
-			SaveXml( XmlLog );
-		}
-
 		if ( PWNYPOT_REGCONFIG.ROP.PIVOT_DETECTION )
 		{
 			/* NOT IMPLEMENTED */
@@ -116,6 +88,37 @@ ValidateCallAgainstRop(
 }
 
 
+/* check if WriteProcessMemory is live-patched to inject shellcode in executable memory 
+ * offset for code after WriteProcessMemory: 0xbc, address windows xp: 0x7C802213 (after:7C8022CF)
+ * lpAddress ist lpBaseAddress from the original WPM call, flProtect contains buffer to write
+ */
+extern "C"
+VOID
+ValidateWPM(
+	IN ULONG_PTR lpEspAddress,
+	IN LPVOID lpBaseAddress, 
+	IN LPCVOID buffer
+	)
+{	
+	CHAR szModuleName [MAX_MODULE_NAME32];
+	PXMLNODE XmlIDLogNode;
+	PXMLNODE XmlData;
+	SecureZeroMemory(szModuleName, MAX_MODULE_NAME32);
+	XmlIDLogNode = CreateXmlElement( XmlShellcode, "row");
+    mxmlElementSetAttr(XmlIDLogNode, "type", ANALYSIS_TYPE_WPM);
+    mxmlElementSetAttrf(XmlIDLogNode, "address", "%p", lpBaseAddress);
+    mxmlElementSetAttrf(XmlIDLogNode, "data", "%s", buffer);
+	DEBUG_PRINTF(LROP,NULL,"WriteProcessMemory call detected at baseaddress: %p \n", lpBaseAddress);
+	if(DbgGetRopModule((PVOID)lpEspAddress, szModuleName, MAX_MODULE_NAME32) == PWNYPOT_STATUS_SUCCESS)
+	{
+    	mxmlElementSetAttrf(XmlIDLogNode, "module", "%s", szModuleName);
+	}
+	if(lpBaseAddress == (LPVOID)0x7C8022CF || lpBaseAddress == (LPVOID)0x7C802213) 
+	{
+    	mxmlElementSetAttr(XmlIDLogNode, "address_info", "Known WinXP WriteProcessMemory base Address used to avoid DEP.");
+	}
+	SaveXml( XmlLog );
+}
 
 STATUS
 DbgSetRopFlag(
